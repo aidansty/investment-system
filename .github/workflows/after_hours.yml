@@ -1,0 +1,30 @@
+name: After-Hours Position Monitor
+
+on:
+  schedule:
+    - cron: '0 19 * * 1-5'  # 3:00 PM ET (19:00 UTC) Monday-Friday
+  workflow_dispatch:
+
+jobs:
+  after-hours-monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run after-hours monitor
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
+          FRED_KEY: ${{ secrets.FRED_KEY }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: python scripts/after_hours_alert.py

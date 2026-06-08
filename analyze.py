@@ -1,5 +1,6 @@
 import sys
 import time
+import json
 from datetime import date
 
 from utils.market_calendar import is_trading_day
@@ -19,42 +20,62 @@ from ai.briefing import generate_daily_briefing
 from output.notion import write_daily_briefing, write_trade_candidates
 
 
+def save_morning_snapshot(scan_results, fundamentals, regime, today):
+    """
+    Save morning scan results for afternoon comparison.
+    Includes fundamentals so afternoon run does not need to re-fetch.
+    """
+    import os
+    os.makedirs("data/cache", exist_ok=True)
+
+    snapshot = {
+        "date": today.isoformat(),
+        "regime": {
+            "label": regime["label"],
+            "confidence": regime["confidence"],
+            "bullish_points": regime["bullish_points"],
+            "bearish_points": regime["bearish_points"],
+        },
+        "strong": scan_results.get("strong", []),
+        "developing": scan_results.get("developing", []),
+        "watch": scan_results.get("watch", []),
+        "fundamentals_ticker_list": list(fundamentals.keys()),
+    }
+
+    path = f"data/cache/morning_snapshot_{today.isoformat()}.json"
+    with open(path, "w") as f:
+        json.dump(snapshot, f, indent=2, default=str)
+
+    log(f"Morning snapshot saved: {path}")
+
+
 def main():
     start = time.time()
     today = date.today()
     log(f"=== Investment System starting: {today} ===")
 
-    # Step 1: Market calendar check
     if not is_trading_day(today):
         log("Market closed today. Exiting cleanly.")
         sys.exit(0)
 
-    # Step 2: Load universe
     universe = get_universe()
     log(f"Universe loaded: {len(universe)} tickers")
 
-    # Step 3: Fetch macro data
     macro = fetch_macro_data()
     if macro is None:
         log("ERROR: Macro data fetch failed. Cannot continue.")
         sys.exit(1)
 
-    # Step 4: Fetch universe prices
     log("Fetching universe prices...")
     prices = fetch_all_prices(universe)
     if prices is None:
         log("ERROR: Price fetch failed coverage threshold. Cannot continue.")
         sys.exit(1)
 
-    # Step 5: Calculate breadth and add to macro
     breadth = calculate_breadth(prices)
     macro["breadth_pct"] = breadth
-
-    # Step 6: Determine regime
     regime = determine_regime(macro)
 
-    # Step 7: Portfolio always runs first — protects existing risk
-    # Uses price cache to avoid redundant API calls
     positions = []
     try:
         positions = get_open_positions(price_cache=prices)
@@ -63,8 +84,8 @@ def main():
     except Exception as e:
         log(f"CRITICAL PORTFOLIO EXCEPTION: Risk tracking impaired: {e}")
 
-    # Step 8: Scanning runs second — safely wrapped
     scan_results = {"strong": [], "developing": [], "watch": [], "scan_stats": {}}
+    fundamentals = {}
     try:
         rs_scores = calculate_relative_strength(prices)
         rs_qualified = get_rs_qualified(rs_scores)
@@ -73,11 +94,9 @@ def main():
 
         fundamentals = fetch_fundamentals_batch(trend_qualified)
 
-        # Fundamentals coverage check — abort if API is down
         coverage = len(fundamentals) / max(len(trend_qualified), 1)
         if coverage < 0.5:
-            log(f"CRITICAL ERROR: Fundamentals coverage only {coverage:.0%}. "
-                f"Possible Finnhub outage. Aborting scan.")
+            log(f"CRITICAL ERROR: Fundamentals coverage only {coverage:.0%}. Aborting scan.")
             sys.exit(1)
 
         scan_results = run_full_scan(prices, fundamentals, regime)
@@ -87,10 +106,14 @@ def main():
     except Exception as e:
         log(f"SCANNER EXCEPTION: {e}")
 
-    # Step 9: Fetch news
+    # Save morning snapshot for afternoon comparison
+    try:
+        save_morning_snapshot(scan_results, fundamentals, regime, today)
+    except Exception as e:
+        log(f"WARNING: Could not save morning snapshot: {e}")
+
     news = fetch_market_news()
 
-    # Step 10: Generate Claude briefing
     briefing = None
     try:
         briefing = generate_daily_briefing(
@@ -104,7 +127,6 @@ def main():
     except Exception as e:
         log(f"CRITICAL ERROR: AI briefing generation failed: {e}")
 
-    # Step 11: Write briefing to Notion
     if briefing:
         try:
             page_url = write_daily_briefing(
@@ -122,7 +144,6 @@ def main():
     else:
         log("WARNING: No briefing generated — skipping Notion write")
 
-    # Step 12: Write candidates to Notion as one daily page
     try:
         write_trade_candidates(scan_results, regime, today)
     except Exception as e:

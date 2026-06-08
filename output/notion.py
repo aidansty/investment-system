@@ -270,3 +270,111 @@ def update_open_position_prices(positions: list) -> None:
         log("Updated prices for " + str(updated) + " positions")
     except Exception as e:
         log("Position price update error: " + str(e))
+
+
+AFTER_HOURS_ALERTS_DB = "0cbd97d0802842e09065e60e112362e1"  # Reuse Daily Briefings DB
+
+
+def write_after_hours_alert(alert: dict, positions: list, today) -> str | None:
+    """
+    Write after-hours alert as a Notion page in the Daily Briefings database.
+    Only called when material developments are detected.
+    Designed to be read on a phone — short and scannable.
+    """
+    try:
+        notion = get_notion_client()
+        date_str = str(today)
+        sections = alert.get("sections", {})
+        tickers = ", ".join(p["ticker"] for p in positions)
+
+        blocks = []
+
+        # Urgent callout at top
+        summary = sections.get("Alert Summary", "Review required before market open.")
+        blocks.append(_callout("⚠️ AFTER-HOURS ALERT — " + summary, "⚠️"))
+        blocks.append(_divider())
+
+        if sections.get("Position Impact"):
+            blocks.append(_heading("Position Impact"))
+            blocks.append(_text_block(sections["Position Impact"]))
+            blocks.append(_divider())
+
+        if sections.get("Key Risk Tomorrow"):
+            blocks.append(_heading("Key Risk Tomorrow"))
+            blocks.append(_callout(sections["Key Risk Tomorrow"], "🔴"))
+
+        blocks.append(_divider())
+        blocks.append(_text_block("Positions monitored: " + tickers))
+
+        # Write to Daily Briefings DB tagged as after-hours
+        page = notion.pages.create(
+            parent={"database_id": DAILY_BRIEFINGS_DB},
+            properties={
+                "Date": {"title": [{"type": "text", "text": {"content": date_str + " — After-Hours Alert"}}]},
+                "Actions Required": {"checkbox": True},
+            },
+            children=blocks
+        )
+
+        page_url = page.get("url", "")
+        log("After-hours alert written to Notion: " + page_url)
+        return page_url
+
+    except Exception as e:
+        log("After-hours alert write error: " + str(e))
+        return None
+
+
+def write_after_hours_alert(briefing: dict, positions: list, today) -> str | None:
+    """
+    Write after-hours alert as a Notion page in the Daily Briefings database.
+    Only called when material developments are detected.
+    Designed to be read on a phone — short and scannable.
+    """
+    try:
+        notion = get_notion_client()
+        date_str = str(today)
+        sections = briefing.get("sections", {})
+        tickers = ", ".join(p["ticker"] for p in positions) if positions else "No positions"
+
+        blocks = []
+
+        summary = sections.get("Key Risk Before Open", "Review before market open.")
+        blocks.append(_callout("AFTER-HOURS ALERT | " + date_str + " | " + summary, "⚠️"))
+        blocks.append(_divider())
+
+        if sections.get("Position Review"):
+            blocks.append(_heading("Position Review"))
+            blocks.append(_text_block(sections["Position Review"]))
+            blocks.append(_divider())
+
+        if sections.get("New Opportunities"):
+            blocks.append(_heading("New Opportunities"))
+            blocks.append(_text_block(sections["New Opportunities"]))
+            blocks.append(_divider())
+
+        if sections.get("Key Risk Before Open"):
+            blocks.append(_heading("Key Risk Before Open"))
+            blocks.append(_callout(sections["Key Risk Before Open"], "🔴"))
+
+        blocks.append(_divider())
+        blocks.append(_text_block("Positions monitored: " + tickers))
+
+        page = notion.pages.create(
+            parent={"database_id": DAILY_BRIEFINGS_DB},
+            properties={
+                "Date": {"title": [{"type": "text", "text": {"content": date_str + " PM Alert"}}]},
+                "Actions Required": {"checkbox": True},
+                "Bullish Points": {"number": 0},
+                "Bearish Points": {"number": 0},
+            },
+            children=blocks
+        )
+
+        page_url = page.get("url", "")
+        log("After-hours alert written to Notion: " + page_url)
+        return page_url
+
+    except Exception as e:
+        log("After-hours alert write error: " + str(e))
+        return None
