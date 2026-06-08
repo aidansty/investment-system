@@ -151,8 +151,9 @@ def fetch_macro_data():
 
     vix = fetch_vix()
     if vix is None:
-        log("ERROR: Could not fetch VIX")
-        return None
+        log("WARNING: Could not fetch VIX — using fallback value of 20.0")
+        log("Regime will be marked as degraded")
+        vix = 20.0  # Neutral assumption — neither bullish nor bearish
 
     vix_history = fetch_vix_history(days=10)
     vix_5d_avg = None
