@@ -70,6 +70,27 @@ def get_open_positions(price_cache: dict = None) -> list:
             if not ticker:
                 continue
 
+            # Calculate days to catalyst from stored date
+            catalyst_date_str = get_date("Catalyst Date")
+            days_to_catalyst = None
+            if catalyst_date_str:
+                try:
+                    from utils.market_calendar import is_trading_day
+                    import datetime as dt_module
+                    cat_date = dt_module.date.fromisoformat(catalyst_date_str)
+                    today_date = date.today()
+                    if cat_date > today_date:
+                        # Count trading days between today and catalyst
+                        count = 0
+                        current = today_date + dt_module.timedelta(days=1)
+                        while current <= cat_date:
+                            if is_trading_day(current):
+                                count += 1
+                            current += dt_module.timedelta(days=1)
+                        days_to_catalyst = count
+                except Exception:
+                    days_to_catalyst = None
+
             positions.append({
                 "page_id": page["id"],
                 "ticker": ticker,
@@ -80,6 +101,8 @@ def get_open_positions(price_cache: dict = None) -> list:
                 "position_size": get_num("Position Size"),
                 "current_price": get_num("Current Price"),
                 "thesis": get_text("Thesis"),
+                "catalyst_date": catalyst_date_str,
+                "days_to_catalyst": days_to_catalyst,
                 "price_status": "unknown",
                 "flags": []
             })
@@ -141,6 +164,12 @@ def get_open_positions(price_cache: dict = None) -> list:
 
             if position["price_status"] == "missing":
                 flags.append("PRICE UNAVAILABLE")
+
+            # Pre-earnings exit rule
+            # Check if this position has earnings within PRE_EARNINGS_EXIT_DAYS
+            days_to_earnings = position.get("days_to_catalyst")
+            if days_to_earnings is not None and days_to_earnings <= 3:
+                flags.append("EXIT BEFORE EARNINGS — earnings in " + str(days_to_earnings) + " trading days")
 
             position["flags"] = flags
 

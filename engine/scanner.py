@@ -9,6 +9,65 @@ from signals.catalyst import apply_catalyst_scoring
 # Composite score weights
 # score = (rs_normalized * 0.40) + (earnings_score * 0.35) + (catalyst_score * 0.25)
 # First calibration review: after 30 completed trades.
+
+# Sector mapping for hard concentration limits
+# Only the highest composite score candidate per sector surfaces as Strong
+# Others move to Developing with "Sector concentration limit" as missing signal
+SECTOR_MAP = {
+    "NVDA": "Semiconductors", "AMD": "Semiconductors", "INTC": "Semiconductors",
+    "MU": "Semiconductors", "AVGO": "Semiconductors", "QCOM": "Semiconductors",
+    "AMAT": "Semiconductors", "LRCX": "Semiconductors", "KLAC": "Semiconductors",
+    "MCHP": "Semiconductors", "ON": "Semiconductors", "STX": "Semiconductors",
+    "WDC": "Semiconductors", "HPE": "Semiconductors",
+    "MSFT": "Software", "ORCL": "Software", "ADBE": "Software", "CRM": "Software",
+    "NOW": "Software", "INTU": "Software", "CDNS": "Software", "SNPS": "Software",
+    "PANW": "Cybersecurity", "CRWD": "Cybersecurity", "FTNT": "Cybersecurity",
+    "DDOG": "Cloud", "TEAM": "Cloud", "WDAY": "Cloud",
+    "AAPL": "Consumer Tech", "META": "Consumer Tech", "GOOGL": "Consumer Tech",
+    "GOOG": "Consumer Tech", "AMZN": "Consumer Tech", "NFLX": "Consumer Tech",
+    "TSLA": "Consumer Tech",
+    "JPM": "Financials", "BAC": "Financials", "GS": "Financials", "MS": "Financials",
+    "V": "Financials", "MA": "Financials", "AXP": "Financials",
+    "UNH": "Healthcare", "LLY": "Healthcare", "ABBV": "Healthcare",
+    "JNJ": "Healthcare", "MRK": "Healthcare", "TMO": "Healthcare",
+    "XOM": "Energy", "CVX": "Energy", "COP": "Energy", "EOG": "Energy",
+    "CAT": "Industrials", "DE": "Industrials", "HON": "Industrials",
+    "GE": "Industrials", "RTX": "Industrials",
+    "AMGN": "Biotech", "GILD": "Biotech", "REGN": "Biotech", "VRTX": "Biotech",
+}
+
+def get_sector(ticker):
+    return SECTOR_MAP.get(ticker, "Other")
+
+
+def apply_sector_limit(candidates):
+    """
+    Hard sector limit: only the highest composite score candidate
+    per sector advances as Strong. Others are demoted to Developing
+    with 'Sector concentration limit' as the missing signal.
+    Prevents accidentally owning 3 semiconductor names simultaneously.
+    """
+    seen_sectors = {}
+    result = []
+
+    for c in candidates:
+        sector = get_sector(c["ticker"])
+        if sector == "Other":
+            result.append(c)
+            continue
+
+        if sector not in seen_sectors:
+            seen_sectors[sector] = True
+            result.append(c)
+        else:
+            # Demote to Developing with sector limit reason
+            demoted = dict(c)
+            demoted["tier"] = "Developing"
+            demoted["missing_signal"] = "Sector concentration limit (" + sector + " already represented)"
+            result.append(demoted)
+
+    return result
+
 RS_WEIGHT = 0.40
 EARNINGS_WEIGHT = 0.35
 CATALYST_WEIGHT = 0.25
@@ -132,6 +191,13 @@ def run_full_scan(prices, fundamentals, regime):
             "missing_signal": missing,
         })
 
+    candidates.sort(key=lambda x: x["composite_score"], reverse=True)
+
+    # Apply hard sector limit to Strong candidates only
+    strong_candidates = [c for c in candidates if c["tier"] == "Strong"]
+    others = [c for c in candidates if c["tier"] != "Strong"]
+    strong_candidates = apply_sector_limit(strong_candidates)
+    candidates = strong_candidates + others
     candidates.sort(key=lambda x: x["composite_score"], reverse=True)
 
     strong = [c for c in candidates if c["tier"] == "Strong"]
