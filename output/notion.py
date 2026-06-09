@@ -98,7 +98,7 @@ def write_daily_briefing(briefing: dict, regime: dict, scan_results: dict, today
         page = notion.pages.create(
             parent={"database_id": DAILY_BRIEFINGS_DB},
             properties={
-                "Date": {"title": [{"type": "text", "text": {"content": date_str}}]},
+                "Date": {"title": [{"type": "text", "text": {"content": date_str + " — 9AM Morning Briefing"}}]},
                 "Regime": {"select": {"name": label}},
                 "Confidence": {"select": {"name": confidence}},
                 "Candidates Found": {"number": stats.get("strong_count", 0)},
@@ -189,7 +189,7 @@ def write_trade_candidates(scan_results: dict, regime: dict, today: date) -> str
         page = notion.pages.create(
             parent={"database_id": TRADE_CANDIDATES_DB},
             properties={
-                "Date": {"title": [{"type": "text", "text": {"content": date_str}}]},
+                "Date": {"title": [{"type": "text", "text": {"content": date_str + " — 9AM Morning Briefing"}}]},
                 "Regime": {"select": {"name": regime_label}},
                 "Strong Count": {"number": len(strong)},
                 "Developing Count": {"number": len(developing)},
@@ -363,7 +363,7 @@ def write_after_hours_alert(briefing: dict, positions: list, today) -> str | Non
         page = notion.pages.create(
             parent={"database_id": DAILY_BRIEFINGS_DB},
             properties={
-                "Date": {"title": [{"type": "text", "text": {"content": date_str + " PM Alert"}}]},
+                "Date": {"title": [{"type": "text", "text": {"content": date_str + " — 3PM Alert ⚠️"}}]},
                 "Actions Required": {"checkbox": True},
                 "Bullish Points": {"number": 0},
                 "Bearish Points": {"number": 0},
