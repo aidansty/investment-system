@@ -27,4 +27,4 @@ jobs:
           FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
           FRED_KEY: ${{ secrets.FRED_KEY }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-        run: python scripts/after_hours_alert.py
+          run: PYTHONPATH=$PYTHONPATH:$(pwd) python scripts/after_hours_alert.py
