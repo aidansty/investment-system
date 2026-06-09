@@ -51,7 +51,13 @@ def save_morning_snapshot(scan_results, fundamentals, regime, today):
 
 def main():
     start = time.time()
-    today = date.today()
+    try:
+        import pytz
+        from datetime import datetime as dt
+        eastern = pytz.timezone("America/New_York")
+        today = dt.now(eastern).date()
+    except Exception:
+        today = date.today()
     log(f"=== Investment System starting: {today} ===")
 
     if not is_trading_day(today):
