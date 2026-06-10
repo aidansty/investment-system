@@ -378,3 +378,98 @@ def write_after_hours_alert(briefing: dict, positions: list, today) -> str | Non
     except Exception as e:
         log("After-hours alert write error: " + str(e))
         return None
+
+
+CANDIDATE_ANALYSIS_DB = "34c25f29-1aea-4416-bb9f-89421bf2dabc"
+
+
+def write_candidate_analysis(candidates: list, today) -> None:
+    """
+    Write full audit trail for every Strong and Developing candidate.
+    All raw calculations, every flag value, every signal score.
+    This is the data source for the 30-trade review.
+    """
+    if not candidates:
+        return
+
+    try:
+        notion = get_notion_client()
+        written = 0
+        date_str = str(today)
+
+        for c in candidates:
+            ticker = c.get("ticker", "")
+            if not ticker:
+                continue
+
+            props = {
+                "Ticker": {"title": [{"type": "text", "text": {"content": ticker}}]},
+                "Tier": {"select": {"name": c.get("tier", "Watch")}},
+                "Composite Score": {"number": c.get("composite_score")},
+                "RS Score Raw": {"number": c.get("raw_rs") or c.get("rs_score")},
+                "RS Normalized": {"number": c.get("rs_normalized")},
+                "Ticker 63d Return": {"number": c.get("rs_return")},
+                "SPY 63d Return": {"number": c.get("spy_return")},
+                "Beat Streak": {"number": c.get("beat_streak")},
+                "Earnings Score": {"number": c.get("earnings_score")},
+                "Catalyst Score": {"number": c.get("catalyst_score")},
+                "Has Catalyst": {"checkbox": bool(c.get("has_catalyst", False))},
+                "Days To Catalyst": {"number": c.get("days_to_catalyst")},
+                "Catalyst Confirmed": {"checkbox": bool(c.get("catalyst_confirmed", False))},
+                "ATR 14 Day Pct": {"number": c.get("atr_14d_pct")},
+                "ATR Stop Pct": {"number": c.get("atr_stop_pct")},
+                "ATR Stop Price": {"number": c.get("atr_stop_price")},
+                "Profit Target T1": {"number": c.get("tier1_target_price")},
+                "VIX At Scan": {"number": c.get("vix_at_scan")},
+                "Insider Net 90d": {"number": c.get("insider_net_90d")},
+                "Implied Move Pct": {"number": c.get("implied_move_pct")},
+                "Sector": {"rich_text": [{"type": "text", "text": {"content": c.get("sector", "")}}]},
+                "Sub Industry": {"rich_text": [{"type": "text", "text": {"content": c.get("sub_industry", "")}}]},
+                "Missing Signal": {"rich_text": [{"type": "text", "text": {"content": c.get("missing_signal", "")}}]},
+                "Flags Applied": {"rich_text": [{"type": "text", "text": {"content": c.get("flags_str", "")}}]},
+            }
+
+            # Optional fields with enum values
+            if c.get("freshness"):
+                props["Freshness"] = {"select": {"name": c["freshness"]}}
+            if c.get("reaction_quality"):
+                props["Reaction Quality"] = {"select": {"name": c["reaction_quality"]}}
+            if c.get("conviction_tier"):
+                props["Conviction Tier"] = {"select": {"name": c["conviction_tier"]}}
+            if c.get("vix_regime"):
+                props["VIX Regime"] = {"select": {"name": c["vix_regime"]}}
+            if c.get("implied_move_check"):
+                props["Implied Move Check"] = {"select": {"name": c["implied_move_check"]}}
+            if c.get("insider_flag"):
+                props["Insider Flag"] = {"select": {"name": c["insider_flag"]}}
+            if c.get("base_position_size"):
+                props["Base Position Size"] = {"select": {"name": c["base_position_size"]}}
+            if c.get("final_position_size"):
+                props["Final Position Size"] = {"select": {"name": c["final_position_size"]}}
+
+            # Date fields
+            if c.get("catalyst_date"):
+                props["Catalyst Date"] = {"date": {"start": c["catalyst_date"]}}
+            if c.get("pre_earnings_exit_date"):
+                props["Pre Earnings Exit Date"] = {"date": {"start": c["pre_earnings_exit_date"]}}
+            if c.get("sector_overlap_with"):
+                props["Sector Overlap With"] = {"rich_text": [{"type": "text", "text": {"content": c["sector_overlap_with"]}}]}
+
+            props["Scan Date"] = {"date": {"start": date_str}}
+            if c.get("five_day_return") is not None:
+                props["5 Day Return"] = {"number": c["five_day_return"]}
+            if c.get("ten_day_return") is not None:
+                props["10 Day Return"] = {"number": c["ten_day_return"]}
+            if c.get("avg_post_earnings_return") is not None:
+                props["Avg Post Earnings Return"] = {"number": c["avg_post_earnings_return"]}
+
+            notion.pages.create(
+                parent={"database_id": "fc07a1e8f3544a679066ef7e8a572bdd"},
+                properties=props
+            )
+            written += 1
+
+        log(f"Candidate analysis written: {written} records to audit trail")
+
+    except Exception as e:
+        log(f"Candidate analysis write error: {e}")

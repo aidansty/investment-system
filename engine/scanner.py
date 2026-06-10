@@ -1,72 +1,16 @@
 from utils.logger import log
 from config.signals import SIGNAL_CONFIG
 from config.risk import RISK_CONFIG
+from config.sector_map import get_sector_info, detect_sector_overlaps
 from signals.relative_strength import calculate_relative_strength, get_rs_qualified
 from signals.trend_filter import apply_trend_filter
 from signals.earnings_proxy import apply_earnings_scoring
 from signals.catalyst import apply_catalyst_scoring
-
-# Composite score weights
-# score = (rs_normalized * 0.40) + (earnings_score * 0.35) + (catalyst_score * 0.25)
-# First calibration review: after 30 completed trades.
-
-# Sector mapping for hard concentration limits
-# Only the highest composite score candidate per sector surfaces as Strong
-# Others move to Developing with "Sector concentration limit" as missing signal
-SECTOR_MAP = {
-    "NVDA": "Semiconductors", "AMD": "Semiconductors", "INTC": "Semiconductors",
-    "MU": "Semiconductors", "AVGO": "Semiconductors", "QCOM": "Semiconductors",
-    "AMAT": "Semiconductors", "LRCX": "Semiconductors", "KLAC": "Semiconductors",
-    "MCHP": "Semiconductors", "ON": "Semiconductors", "STX": "Semiconductors",
-    "WDC": "Semiconductors", "HPE": "Semiconductors",
-    "MSFT": "Software", "ORCL": "Software", "ADBE": "Software", "CRM": "Software",
-    "NOW": "Software", "INTU": "Software", "CDNS": "Software", "SNPS": "Software",
-    "PANW": "Cybersecurity", "CRWD": "Cybersecurity", "FTNT": "Cybersecurity",
-    "DDOG": "Cloud", "TEAM": "Cloud", "WDAY": "Cloud",
-    "AAPL": "Consumer Tech", "META": "Consumer Tech", "GOOGL": "Consumer Tech",
-    "GOOG": "Consumer Tech", "AMZN": "Consumer Tech", "NFLX": "Consumer Tech",
-    "TSLA": "Consumer Tech",
-    "JPM": "Financials", "BAC": "Financials", "GS": "Financials", "MS": "Financials",
-    "V": "Financials", "MA": "Financials", "AXP": "Financials",
-    "UNH": "Healthcare", "LLY": "Healthcare", "ABBV": "Healthcare",
-    "JNJ": "Healthcare", "MRK": "Healthcare", "TMO": "Healthcare",
-    "XOM": "Energy", "CVX": "Energy", "COP": "Energy", "EOG": "Energy",
-    "CAT": "Industrials", "DE": "Industrials", "HON": "Industrials",
-    "GE": "Industrials", "RTX": "Industrials",
-    "AMGN": "Biotech", "GILD": "Biotech", "REGN": "Biotech", "VRTX": "Biotech",
-}
-
-def get_sector(ticker):
-    return SECTOR_MAP.get(ticker, "Other")
-
-
-def apply_sector_limit(candidates):
-    """
-    Hard sector limit: only the highest composite score candidate
-    per sector advances as Strong. Others are demoted to Developing
-    with 'Sector concentration limit' as the missing signal.
-    Prevents accidentally owning 3 semiconductor names simultaneously.
-    """
-    seen_sectors = {}
-    result = []
-
-    for c in candidates:
-        sector = get_sector(c["ticker"])
-        if sector == "Other":
-            result.append(c)
-            continue
-
-        if sector not in seen_sectors:
-            seen_sectors[sector] = True
-            result.append(c)
-        else:
-            # Demote to Developing with sector limit reason
-            demoted = dict(c)
-            demoted["tier"] = "Developing"
-            demoted["missing_signal"] = "Sector concentration limit (" + sector + " already represented)"
-            result.append(demoted)
-
-    return result
+from signals.advanced_signals import (
+    calculate_atr, calculate_atr_stop, calculate_freshness,
+    calculate_earnings_reaction, get_conviction_tier,
+    get_vix_regime, calculate_profit_targets
+)
 
 RS_WEIGHT = 0.40
 EARNINGS_WEIGHT = 0.35
@@ -91,12 +35,7 @@ def _normalize_rs_scores(rs_scores, qualified):
 
 
 def _get_missing_signals(earnings_data, catalyst_data, composite):
-    """
-    Produce a plain English explanation of why a candidate is Developing
-    rather than Strong. Every candidate gets an explicit reason — never Unknown.
-    """
     missing = []
-
     if earnings_data is None:
         missing.append("No earnings history available")
     elif not earnings_data.get("qualifies", False):
@@ -106,23 +45,19 @@ def _get_missing_signals(earnings_data, catalyst_data, composite):
         else:
             needed = SIGNAL_CONFIG["min_consecutive_beats"]
             missing.append(f"Earnings streak too short ({streak} beat, need {needed})")
-
     if not catalyst_data.get("has_catalyst", False):
         missing.append("No confirmed catalyst in 5-42 day window")
-
     if composite < STRONG_THRESHOLD and composite >= DEVELOPING_THRESHOLD:
         if not missing:
             missing.append(f"Composite score {composite:.3f} below Strong threshold ({STRONG_THRESHOLD})")
-
     return ", ".join(missing) if missing else "Below composite threshold"
 
 
 def run_full_scan(prices, fundamentals, regime):
     """
-    Run the complete two-stage candidate identification pipeline.
-
-    Composite score formula:
-        score = (rs_normalized * 0.40) + (earnings_score * 0.35) + (catalyst_score * 0.25)
+    Run complete candidate identification pipeline with all signal upgrades.
+    All raw calculations stored in candidate dict for Notion audit trail.
+    Briefing receives only conclusions.
     """
     log("=== Starting full universe scan ===")
 
@@ -134,12 +69,36 @@ def run_full_scan(prices, fundamentals, regime):
     log(f"Coverage checkpoint: RS qualified={len(rs_qualified)} | Trend qualified={len(trend_qualified)}")
 
     if not trend_qualified:
-        log("No technically qualified candidates — scan complete")
+        log("No technically qualified candidates")
         return _empty_result(regime)
 
     earnings_scored, earnings_diagnostics = apply_earnings_scoring(fundamentals, trend_qualified)
     catalyst_scored = apply_catalyst_scoring(fundamentals, trend_qualified)
     rs_normalized = _normalize_rs_scores(rs_scores, trend_qualified)
+
+    # VIX regime (observation only)
+    vix = regime.get("conditions", {}).get("vix_level", {}).get("value", "")
+    vix_val = None
+    try:
+        vix_val = float(str(vix).replace("VIX ", ""))
+    except Exception:
+        pass
+
+    vix_5d_avg = None
+    vix_regime_data = {"vix_regime": "Green", "vix_trend": "Flat"}
+    if vix_val:
+        from data.fetch_macro import fetch_vix_history
+        try:
+            hist = fetch_vix_history(days=10)
+            if hist and len(hist) >= 5:
+                vix_5d_avg = sum(hist[-5:]) / 5
+        except Exception:
+            pass
+        vix_regime_data = get_vix_regime(vix_val, vix_5d_avg)
+
+    # Sector overlap detection among all candidates
+    all_candidate_list = [{"ticker": t} for t in trend_qualified]
+    sector_overlaps = detect_sector_overlaps(all_candidate_list)
 
     candidates = []
 
@@ -147,6 +106,7 @@ def run_full_scan(prices, fundamentals, regime):
         rs_norm = rs_normalized.get(ticker, 0.0)
         earnings_data = earnings_scored.get(ticker)
         catalyst_data = catalyst_scored.get(ticker, {})
+        ticker_prices = prices.get(ticker, [])
 
         e_score = earnings_data["earnings_score"] if earnings_data else 0.0
         c_score = catalyst_data.get("catalyst_score", 0.0)
@@ -157,7 +117,6 @@ def run_full_scan(prices, fundamentals, regime):
             c_score * CATALYST_WEIGHT
         )
 
-        # Hard gate: zero beats go to Watch
         qualifies = earnings_data is not None and earnings_data.get("qualifies", False)
 
         if not qualifies:
@@ -173,60 +132,191 @@ def run_full_scan(prices, fundamentals, regime):
             tier = "Watch"
             missing = _get_missing_signals(earnings_data, catalyst_data, composite)
 
-        candidates.append({
+        # Advanced signals
+        current_price = ticker_prices[-1] if ticker_prices else 0
+
+        # ATR stop
+        atr_pct = calculate_atr(ticker_prices, SIGNAL_CONFIG["atr_period"])
+        atr_stop_data = calculate_atr_stop(current_price, atr_pct) if atr_pct else {
+            "atr_pct": None,
+            "stop_pct": RISK_CONFIG["stop_loss_normal_pct"] * 100,
+            "stop_price": round(current_price * (1 - RISK_CONFIG["stop_loss_normal_pct"]), 2)
+        }
+
+        # Freshness
+        freshness_data = calculate_freshness(ticker_prices)
+
+        # Earnings reaction (observation only)
+        earnings_history = fundamentals.get(ticker, {}).get("earnings", [])
+        reaction_data = calculate_earnings_reaction(earnings_history, prices, ticker)
+
+        # Conviction tier (observation only)
+        conviction_tier = get_conviction_tier(composite)
+
+        # Sector info
+        sector, sub_industry = get_sector_info(ticker)
+        overlap_with = sector_overlaps.get(ticker)
+
+        # Profit targets
+        catalyst_date = catalyst_data.get("catalyst_date")
+        from datetime import date
+        profit_data = calculate_profit_targets(
+            current_price,
+            atr_stop_data.get("stop_pct", 8.0) / 100,
+            catalyst_date,
+            date.today().isoformat()
+        )
+
+        # Freshness removes Watch-level extended stocks from Strong
+        if tier == "Strong" and freshness_data["freshness"] == "Watch":
+            tier = "Developing"
+            missing = "Extended move — 5-day return above 15%, wait for pullback"
+
+        # Build flags list (for briefing FLAGS line — conclusions only)
+        flags = []
+        if freshness_data["freshness"] == "Extended":
+            flags.append("Extended — consider smaller size")
+        if freshness_data["freshness"] == "Watch":
+            flags.append("Overextended — wait for pullback")
+        if reaction_data["reaction_quality"] == "Sells News":
+            flags.append("Sells the news pattern")
+        if overlap_with:
+            flags.append(f"Sector overlap with {overlap_with}")
+        flags_str = " | ".join(flags) if flags else "No flags"
+
+        # Coverage reporting diagnostic
+        beat_history_available = 1 if earnings_history else 0
+
+        candidate = {
+            # Core identification
             "ticker": ticker,
             "tier": tier,
             "composite_score": round(composite, 3),
+            "missing_signal": missing,
+
+            # RS signals
             "rs_score": rs_scores[ticker]["rs_score"],
             "rs_normalized": round(rs_norm, 3),
             "rs_return": rs_scores[ticker]["ticker_return"],
+            "raw_rs": rs_scores[ticker].get("raw_rs", rs_scores[ticker]["rs_score"]),
+            "spy_return": rs_scores[ticker]["spy_return"],
+
+            # Earnings signals
             "earnings_score": e_score,
             "beat_streak": earnings_data["streak"] if earnings_data else 0,
+
+            # Catalyst signals
             "catalyst_score": c_score,
             "has_catalyst": catalyst_data.get("has_catalyst", False),
             "days_to_catalyst": catalyst_data.get("days_to_catalyst"),
-            "catalyst_date": catalyst_data.get("catalyst_date"),
+            "catalyst_date": catalyst_date,
             "catalyst_type": catalyst_data.get("catalyst_type", "none"),
-            "spy_return": rs_scores[ticker]["spy_return"],
-            "missing_signal": missing,
-        })
+            "catalyst_confirmed": catalyst_data.get("is_confirmed", False),
 
-    candidates.sort(key=lambda x: x["composite_score"], reverse=True)
+            # ATR stop (replaces flat 8%)
+            "atr_14d_pct": atr_stop_data.get("atr_pct"),
+            "atr_stop_pct": atr_stop_data.get("stop_pct"),
+            "atr_stop_price": atr_stop_data.get("stop_price"),
+            "current_price": round(current_price, 2),
 
-    # Apply hard sector limit to Strong candidates only
-    strong_candidates = [c for c in candidates if c["tier"] == "Strong"]
-    others = [c for c in candidates if c["tier"] != "Strong"]
-    strong_candidates = apply_sector_limit(strong_candidates)
-    candidates = strong_candidates + others
+            # Freshness filter
+            "five_day_return": freshness_data.get("five_day_return"),
+            "ten_day_return": freshness_data.get("ten_day_return"),
+            "freshness": freshness_data.get("freshness"),
+            "freshness_note": freshness_data.get("freshness_note"),
+
+            # Earnings reaction (observation only)
+            "avg_post_earnings_return": reaction_data.get("avg_post_earnings_return"),
+            "reaction_quality": reaction_data.get("reaction_quality"),
+
+            # Conviction tier (observation only)
+            "conviction_tier": conviction_tier,
+
+            # VIX regime (observation only)
+            "vix_regime": vix_regime_data.get("vix_regime"),
+            "vix_at_scan": vix_val,
+
+            # Sector
+            "sector": sector,
+            "sub_industry": sub_industry,
+            "sector_overlap_with": overlap_with,
+
+            # Profit targets
+            "tier1_target_price": profit_data.get("tier1_target_price"),
+            "pre_earnings_exit_date": profit_data.get("pre_earnings_exit_date"),
+            "time_stop_days": profit_data.get("time_stop_days"),
+
+            # Insider (placeholder — populated by post-scan enrichment)
+            "insider_net_90d": None,
+            "insider_flag": "Not Checked",
+
+            # Implied move (placeholder — populated by post-scan enrichment)
+            "implied_move_pct": None,
+            "implied_move_check": "Not Checked",
+
+            # Briefing output (conclusions only)
+            "flags_str": flags_str,
+            "base_position_size": "Full" if conviction_tier == "A" else "Half" if conviction_tier == "B" else "Quarter",
+            "final_position_size": "Full" if conviction_tier == "A" else "Half" if conviction_tier == "B" else "Quarter",
+        }
+
+        candidates.append(candidate)
+
     candidates.sort(key=lambda x: x["composite_score"], reverse=True)
 
     strong = [c for c in candidates if c["tier"] == "Strong"]
     developing = [c for c in candidates if c["tier"] == "Developing"]
     watch = [c for c in candidates if c["tier"] == "Watch"]
 
-    # Coverage diagnostics — flag data quality issues early
-    fundamentals_success = sum(
-        1 for t in trend_qualified
-        if t in fundamentals and fundamentals[t].get("status") == "success"
-    )
-    beat_history_available = sum(
-        1 for t in trend_qualified
-        if t in earnings_scored
-    )
-    beat_coverage_pct = beat_history_available / max(len(trend_qualified), 1) * 100
+    # Post-scan enrichment for Strong candidates only
+    # Insider activity and implied move — Strong candidates only
+    try:
+        from data.fetch_insider import fetch_insider_activity
+        from data.fetch_options import fetch_implied_move, check_implied_move_compatibility
+
+        for c in strong:
+            ticker = c["ticker"]
+
+            # Insider activity
+            insider_data = fetch_insider_activity(ticker)
+            c["insider_net_90d"] = insider_data.get("insider_net_90d")
+            c["insider_flag"] = insider_data.get("insider_flag", "Not Checked")
+
+            # Implied move — only for confirmed catalyst within 20 days
+            if c.get("has_catalyst") and c.get("days_to_catalyst") and c["days_to_catalyst"] <= 20 and c.get("catalyst_confirmed"):
+                implied_data = fetch_implied_move(ticker, c["catalyst_date"])
+                c["implied_move_pct"] = implied_data.get("implied_move_pct")
+                compatibility = check_implied_move_compatibility(
+                    c["implied_move_pct"],
+                    c.get("atr_stop_pct")
+                )
+                c["implied_move_check"] = compatibility
+
+                if compatibility in ("Warning", "Mismatch"):
+                    if "flags_str" in c and c["flags_str"] != "No flags":
+                        c["flags_str"] += f" | Earnings implied move ±{c['implied_move_pct']}%"
+                    else:
+                        c["flags_str"] = f"Earnings implied move ±{c['implied_move_pct']}%"
+
+    except Exception as e:
+        log(f"Post-scan enrichment error: {e}")
+
+    # Coverage diagnostics
+    beat_history_count = sum(1 for t in trend_qualified if t in earnings_scored)
+    beat_coverage_pct = beat_history_count / max(len(trend_qualified), 1) * 100
 
     log(f"Coverage report:")
-    log(f"  RS qualified:          {len(rs_qualified)}")
-    log(f"  Trend qualified:       {len(trend_qualified)}")
-    log(f"  Fundamentals success:  {fundamentals_success}")
-    log(f"  Beat history available: {beat_history_available}")
-    log(f"  Beat history coverage: {beat_coverage_pct:.0f}%")
+    log(f"  RS qualified:           {len(rs_qualified)}")
+    log(f"  Trend qualified:        {len(trend_qualified)}")
+    log(f"  Fundamentals success:   {len(earnings_scored)}")
+    log(f"  Beat history available: {beat_history_count}")
+    log(f"  Beat history coverage:  {beat_coverage_pct:.0f}%")
 
     if beat_coverage_pct < 70:
-        log(f"WARNING: Beat history coverage {beat_coverage_pct:.0f}% is below 70% — "
-            f"check Finnhub data quality or earnings parsing logic")
+        log(f"WARNING: Beat history coverage {beat_coverage_pct:.0f}% is below 70%")
 
     log(f"Scan complete: {len(strong)} Strong | {len(developing)} Developing | {len(watch)} Watch")
+    log(f"VIX Regime: {vix_regime_data.get('vix_regime')} | Trend: {vix_regime_data.get('vix_trend')}")
 
     return {
         "strong": strong,
@@ -234,6 +324,7 @@ def run_full_scan(prices, fundamentals, regime):
         "watch": watch,
         "all_scored": candidates,
         "regime_label": regime["label"],
+        "vix_regime": vix_regime_data.get("vix_regime"),
         "scan_stats": {
             "universe_size": len(prices) - 1,
             "rs_qualified": len(rs_qualified),
@@ -241,17 +332,15 @@ def run_full_scan(prices, fundamentals, regime):
             "earnings_qualified": earnings_diagnostics["qualifies"],
             "strong_count": len(strong),
             "developing_count": len(developing),
-            "earnings_diagnostics": earnings_diagnostics
+            "earnings_diagnostics": earnings_diagnostics,
         }
     }
 
 
 def _empty_result(regime):
     return {
-        "strong": [],
-        "developing": [],
-        "watch": [],
-        "all_scored": [],
+        "strong": [], "developing": [], "watch": [], "all_scored": [],
         "regime_label": regime["label"],
+        "vix_regime": "Green",
         "scan_stats": {}
     }

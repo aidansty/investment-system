@@ -17,7 +17,7 @@ from engine.regime import determine_regime
 from engine.scanner import run_full_scan
 from engine.portfolio import get_open_positions, update_position_prices
 from ai.briefing import generate_daily_briefing
-from output.notion import write_daily_briefing, write_trade_candidates
+from output.notion import write_daily_briefing, write_trade_candidates, write_candidate_analysis
 
 
 def save_morning_snapshot(scan_results, fundamentals, regime, today):
