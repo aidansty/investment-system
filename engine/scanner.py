@@ -153,6 +153,30 @@ def run_full_scan(prices, fundamentals, regime):
         # Conviction tier (observation only)
         conviction_tier = get_conviction_tier(composite)
 
+        # Base position size from conviction tier
+        if conviction_tier == "A":
+            base_size = "Full"
+        elif conviction_tier == "B":
+            base_size = "Half"
+        else:
+            base_size = "Quarter"
+
+        # Apply freshness adjustment to final position size
+        # Extended flag reduces by one level regardless of conviction tier
+        freshness_val = freshness_data.get("freshness", "Fresh")
+        if freshness_val == "Watch":
+            final_size = "Watch"  # Removed from Strong, do not enter
+        elif freshness_val == "Extended":
+            # Reduce one level
+            if base_size == "Full":
+                final_size = "Half"
+            elif base_size == "Half":
+                final_size = "Quarter"
+            else:
+                final_size = "Watch"  # Already at minimum, move to Watch
+        else:
+            final_size = base_size
+
         # Sector info
         sector, sub_industry = get_sector_info(ticker)
         overlap_with = sector_overlaps.get(ticker)
@@ -256,8 +280,8 @@ def run_full_scan(prices, fundamentals, regime):
 
             # Briefing output (conclusions only)
             "flags_str": flags_str,
-            "base_position_size": "Full" if conviction_tier == "A" else "Half" if conviction_tier == "B" else "Quarter",
-            "final_position_size": "Full" if conviction_tier == "A" else "Half" if conviction_tier == "B" else "Quarter",
+            "base_position_size": base_size,
+            "final_position_size": final_size,
         }
 
         candidates.append(candidate)
