@@ -17,13 +17,30 @@ def get_notion_client() -> Client:
 
 
 def _text_block(content: str) -> dict:
+    """Single text block — truncates at 1900 chars to stay under Notion API limit."""
     return {
         "object": "block",
         "type": "paragraph",
         "paragraph": {
-            "rich_text": [{"type": "text", "text": {"content": content[:2000]}}]
+            "rich_text": [{"type": "text", "text": {"content": content[:1900]}}]
         }
     }
+
+
+def _text_blocks(content: str) -> list:
+    """Split long content into multiple 1900-char blocks to prevent truncation."""
+    blocks = []
+    while content:
+        chunk = content[:1900]
+        blocks.append({
+            "object": "block",
+            "type": "paragraph",
+            "paragraph": {
+                "rich_text": [{"type": "text", "text": {"content": chunk}}]
+            }
+        })
+        content = content[1900:]
+    return blocks
 
 
 def _heading(text: str) -> dict:

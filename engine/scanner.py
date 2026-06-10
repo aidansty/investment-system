@@ -307,7 +307,7 @@ def run_full_scan(prices, fundamentals, regime):
             c["insider_flag"] = insider_data.get("insider_flag", "Not Checked")
 
             # Implied move — only for confirmed catalyst within 20 days
-            if c.get("has_catalyst") and c.get("days_to_catalyst") and c["days_to_catalyst"] <= 20 and c.get("catalyst_confirmed"):
+            if c.get("has_catalyst") and c.get("days_to_catalyst") and c["days_to_catalyst"] <= 20:
                 implied_data = fetch_implied_move(ticker, c["catalyst_date"])
                 c["implied_move_pct"] = implied_data.get("implied_move_pct")
                 compatibility = check_implied_move_compatibility(

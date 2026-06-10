@@ -1,73 +1,44 @@
 # All Claude prompt templates live here.
 # Edit this file to improve briefing quality over time.
 # Never hardcode prompts anywhere else in the codebase.
-#
-# COMPOSITE SCORE FORMULA (for developer reference):
-# score = (rs_normalized * 0.40) + (earnings_score * 0.35) + (catalyst_score * 0.25)
-#
-# rs_normalized:   0.0-1.0, normalized excess return vs SPY within qualified pool
-# earnings_score:  0.0=no beats, 0.3=1 beat, 0.6=2 beats, 0.8=3 beats, 1.0=4+ beats
-# catalyst_score:  0.0=none, 0.5=catalyst 21-42 days away, 1.0=catalyst 5-20 days away
-#
-# Tier thresholds:
-# Strong:     composite >= 0.65 AND earnings_score > 0
-# Developing: composite >= 0.45 AND earnings_score > 0
-# Watch:      composite < 0.45
-#
-# Weights are documented assumptions, not calibrated values.
-# First calibration review: after 30 completed trades.
 
 DAILY_BRIEFING_SYSTEM_PROMPT = """
-You are a professional investment analyst generating a daily morning briefing
-for a retail investor using a rules-based framework.
+You are generating a daily morning investment briefing. Your only job is to
+synthesize the verified data in the context block into a clean, actionable output.
 
-CORE RULES:
-1. Every number, price, date, and data point you reference must come from the
-   context block provided. You never invent data.
-2. If information is unavailable in the provided context, state that it is
-   unavailable. Do not infer, estimate, assume, or invent missing information.
-   This applies to company descriptions, event dates, news implications,
-   position reviews, and candidate analysis.
-3. Do not reference company names, business descriptions, or sector details
-   unless explicitly provided in the context. Use the ticker symbol only.
-4. Provide clear interpretations of the data and identify actions consistent
-   with the framework rules. Do not create new rules or override existing ones.
-5. Do not present future price movements as certainties. Avoid language such
-   as "will rise", "will fall", or "should rally". Instead describe setup
-   quality, supporting evidence, key risks, and conditions that would
-   invalidate the thesis.
-6. If signals conflict -- for example a bullish regime with negative news and
-   zero strong candidates, or a bearish regime with strong individual setups --
-   explain the conflict explicitly. Do not force all evidence into a single
-   bullish or bearish conclusion. Describe what is supportive and what is
-   cautionary.
-7. When summarizing news, prioritize headlines relevant to current positions,
-   strong candidates, or market regime conditions. Do not spend significant
-   space on headlines with no impact on portfolio decisions.
-8. Only fully discuss the top 5 strong candidates by composite score.
-   If more than 5 exist, summarize the remainder in one short paragraph.
-9. Every sentence must either inform a decision or explain a risk.
-   Remove anything that does neither.
-
-WRITING STYLE:
-- Plain English only. No financial jargon.
-- Be specific. Reference actual tickers, actual prices, actual dates.
-- Be concise. Short paragraphs and clear bullet points.
-- Write for someone who is intelligent but not a finance professional.
+ABSOLUTE RULES — NEVER VIOLATE THESE:
+1. Every number, price, date, and fact must come from the context block.
+   You never invent, estimate, or infer data.
+2. If a field says None or N/A, do not use it. Do not substitute a guess.
+3. Do not reference company names or business descriptions.
+   Use ticker symbols only. The user knows what the companies do.
+4. Do not use jargon: no "momentum play", no "technical setup", no "breakout".
+   Write plain English that a non-specialist can act on.
+5. Do not add sections, headers, bullet points, or commentary beyond what
+   the output format specifies. Six lines per candidate, no exceptions.
+6. The WHY THIS TRADE must contain four things in order:
+   (1) what the stock has been doing and why it is showing strength
+   (2) what the upcoming catalyst is and why the timing makes sense now
+   (3) what combination of factors makes this a genuine entry and not just
+       a stock that has moved up
+   (4) one sentence on what must remain true for the trade to work
+   Do not add a fifth sentence. Do not add sub-points.
+7. If catalyst_confirmed is False, do not present an earnings date as certain.
+   Write "an unconfirmed earnings date" or "a probable catalyst around [date]".
+8. The FLAGS line surfaces only things that change what the user does:
+   insider selling, sector overlap, implied move warning, extended move,
+   no confirmed catalyst. If nothing material: write exactly "No flags."
 """
 
 
 def build_daily_briefing_prompt(regime, macro, news, candidates, positions, today):
     """
-    Assembles the full verified context block and output instructions.
-    Claude receives only this data -- nothing external, nothing invented.
-
-    Composite score formula (for context interpretation):
-    score = (rs_normalized * 0.40) + (earnings_score * 0.35) + (catalyst_score * 0.25)
-    Higher score = stronger combination of momentum, earnings consistency, and timing.
+    Assembles verified context block for Claude.
+    All new signal fields are passed explicitly.
+    Claude receives conclusions, not raw scores.
     """
 
-    # Format news headlines
+    # News block
     news_block = ""
     for i, article in enumerate(news[:15], 1):
         dt = article.get("datetime", "")[:16] if article.get("datetime") else ""
@@ -75,7 +46,7 @@ def build_daily_briefing_prompt(regime, macro, news, candidates, positions, toda
         source = article.get("source", "")
         news_block += str(i) + ". [" + dt + "] " + headline + " (" + source + ")\n"
 
-    # Format economic calendar
+    # Economic calendar
     economic_calendar = macro.get("economic_calendar", None)
     if economic_calendar is None:
         calendar_block = "Economic calendar data not provided."
@@ -86,44 +57,96 @@ def build_daily_briefing_prompt(regime, macro, news, candidates, positions, toda
         for event in economic_calendar:
             calendar_block += "- " + event["name"] + ": " + event["status"] + " (" + event["date"] + ")\n"
 
-    # Format strong candidates -- top 5 only
+    # Strong candidates — pass ALL new signal fields explicitly
     strong = candidates.get("strong", [])
     strong_top5 = strong[:5]
     strong_remainder = strong[5:]
 
     strong_block = ""
     for c in strong_top5:
-        if c.get("has_catalyst"):
-            catalyst_str = "Earnings in " + str(c["days_to_catalyst"]) + " trading days (" + str(c["catalyst_date"]) + ")"
-        else:
-            catalyst_str = "No upcoming catalyst in window"
+        ticker = c["ticker"]
+        current_price = c.get("current_price", "N/A")
 
-        strong_block += "\nTICKER: " + c["ticker"] + "\n"
-        strong_block += "Outperformed SPY by: " + str(round(c["rs_score"], 1)) + " percentage points over 63 days\n"
-        strong_block += "Stock 63-day return: " + str(round(c["rs_return"], 1)) + "%\n"
-        strong_block += "Consecutive earnings beats: " + str(c["beat_streak"]) + " quarters in a row\n"
-        strong_block += "Catalyst: " + catalyst_str + "\n"
-        strong_block += "Composite score: " + str(c["composite_score"]) + "\n"
+        # Catalyst description — respect confirmed status
+        has_catalyst = c.get("has_catalyst", False)
+        confirmed = c.get("catalyst_confirmed", False)
+        days = c.get("days_to_catalyst")
+        cat_date = c.get("catalyst_date", "N/A")
+
+        if has_catalyst and confirmed:
+            catalyst_str = "Confirmed earnings in " + str(days) + " trading days (" + str(cat_date) + ")"
+        elif has_catalyst and not confirmed:
+            catalyst_str = "Unconfirmed earnings approximately " + str(days) + " trading days out (" + str(cat_date) + " — date not yet confirmed by company)"
+        else:
+            catalyst_str = "No catalyst in 5-42 day window"
+
+        # Freshness
+        freshness = c.get("freshness", "Fresh")
+        freshness_note = c.get("freshness_note", "")
+        entry_line = freshness
+        if freshness == "Extended":
+            entry_line = "Extended — wait for pullback or reduce size"
+        elif freshness == "Pulling Back":
+            entry_line = "Pulling back — potential better entry forming"
+        elif freshness == "Watch":
+            entry_line = "Overextended — do not enter"
+
+        # Stop and targets
+        atr_stop = c.get("atr_stop_price", "N/A")
+        tier1_target = c.get("tier1_target_price", "N/A")
+        pre_exit_date = c.get("pre_earnings_exit_date", "N/A")
+        position_size = c.get("final_position_size", "Full")
+
+        # Implied move
+        implied_move = c.get("implied_move_pct")
+        implied_check = c.get("implied_move_check", "Not Checked")
+
+        # Earnings reaction quality
+        reaction = c.get("reaction_quality", "Neutral")
+
+        # Flags
+        flags_str = c.get("flags_str", "No flags")
+
+        # Sector
+        sector = c.get("sector", "Other")
+        sub_industry = c.get("sub_industry", "Other")
+        overlap = c.get("sector_overlap_with")
+
+        # Beat streak
+        streak = c.get("beat_streak", 0)
+
+        strong_block += "\n---\n"
+        strong_block += "TICKER: " + ticker + "\n"
+        strong_block += "current_price: $" + str(current_price) + "\n"
+        strong_block += "stock_63d_return: " + str(c.get("rs_return", "N/A")) + "%\n"
+        strong_block += "spy_outperformance: " + str(round(c.get("raw_rs") or c.get("rs_score", 0), 1)) + "pp over 63 days\n"
+        strong_block += "consecutive_beats: " + str(streak) + " quarters\n"
+        strong_block += "earnings_reaction_history: " + reaction + "\n"
+        strong_block += "catalyst: " + catalyst_str + "\n"
+        strong_block += "freshness_status: " + freshness + " | " + freshness_note + "\n"
+        strong_block += "entry_instruction: " + entry_line + "\n"
+        strong_block += "position_size_instruction: " + position_size + " position\n"
+        strong_block += "atr_stop_price: $" + str(atr_stop) + "\n"
+        strong_block += "tier1_exit_price: $" + str(tier1_target) + "\n"
+        strong_block += "pre_earnings_exit_date: " + str(pre_exit_date) + "\n"
+        strong_block += "sector: " + sector + " / " + sub_industry + "\n"
+        if overlap:
+            strong_block += "sector_overlap_with: " + str(overlap) + "\n"
+        if implied_move:
+            strong_block += "implied_earnings_move: +/-" + str(implied_move) + "% | compatibility: " + implied_check + "\n"
+        strong_block += "flags: " + flags_str + "\n"
 
     if strong_remainder:
         tickers = ", ".join(c["ticker"] for c in strong_remainder)
-        strong_block += "\nAdditional strong candidates not shown: " + tickers + "\n"
+        strong_block += "\nAdditional strong candidates (met all criteria): " + tickers + "\n"
 
-    # Format developing candidates -- include explicit failure reason
+    # Developing candidates
     developing_block = ""
     for c in candidates.get("developing", [])[:8]:
-        if c.get("has_catalyst"):
-            catalyst_str = "earnings in " + str(c["days_to_catalyst"]) + "d"
-        else:
-            catalyst_str = "no catalyst in window"
-        missing = c.get("missing_signal", "Unknown")
-        developing_block += (
-            "- " + c["ticker"] + ": RS " + str(round(c["rs_score"], 1)) + "pp | "
-            + str(c["beat_streak"]) + " consecutive beats | " + catalyst_str
-            + " | Missing: " + missing + "\n"
-        )
+        missing = c.get("missing_signal", "Below threshold")
+        developing_block += "- " + c["ticker"] + ": " + missing + "\n"
 
-    # Format open positions
+    # Open positions
     positions_block = ""
     for p in positions:
         if not p.get("ticker"):
@@ -135,17 +158,21 @@ def build_daily_briefing_prompt(regime, macro, news, candidates, positions, toda
         pnl = ((current - entry) / entry * 100) if entry > 0 else 0
         dist_stop = ((current - stop) / current * 100) if current > 0 else 0
         dist_target = ((target - current) / current * 100) if current > 0 else 0
-
         positions_block += "\nTICKER: " + p["ticker"] + "\n"
         positions_block += "Entry: $" + str(round(entry, 2)) + " | Current: $" + str(round(current, 2)) + " | P&L: " + str(round(pnl, 1)) + "%\n"
         positions_block += "Stop: $" + str(round(stop, 2)) + " (" + str(round(dist_stop, 1)) + "% from current) | Target: $" + str(round(target, 2)) + " (" + str(round(dist_target, 1)) + "% from current)\n"
         positions_block += "Original thesis: " + str(p.get("thesis", "Not recorded")) + "\n"
 
-    # Format regime conditions
+    # Regime conditions
     conditions_block = ""
     for name, data in regime.get("conditions", {}).items():
         status = "BULLISH" if data["bullish"] else ("BEARISH" if data["bearish"] else "NEUTRAL")
         conditions_block += "- " + name + ": " + status + " -- " + str(data["value"]) + "\n"
+
+    # VIX regime from first strong candidate (all share same scan)
+    vix_regime = "Green"
+    if strong:
+        vix_regime = strong[0].get("vix_regime", "Green")
 
     return (
         "\nDATE: " + str(today) + "\n\n"
@@ -154,59 +181,57 @@ def build_daily_briefing_prompt(regime, macro, news, candidates, positions, toda
         "Confidence: " + regime["confidence"] + "\n"
         "Bullish signals: " + str(regime["bullish_points"]) + "/5\n"
         "Bearish signals: " + str(regime["bearish_points"]) + "/5\n"
-        "Data degraded: " + str(regime.get("degraded", False)) + "\n"
+        "VIX Regime: " + vix_regime + "\n"
         "Max positions allowed today: " + str(regime["max_positions"]) + "\n"
-        "Minimum cash to maintain: " + str(int(regime["min_cash_pct"] * 100)) + "%\n"
-        "Stop loss width: " + str(int(regime["stop_loss_pct"] * 100)) + "%\n\n"
+        "Minimum cash to maintain: " + str(int(regime["min_cash_pct"] * 100)) + "%\n\n"
         "Condition breakdown:\n" + conditions_block + "\n"
         "ECONOMIC CALENDAR:\n" + calendar_block + "\n\n"
-        "TODAY'S NEWS (verified headlines, last 24 hours):\n"
+        "TODAY'S NEWS (last 24 hours):\n"
         + (news_block if news_block else "No news data available.") + "\n\n"
-        "STRONG CANDIDATES (" + str(len(strong)) + " found today -- showing top 5):\n"
+        "STRONG CANDIDATES (" + str(len(strong)) + " found — showing top 5):\n"
         + (strong_block if strong_block else "No strong candidates today.") + "\n\n"
         "DEVELOPING CANDIDATES (" + str(len(candidates.get("developing", []))) + " found):\n"
         + (developing_block if developing_block else "None today.") + "\n\n"
         "OPEN POSITIONS (" + str(len(positions)) + " held):\n"
         + (positions_block if positions_block else "No open positions.") + "\n\n"
         "---\n"
-        "REQUIRED OUTPUT -- write each section exactly as shown.\n"
-        "Use paragraphs and bullet points. Never use tables or grids.\n\n"
+        "OUTPUT FORMAT — FOLLOW EXACTLY, NO DEVIATIONS:\n\n"
         "## Market Regime\n"
-        "2-3 sentences. What is the current market environment and what does it mean\n"
-        "for capital deployment today? Reference the specific signal values above.\n"
-        "If signals conflict, describe the conflict explicitly.\n\n"
+        "Write this header line first, exactly:\n"
+        "[Regime] — [Confidence] Confidence | VIX [GREEN/YELLOW/RED] | [N] Strong | [N] Developing\n\n"
+        "Then one sentence only on what this means for deploying capital today.\n\n"
         "## Market News Summary\n"
-        "3-5 sentences. Focus only on news relevant to current positions, strong\n"
-        "candidates, or regime conditions. Explain how relevant headlines affect\n"
-        "positioning. If no headlines are relevant, state that clearly in one sentence.\n\n"
+        "2-3 sentences. Only news relevant to held positions or strong candidates.\n"
+        "If nothing relevant: one sentence saying so.\n\n"
         "## Today's Key Events\n"
-        "Report economic releases from the ECONOMIC CALENDAR section above.\n"
-        "If the calendar data was not provided, write:\n"
-        "Economic calendar data not available for today.\n"
-        "If no releases are listed, write:\n"
-        "No major economic releases detected today.\n"
-        "Do not invent or assume any events.\n\n"
+        "Report from ECONOMIC CALENDAR only. If none: 'No major economic releases today.'\n\n"
         "## Open Position Review\n"
-        "For each open position:\n"
-        "TICKER -- HOLD / ADD / REDUCE / EXIT\n"
-        "One sentence explaining the action based on price relative to stop and target.\n"
-        "State whether the original thesis remains intact based on available data only.\n"
-        "If no positions: No open positions to review.\n\n"
+        "For each position: TICKER — HOLD/WATCH/REDUCE/EXIT. One sentence reason.\n"
+        "If none: 'No open positions.'\n\n"
         "## Strong Candidates\n"
-        "For each of the top 5 strong candidates:\n\n"
-        "**TICKER**\n"
-        "- Why it qualifies: describe each signal using only the data provided above\n"
-        "- Catalyst: what is it, when does it occur, why does it create a timing window\n"
-        "- Key risk: the single most important thing that could go wrong\n"
-        "- What ends the trade: one specific condition that would invalidate the setup\n\n"
-        "If additional strong candidates exist beyond the top 5, summarize them\n"
-        "in one short paragraph listing their tickers and noting they met all criteria.\n\n"
+        "For each strong candidate, write EXACTLY these six lines. Nothing else.\n"
+        "No bullet points. No sub-headers. No extra commentary.\n\n"
+        "TICKER\n\n"
+        "WHY THIS TRADE\n"
+        "Write exactly 3-4 sentences covering in order:\n"
+        "(1) What the stock has been doing and why it is showing strength — use stock_63d_return and spy_outperformance\n"
+        "(2) What the catalyst is and why the timing makes sense — use catalyst field, respect confirmed vs unconfirmed\n"
+        "(3) What combination of factors makes this a genuine entry — use consecutive_beats, earnings_reaction_history, freshness_status\n"
+        "(4) One sentence on what must remain true for this trade to work\n"
+        "No jargon. No score references. Write so another analyst could verify the signal independently.\n\n"
+        "ENTRY: [use entry_instruction field exactly]\n\n"
+        "POSITION SIZE: [use position_size_instruction field exactly]\n\n"
+        "STOP: $[use atr_stop_price field]\n\n"
+        "EXIT PLAN: Take half off at $[tier1_exit_price] — exit remainder by [pre_earnings_exit_date] before earnings\n"
+        "Use this format whenever pre_earnings_exit_date is not None, regardless of confirmed status.\n"
+        "Only use the trailing stop format if pre_earnings_exit_date is None.\n\n"
+        "FLAGS: [use flags field. Add implied move warning if implied_earnings_move is present and check is Warning or Mismatch. "
+        "Add 'No confirmed earnings date' if catalyst_confirmed is False. "
+        "If nothing material: write exactly 'No flags.']\n\n"
+        "---\n\n"
         "## Developing Candidates\n"
-        "One bullet per candidate using the Missing field from the context:\n"
-        "- TICKER: explain in plain English what is missing and what would need to\n"
-        "  change for it to become a strong candidate\n\n"
+        "One bullet per candidate. One sentence explaining what is missing in plain English.\n\n"
         "## Risk Assessment\n"
-        "2-3 sentences. Should new positions be opened today or is caution warranted?\n"
-        "Name any specific reason -- from news, regime, or position data -- to be more\n"
-        "careful than the regime label alone suggests. If everything aligns, say so.\n"
+        "One sentence only. Is this a good day to open new positions or exercise caution?\n"
+        "Name one specific reason from the data. No generic market commentary.\n"
     )
