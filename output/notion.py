@@ -381,6 +381,7 @@ def write_after_hours_alert(briefing: dict, positions: list, today) -> str | Non
 
 
 CANDIDATE_ANALYSIS_DB = "34c25f29-1aea-4416-bb9f-89421bf2dabc"
+AFTER_HOURS_BRIEFING_DB = "e4c6418f08b54a14ae8748e1da7e437e"
 
 
 def write_candidate_analysis(candidates: list, today) -> None:

@@ -129,7 +129,13 @@ def compare_snapshots(morning: dict, afternoon: dict) -> dict:
 
 def main():
     start = time.time()
-    today = date.today()
+    try:
+        import pytz
+        from datetime import datetime as dt
+        eastern = pytz.timezone("America/New_York")
+        today = dt.now(eastern).date()
+    except Exception:
+        today = date.today()
     log(f"=== After-Hours Monitor starting: {today} ===")
 
     if not is_trading_day(today):
