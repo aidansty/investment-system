@@ -1,9 +1,7 @@
 name: After-Hours Position Monitor
 
 on:
-  schedule:
-    - cron: '0 19 * * 1-5'  # 3:00 PM ET (19:00 UTC) Monday-Friday
-  workflow_dispatch:
+  workflow_dispatch:  # Triggered by cron-job.org at 3 PM ET only
 
 jobs:
   after-hours-monitor:
