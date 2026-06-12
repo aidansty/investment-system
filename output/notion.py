@@ -136,69 +136,96 @@ def write_daily_briefing(briefing: dict, regime: dict, scan_results: dict, today
         return None
 
 
-def write_trade_candidates(scan_results: dict, regime: dict, today: date) -> str | None:
+def write_trade_candidates(scan_results: dict, regime: dict, today) -> str | None:
     """
     Write one daily Trade Candidates page to Notion.
-    Strong candidates get full readable writeups.
-    Developing candidates get a single summary line each.
-    Organized by date — one page per trading day.
+    Action lines only — no WHY THIS TRADE paragraph.
+    Quick reference card for during-the-day use.
+    Morning Briefing contains the full thesis.
     """
     if not scan_results:
         return None
 
     try:
         notion = get_notion_client()
-        date_str = today.isoformat()
+        date_str = str(today)
         strong = scan_results.get("strong", [])
         developing = scan_results.get("developing", [])
 
+        regime_label = regime["label"]
+        vix_regime = strong[0].get("vix_regime", "Green") if strong else "Green"
+        emoji = "🟢" if regime_label == "Bullish" else "🔴" if regime_label == "Bearish" else "🟡"
+        vix_emoji = "🟢" if vix_regime == "Green" else "🔴" if vix_regime == "Red" else "🟡"
+
         blocks = []
 
-        regime_label = regime["label"]
-        emoji = "🟢" if regime_label == "Bullish" else "🔴" if regime_label == "Bearish" else "🟡"
-
-        header = emoji + " " + regime_label + " regime | " + str(len(strong)) + " Strong | " + str(len(developing)) + " Developing"
+        header = (emoji + " " + regime_label + " | " + vix_emoji + " VIX " + vix_regime.upper() +
+                  " | " + str(len(strong)) + " Strong | " + str(len(developing)) + " Developing")
         blocks.append(_callout(header, emoji))
         blocks.append(_divider())
-
-        # Strong candidates — full writeup
-        blocks.append(_heading("🎯 Strong Candidates — Review These Today"))
+        blocks.append(_heading("🎯 Strong Candidates"))
 
         if strong:
             for c in strong:
-                if c.get("has_catalyst"):
-                    catalyst_str = "Earnings in " + str(c["days_to_catalyst"]) + " trading days (" + str(c["catalyst_date"]) + ")"
-                else:
-                    catalyst_str = "No confirmed catalyst in window"
+                ticker = c["ticker"]
 
-                lines = [
-                    c["ticker"],
-                    "Outperforming market by " + str(round(c["rs_score"], 1)) + "pp over 63 days (stock returned " + str(round(c["rs_return"], 1)) + "%)",
-                    str(c["beat_streak"]) + " consecutive earnings beats (earnings score: " + str(round(c["earnings_score"], 1)) + "/1.0)",
-                    "Catalyst: " + catalyst_str,
-                    "Composite score: " + str(c["composite_score"]) + " | Missing signals: " + str(c.get("missing_signal", "None")),
-                ]
-                entry_text = "\n".join(lines)
-                blocks.append(_text_block(entry_text))
+                freshness = c.get("freshness", "Fresh")
+                if freshness == "Extended":
+                    entry_line = "Extended — wait for pullback or reduce size"
+                elif freshness == "Pulling Back":
+                    entry_line = "Pulling back — potential better entry forming"
+                elif freshness == "Watch":
+                    entry_line = "Overextended — do not enter"
+                else:
+                    entry_line = "Fresh"
+
+                position_size = c.get("final_position_size", "Full") + " position"
+
+                stop = c.get("atr_stop_price")
+                stop_line = "$" + str(stop) if stop else "See briefing"
+
+                tier1 = c.get("tier1_target_price")
+                pre_exit = c.get("pre_earnings_exit_date")
+                if tier1 and pre_exit:
+                    exit_line = "Take half off at $" + str(tier1) + " — exit remainder by " + str(pre_exit) + " before earnings"
+                elif tier1:
+                    exit_line = "Take half off at $" + str(tier1) + " and trail the rest"
+                else:
+                    exit_line = "See briefing"
+
+                flags = c.get("flags_str", "No flags")
+                if not c.get("catalyst_confirmed", False) and c.get("has_catalyst"):
+                    if "No confirmed" not in flags:
+                        flags = flags + " | No confirmed earnings date" if flags != "No flags" else "No confirmed earnings date"
+                implied = c.get("implied_move_pct")
+                implied_check = c.get("implied_move_check", "Not Checked")
+                if implied and implied_check in ("Warning", "Mismatch"):
+                    implied_flag = "Earnings implied move +-" + str(implied) + "%"
+                    flags = flags + " | " + implied_flag if flags != "No flags" else implied_flag
+
+                blocks.append(_heading(ticker))
+                action_lines = (
+                    "ENTRY: " + entry_line + "\n" +
+                    "POSITION SIZE: " + position_size + "\n" +
+                    "STOP: " + stop_line + "\n" +
+                    "EXIT PLAN: " + exit_line + "\n" +
+                    "FLAGS: " + flags
+                )
+                blocks.extend(_text_blocks(action_lines))
                 blocks.append(_divider())
         else:
             blocks.append(_text_block("No strong candidates today."))
             blocks.append(_divider())
 
-        # Developing candidates — one line each
         blocks.append(_heading("👀 Developing — Watch List"))
 
         if developing:
             dev_lines = []
             for c in developing[:15]:
-                if c.get("has_catalyst"):
-                    cat = "catalyst in " + str(c["days_to_catalyst"]) + "d"
-                else:
-                    cat = "no catalyst"
-                line = c["ticker"] + ": RS " + str(round(c["rs_score"], 1)) + "pp | " + str(c["beat_streak"]) + " beats | " + cat + " | Missing: " + str(c.get("missing_signal", "Below threshold"))
-                dev_lines.append(line)
+                missing = c.get("missing_signal", "Below threshold")
+                dev_lines.append("• " + c["ticker"] + ": " + missing)
             if len(developing) > 15:
-                dev_lines.append("...and " + str(len(developing) - 15) + " more developing candidates")
+                dev_lines.append("• ...and " + str(len(developing) - 15) + " more")
             blocks.append(_text_block("\n".join(dev_lines)))
         else:
             blocks.append(_text_block("No developing candidates today."))
@@ -206,7 +233,7 @@ def write_trade_candidates(scan_results: dict, regime: dict, today: date) -> str
         page = notion.pages.create(
             parent={"database_id": TRADE_CANDIDATES_DB},
             properties={
-                "Date": {"title": [{"type": "text", "text": {"content": date_str + " — 9AM Morning Briefing"}}]},
+                "Date": {"title": [{"type": "text", "text": {"content": date_str + " — Trade Candidates"}}]},
                 "Regime": {"select": {"name": regime_label}},
                 "Strong Count": {"number": len(strong)},
                 "Developing Count": {"number": len(developing)},
