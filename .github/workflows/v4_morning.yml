@@ -1,0 +1,31 @@
+name: V4 Morning Intelligence Briefing
+
+on:
+  workflow_dispatch:  # Triggered by cron-job.org at 8:45 AM ET
+
+jobs:
+  v4-morning:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run V4 morning briefing
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
+          FRED_KEY: ${{ secrets.FRED_KEY }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
+        run: PYTHONPATH=$(pwd) python v4_morning.py
