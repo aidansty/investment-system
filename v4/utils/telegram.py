@@ -13,7 +13,7 @@ def send_telegram(message: str, parse_mode: str = "HTML") -> bool:
     Message is automatically truncated to 4096 chars (Telegram limit).
     """
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        log("Telegram credentials not set — skipping notification")
+        log("WARNING: Telegram credentials not set — message NOT sent")
         return False
 
     # Telegram max message length

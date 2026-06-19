@@ -11,6 +11,7 @@ def build_morning_context(
     macro: dict,
     industry_results: dict,
     news: list,
+    forward_catalysts: list,
     positions: list,
     today: str,
 ) -> str:
@@ -35,13 +36,30 @@ Economic events today: {len(econ_events)}"""
         for e in econ_events[:3]:
             macro_block += f"\n- {e['name']} ({e['impact']} impact)"
 
-    # News block — top 30 headlines
+    # News block — already deduplicated and summarized stories
     news_block = ""
-    for i, item in enumerate(news[:30], 1):
-        dt = item.get("datetime", "")[:16]
-        news_block += f"{i}. [{dt}] {item['headline']} ({item['source']})\n"
-        if item.get("summary"):
-            news_block += f"   Summary: {item['summary'][:150]}\n"
+    for i, item in enumerate(news, 1):
+        headline = item.get("headline", "")
+        summary = item.get("summary", "")
+        category = item.get("category", "")
+        news_block += f"{i}. {headline}\n"
+        if summary:
+            news_block += f"   {summary}\n"
+        if category:
+            news_block += f"   Category: {category}\n"
+
+    # Forward catalysts block — events with specific future dates
+    catalysts_block = ""
+    for cat in forward_catalysts:
+        event = cat.get("event", "")
+        date_str = cat.get("date", "")
+        why = cat.get("why_it_matters", "")
+        action = cat.get("action_type", "")
+        holdings = cat.get("affected_holdings", [])
+        holdings_str = ", ".join(holdings) if holdings else "None — new opportunity"
+        catalysts_block += f"[{date_str}] {event}\n"
+        catalysts_block += f"   Why it matters: {why}\n"
+        catalysts_block += f"   Action type: {action} | Affects: {holdings_str}\n\n"
 
     # Industry results block
     top_industries = industry_results.get("top_industries", [])
@@ -162,6 +180,15 @@ Keep this to 2-3 sentences maximum.
 
 ---
 
+## Catalysts Ahead
+List 3-5 of the most important upcoming catalysts from the data above.
+For each: date, event, and one sentence on whether this is an entry opportunity,
+a position management decision, or both. Prioritize catalysts affecting current
+holdings or high-conviction industries. If a catalyst is an entry opportunity,
+say so explicitly — e.g. "Consider entering before this date to capture the move."
+If a catalyst requires managing an existing position, say so explicitly —
+e.g. "Decide hold/reduce/exit on TICKER before this date per pre-earnings rules."
+
 ## Open Position Review
 For each held position:
 TICKER — HOLD / WATCH / REDUCE / EXIT
@@ -186,6 +213,7 @@ def generate_morning_briefing(
     macro: dict,
     industry_results: dict,
     news: list,
+    forward_catalysts: list,
     positions: list,
     today: str,
 ) -> dict:
@@ -195,7 +223,7 @@ def generate_morning_briefing(
     """
     client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
 
-    context = build_morning_context(macro, industry_results, news, positions, today)
+    context = build_morning_context(macro, industry_results, news, forward_catalysts, positions, today)
     instructions = build_morning_output_instructions()
     full_prompt = context + instructions
 
