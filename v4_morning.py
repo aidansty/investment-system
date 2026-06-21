@@ -44,6 +44,7 @@ def main():
 
     if not is_trading_day(today):
         log("Market closed. Exiting.")
+        send_telegram(f"📅 {today} — Market closed today. No briefing to generate. See you next trading day.")
         sys.exit(0)
 
     # Step 1 — ETF prices
