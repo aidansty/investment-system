@@ -464,40 +464,54 @@ const mktStatus = document.getElementById('market-status');
 mktStatus.textContent = BRIEFING_DATA.market_open ? 'Market open' : 'Market closed';
 
 // ============================================================
+// LIVE PRICE FETCHING
+// ============================================================
+const POSITIONS_CONFIG = BRIEFING_DATA.positions || [];
+const COST_BASIS = BRIEFING_DATA.cost_basis || 0;
+
+// Map crypto tickers to Yahoo Finance symbols
+const YF_TICKER_MAP = {
+  'BTC': 'BTC-USD', 'ETH': 'ETH-USD', 'XRP': 'XRP-USD', 'ZEC': 'ZEC-USD',
+};
+
+async function fetchLivePrices(tickers) {
+  const prices = {};
+  const chunks = [];
+  for (let i = 0; i < tickers.length; i += 5) chunks.push(tickers.slice(i, i + 5));
+
+  for (const chunk of chunks) {
+    const yfTickers = chunk.map(t => YF_TICKER_MAP[t] || t).join(',');
+    try {
+      const url = `https://query1.finance.yahoo.com/v8/finance/spark?symbols=${encodeURIComponent(yfTickers)}&range=1d&interval=1d`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const spark = data?.spark?.result || [];
+      spark.forEach(item => {
+        const sym = item.symbol;
+        const closes = item?.response?.[0]?.meta?.regularMarketPrice;
+        if (closes != null) {
+          // Map back from YF ticker to our ticker
+          const ourTicker = Object.entries(YF_TICKER_MAP).find(([k,v]) => v === sym)?.[0] || sym;
+          prices[ourTicker] = closes;
+        }
+      });
+    } catch(e) {
+      console.warn('Price fetch failed for chunk:', chunk, e);
+    }
+  }
+  return prices;
+}
+
+// ============================================================
 // POSITIONS + SUMMARY CARDS
 // ============================================================
-const positions = BRIEFING_DATA.positions || [];
-const cashBalance = BRIEFING_DATA.cash || 0;
-const costBasis = BRIEFING_DATA.cost_basis || 0;
 
-let totalInvested = 0;
-positions.forEach(p => { totalInvested += (p.balance || 0); });
+// Cash — persisted in localStorage, never resets on reload
+const CASH_KEY = 'investment_desk_cash';
+let currentCash = parseFloat(localStorage.getItem(CASH_KEY) || '0');
+document.getElementById('s-cash').textContent = fmt(currentCash);
 
-const totalValue = totalInvested + cashBalance;
-const totalGain = totalValue - costBasis - cashBalance;
-const totalGainPct = costBasis > 0 ? (totalGain / costBasis * 100) : 0;
-
-document.getElementById('s-total').textContent = fmt(totalValue);
-document.getElementById('s-total-sub').textContent = 'All holdings + cash';
-document.getElementById('s-invested').textContent = fmt(totalInvested);
-document.getElementById('s-invested-sub').textContent = totalValue > 0 ? (totalInvested / totalValue * 100).toFixed(1) + '% of portfolio' : '—';
-
-const gainEl = document.getElementById('s-gain');
-gainEl.textContent = fmtDol(totalGain);
-gainEl.className = 'card-value ' + (totalGain >= 0 ? 'pos' : 'neg');
-const gainSubEl = document.getElementById('s-gain-sub');
-gainSubEl.textContent = fmtPct(totalGainPct) + ' since inception';
-gainSubEl.className = 'card-sub ' + (totalGain >= 0 ? 'pos' : 'neg');
-
-document.getElementById('s-cash').textContent = fmt(cashBalance);
-
-const vsSpyEl = document.getElementById('s-vs-spy');
-const vsSpy = BRIEFING_DATA.vs_spy_pp;
-vsSpyEl.textContent = vsSpy != null ? (vsSpy >= 0 ? '+' : '') + vsSpy.toFixed(1) + 'pp' : '—';
-vsSpyEl.className = 'card-value ' + (vsSpy >= 0 ? 'pos' : 'neg');
-
-// Cash edit
-let currentCash = cashBalance;
+// Cash edit modal
 document.getElementById('edit-cash-btn').onclick = () => {
   document.getElementById('cash-input').value = currentCash;
   document.getElementById('cash-modal').classList.add('open');
@@ -507,10 +521,91 @@ document.getElementById('cash-save').onclick = () => {
   const val = parseFloat(document.getElementById('cash-input').value);
   if (!isNaN(val)) {
     currentCash = val;
+    localStorage.setItem(CASH_KEY, String(val));
     document.getElementById('s-cash').textContent = fmt(val);
+    updateSummaryCards(window._livePositions || POSITIONS_CONFIG);
   }
   document.getElementById('cash-modal').classList.remove('open');
 };
+
+function updateSummaryCards(positions) {
+  let totalInvested = 0;
+  positions.forEach(p => { totalInvested += (p.balance || 0); });
+
+  const totalValue = totalInvested + currentCash;
+  const totalGain = totalInvested - COST_BASIS;
+  const totalGainPct = COST_BASIS > 0 ? (totalGain / COST_BASIS * 100) : 0;
+
+  document.getElementById('s-total').textContent = fmt(totalValue);
+  document.getElementById('s-total-sub').textContent = 'All holdings + cash';
+  document.getElementById('s-invested').textContent = fmt(totalInvested);
+  document.getElementById('s-invested-sub').textContent = totalValue > 0 ? (totalInvested / totalValue * 100).toFixed(1) + '% of portfolio' : '—';
+
+  const gainEl = document.getElementById('s-gain');
+  gainEl.textContent = fmtDol(totalGain);
+  gainEl.className = 'card-value ' + (totalGain >= 0 ? 'pos' : 'neg');
+  const gainSubEl = document.getElementById('s-gain-sub');
+  gainSubEl.textContent = fmtPct(totalGainPct) + ' since inception';
+  gainSubEl.className = 'card-sub ' + (totalGain >= 0 ? 'pos' : 'neg');
+
+  const vsSpyEl = document.getElementById('s-vs-spy');
+  const vsSpy = BRIEFING_DATA.vs_spy_pp;
+  vsSpyEl.textContent = vsSpy != null ? (vsSpy >= 0 ? '+' : '') + vsSpy.toFixed(1) + 'pp' : '—';
+  vsSpyEl.className = 'card-value ' + (vsSpy >= 0 ? 'pos' : 'neg');
+}
+
+// Initial render with data from pipeline
+updateSummaryCards(POSITIONS_CONFIG);
+
+// Fetch live prices and update everything
+(async () => {
+  const tickers = POSITIONS_CONFIG.map(p => p.ticker);
+  const prices = await fetchLivePrices(tickers);
+  console.log('Live prices fetched:', prices);
+
+  // Update each position with live price
+  const updatedPositions = POSITIONS_CONFIG.map(p => {
+    const livePrice = prices[p.ticker];
+    if (livePrice == null) return p;
+    const balance = round2(livePrice * p.qty);
+    const pctChange = p.entry_price > 0 ? round2((livePrice - p.entry_price) / p.entry_price * 100) : 0;
+    const dollarChange = round2((livePrice - p.entry_price) * p.qty);
+    return { ...p, current_price: livePrice, balance, pct_change: pctChange, dollar_change: dollarChange };
+  });
+
+  window._livePositions = updatedPositions;
+
+  // Update summary cards
+  updateSummaryCards(updatedPositions);
+
+  // Update position rows in the DOM
+  updatedPositions.forEach((p, i) => {
+    const toggle = document.querySelector(`.pos-toggle[data-idx="${i}"]`);
+    if (!toggle) return;
+    const cells = toggle.querySelectorAll('.pos-col-val');
+    // cells: qty, price, balance (based on hide-mobile)
+    const priceEls = toggle.querySelectorAll('.pos-col-val');
+    priceEls.forEach(el => {
+      if (el.previousElementSibling?.textContent === 'Price') {
+        el.textContent = '$' + Number(p.current_price).toLocaleString();
+      }
+      if (el.previousElementSibling?.textContent === 'Balance') {
+        el.textContent = fmt(p.balance);
+      }
+    });
+    const pctEl = toggle.querySelector('.pos-pct');
+    const dolEl = toggle.querySelector('.pos-dol');
+    if (pctEl) { pctEl.textContent = fmtPct(p.pct_change); pctEl.style.color = p.pct_change >= 0 ? 'var(--green)' : 'var(--red)'; }
+    if (dolEl) { dolEl.textContent = fmtDol(p.dollar_change); }
+  });
+
+  // Rebuild allocation chart with live balances
+  rebuildAllocChart(updatedPositions, currentCash);
+
+  document.getElementById('last-run').textContent = 'Prices updated live · ' + new Date().toLocaleTimeString();
+})();
+
+function round2(n) { return Math.round(n * 100) / 100; }
 
 // ============================================================
 // PERFORMANCE CHART
@@ -543,8 +638,40 @@ new Chart(document.getElementById('perf-chart'), {
 });
 
 // ============================================================
-// ALLOCATION CHART
+// ALLOCATION CHART — rebuildable with live data
 // ============================================================
+let allocChartInstance = null;
+function rebuildAllocChart(positions, cash) {
+  const allocData = buildAllocData(positions, cash);
+  const allocTotal = allocData.reduce((s, d) => s + d.value, 0);
+  if (allocChartInstance) allocChartInstance.destroy();
+  allocChartInstance = new Chart(document.getElementById('alloc-chart'), {
+    type: 'doughnut',
+    data: {
+      labels: allocData.map(d => d.label),
+      datasets: [{ data: allocData.map(d => d.value), backgroundColor: allocData.map(d => d.color), borderColor: '#09090c', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: (c) => c.label + ': ' + (c.parsed / allocTotal * 100).toFixed(1) + '%' }}
+      }
+    }
+  });
+  const legend = document.getElementById('alloc-legend');
+  legend.innerHTML = '';
+  allocData.forEach(d => {
+    const pct = allocTotal > 0 ? (d.value / allocTotal * 100).toFixed(1) : '0.0';
+    const row = document.createElement('div');
+    row.className = 'alloc-row';
+    row.innerHTML = '<span class="alloc-label"><span class="alloc-dot" style="background:' + d.color + '"></span>' + d.label + '</span><span class="alloc-val">' + fmt(d.value) + ' &nbsp; ' + pct + '%</span>';
+    legend.appendChild(row);
+  });
+}
+
+// ============================================================
+// ALLOCATION CHART — initial render
 const ALLOC_COLORS = ['#7F77DD','#5DCAA5','#D85A30','#378ADD','#D4537E','#EF9F27','#3a9e7a','#6b4fa8','#3a3938'];
 
 function buildAllocData(positions, cash) {
@@ -557,32 +684,8 @@ function buildAllocData(positions, cash) {
   return rows;
 }
 
-const allocData = buildAllocData(positions, cashBalance);
-const allocTotal = allocData.reduce((s, d) => s + d.value, 0);
-
-new Chart(document.getElementById('alloc-chart'), {
-  type: 'doughnut',
-  data: {
-    labels: allocData.map(d => d.label),
-    datasets: [{ data: allocData.map(d => d.value), backgroundColor: allocData.map(d => d.color), borderColor: '#09090c', borderWidth: 2 }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false, cutout: '62%',
-    plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: (c) => c.label + ': ' + (c.parsed / allocTotal * 100).toFixed(1) + '%' }}
-    }
-  }
-});
-
-const legend = document.getElementById('alloc-legend');
-allocData.forEach(d => {
-  const pct = allocTotal > 0 ? (d.value / allocTotal * 100).toFixed(1) : '0.0';
-  const row = document.createElement('div');
-  row.className = 'alloc-row';
-  row.innerHTML = '<span class="alloc-label"><span class="alloc-dot" style="background:' + d.color + '"></span>' + d.label + '</span><span class="alloc-val">' + fmt(d.value) + ' &nbsp; ' + pct + '%</span>';
-  legend.appendChild(row);
-});
+// Initial alloc chart built from pipeline data, rebuilt with live prices after fetch
+rebuildAllocChart(POSITIONS_CONFIG, currentCash);
 
 // ============================================================
 // POSITION ROWS
