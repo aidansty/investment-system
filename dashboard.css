@@ -236,3 +236,28 @@
     .pos-toggle { grid-template-columns: 1.2fr 1fr 1fr 26px; }
     .pos-toggle .hide-mobile { display: none; }
   }
+
+/* Price flash animations */
+@keyframes flashGreen {
+  0%   { background: rgba(93,202,165,0.35); color: #5DCAA5; }
+  100% { background: transparent; color: inherit; }
+}
+@keyframes flashRed {
+  0%   { background: rgba(226,80,79,0.35); color: #e2504f; }
+  100% { background: transparent; color: inherit; }
+}
+.flash-green { animation: flashGreen 1s ease-out; border-radius: 3px; }
+.flash-red   { animation: flashRed 1s ease-out; border-radius: 3px; }
+
+/* Intraday mini chart inside position detail */
+.intraday-wrap {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 0.5px solid rgba(255,255,255,0.06);
+}
+.intraday-label {
+  font-size: 11.5px; color: #87867c; margin-bottom: 8px;
+}
+.intraday-canvas-wrap {
+  position: relative; width: 100%; height: 80px;
+}

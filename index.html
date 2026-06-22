@@ -322,6 +322,9 @@ updateSummaryCards(POSITIONS_CONFIG);
 function round2(n) { return Math.round(n * 100) / 100; }
 
 // Fetch live prices and update — runs AFTER position rows are built
+// Store previous prices for flash coloring
+const prevPrices = {};
+
 async function fetchAndUpdatePrices() {
   try {
     const tickers = POSITIONS_CONFIG.map(p => p.ticker);
@@ -346,9 +349,21 @@ async function fetchAndUpdatePrices() {
         if (!toggle) return;
         toggle.querySelectorAll('.pos-col-val').forEach(el => {
           const label = el.previousElementSibling ? el.previousElementSibling.textContent.trim() : '';
-          if (label === 'Price') el.textContent = '$' + Number(p.current_price).toLocaleString();
+          if (label === 'Price') {
+            const newPrice = '$' + Number(p.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            const prev = prevPrices[p.ticker];
+            el.textContent = newPrice;
+            if (prev != null && p.current_price !== prev) {
+              const flashClass = p.current_price > prev ? 'flash-green' : 'flash-red';
+              el.classList.remove('flash-green', 'flash-red');
+              void el.offsetWidth; // force reflow
+              el.classList.add(flashClass);
+              setTimeout(() => el.classList.remove(flashClass), 1000);
+            }
+          }
           if (label === 'Balance') el.textContent = fmt(p.balance);
         });
+        prevPrices[p.ticker] = p.current_price;
         const pctEl = toggle.querySelector('.pos-pct');
         const dolEl = toggle.querySelector('.pos-dol');
         if (pctEl) { pctEl.textContent = fmtPct(p.pct_change); pctEl.style.color = p.pct_change >= 0 ? 'var(--green)' : 'var(--red)'; }
@@ -541,11 +556,28 @@ document.querySelectorAll('.pos-toggle').forEach(btn => {
     const open = detail.style.display === 'block';
     detail.style.display = open ? 'none' : 'block';
     chev.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+
+    // Load intraday chart when opening
+    if (!open) {
+      const p = POSITIONS_CONFIG[parseInt(idx)];
+      if (!p) return;
+      const canvasId = 'intraday-' + idx;
+      // Add chart section if not already there
+      if (!document.getElementById(canvasId)) {
+        const chartDiv = document.createElement('div');
+        chartDiv.className = 'intraday-wrap';
+        chartDiv.innerHTML = '<div class="intraday-label">Today's price movement</div><div class="intraday-canvas-wrap"><canvas id="' + canvasId + '"></canvas></div>';
+        detail.appendChild(chartDiv);
+      }
+      fetchIntradayChart(p.ticker, canvasId);
+    }
   });
 });
 
 // Now that position rows exist in the DOM, fetch live prices
+// Then refresh every 5 seconds
 fetchAndUpdatePrices();
+setInterval(fetchAndUpdatePrices, 5000);
 
 // ============================================================
 // MORNING TAB
@@ -749,6 +781,71 @@ async function sendMessage() {
 
 sendBtn.addEventListener('click', sendMessage);
 inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+// ============================================================
+// INTRADAY CHARTS
+// ============================================================
+const intradayCharts = {};
+
+async function fetchIntradayChart(ticker, canvasId) {
+  try {
+    const yfTicker = {'BTC':'BTC-USD','ETH':'ETH-USD','XRP':'XRP-USD','ZEC':'ZEC-USD'}[ticker] || ticker;
+    const url = 'https://query1.finance.yahoo.com/v8/finance/spark?symbols=' + encodeURIComponent(yfTicker) + '&range=1d&interval=5m';
+    const res = await fetch(url);
+    const data = await res.json();
+    const result = data?.spark?.result?.[0]?.response?.[0];
+    if (!result) return;
+
+    const closes = result.indicators?.quote?.[0]?.close || [];
+    const timestamps = result.timestamp || [];
+    if (!closes.length) return;
+
+    const validCloses = closes.filter(c => c != null);
+    const firstClose = validCloses[0];
+    const lastClose = validCloses[validCloses.length - 1];
+    const isUp = lastClose >= firstClose;
+    const lineColor = isUp ? '#5DCAA5' : '#e2504f';
+    const fillColor = isUp ? 'rgba(93,202,165,0.08)' : 'rgba(226,80,79,0.08)';
+
+    const labels = timestamps.map(ts => {
+      const d = new Date(ts * 1000);
+      return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    });
+
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    if (intradayCharts[canvasId]) intradayCharts[canvasId].destroy();
+
+    intradayCharts[canvasId] = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: closes,
+          borderColor: lineColor,
+          backgroundColor: fillColor,
+          fill: true,
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.3,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: {
+          callbacks: { label: (c) => '$' + (c.parsed.y != null ? c.parsed.y.toFixed(2) : '—') }
+        }},
+        scales: {
+          x: { display: false },
+          y: { display: false }
+        }
+      }
+    });
+  } catch(e) {
+    console.warn('Intraday chart error for', ticker, e);
+  }
+}
 
 // ============================================================
 // TABS
