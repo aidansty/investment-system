@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investment Desk</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="dashboard_data.js"></script>
+<style>
+  :root {
+    --bg-base: #09090c;
+    --bg-card: #131217;
+    --bg-card-hover: #18171d;
+    --border: rgba(255,255,255,0.07);
+    --border-mid: rgba(255,255,255,0.12);
+    --text-primary: #eceae2;
+    --text-secondary: #87867c;
+    --text-muted: #5a5956;
+    --text-body: #c0bfb7;
+    --green: #5DCAA5;
+    --red: #e2504f;
+    --amber: #EF9F27;
+    --blue: #5b9bd5;
+    --purple: #8077e0;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  /* Layout */
+  .shell { max-width: 1100px; margin: 0 auto; padding: 0 20px 60px; }
+  /* Header */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 0 0; margin-bottom: 24px;
+    border-bottom: 0.5px solid var(--border); padding-bottom: 16px;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: linear-gradient(135deg, #3a3560, #231f3d);
+    border: 0.5px solid rgba(128,119,224,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; color: #a59ce8;
+  }
+  .header-title { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+  .header-sub { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .regime-badge {
+    font-size: 12px; padding: 4px 12px; border-radius: 20px; font-weight: 500;
+  }
+  .regime-bullish { background: rgba(93,202,165,0.12); color: var(--green); }
+  .regime-bearish { background: rgba(226,80,79,0.12); color: var(--red); }
+  .regime-neutral { background: rgba(239,159,39,0.12); color: var(--amber); }
+  .last-updated { font-size: 11.5px; color: var(--text-muted); }
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 0; margin-bottom: 24px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .tab-btn {
+    background: none; border: none; padding: 10px 18px; font-size: 13.5px;
+    font-weight: 500; color: var(--text-secondary); cursor: pointer;
+    border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .tab-btn.active { color: var(--text-primary); border-bottom-color: var(--text-primary); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  /* Cards grid */
+  .cards { display: grid; gap: 12px; margin-bottom: 24px; }
+  .cards-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .cards-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .cards-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .card {
+    background: var(--bg-card); border: 0.5px solid var(--border);
+    border-radius: var(--radius-md); padding: 14px 16px;
+  }
+  .card-label { font-size: 11.5px; color: var(--text-secondary); margin-bottom: 4px; }
+  .card-value { font-size: 21px; font-weight: 500; color: var(--text-primary); line-height: 1.2; }
+  .card-sub { font-size: 12px; margin-top: 4px; }
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+  .muted { color: var(--text-secondary); }
+  /* Chart wrapper */
+  .chart-wrap { position: relative; width: 100%; }
+  .chart-legend { display: flex; gap: 16px; margin-bottom: 8px; font-size: 12px; color: var(--text-secondary); }
+  .legend-dot { width: 10px; height: 2px; display: inline-block; border-radius: 1px; }
+  /* Section headers */
+  .section-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 0 0 14px; }
+  .section-sub { font-size: 11.5px; color: var(--text-muted); margin: -10px 0 14px; }
+  .section-gap { margin-bottom: 28px; }
+  /* Divider */
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 12px 0; }
+  /* Allocation chart */
+  .alloc-grid { display: grid; grid-template-columns: 190px 1fr; gap: 28px; align-items: center; margin-bottom: 28px; }
+  .alloc-canvas-wrap { width: 190px; height: 190px; position: relative; }
+  .alloc-legend { display: flex; flex-direction: column; gap: 10px; }
+  .alloc-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .alloc-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .alloc-label { font-size: 13px; color: var(--text-body); display: flex; align-items: center; gap: 8px; }
+  .alloc-val { font-size: 13px; font-weight: 500; color: var(--text-primary); white-space: nowrap; }
+  /* Position rows */
+  .pos-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+  .pos-row {
+    background: var(--bg-card); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); overflow: hidden;
+  }
+  .pos-toggle {
+    width: 100%; background: none; border: none; cursor: pointer;
+    padding: 13px 18px;
+    display: grid; grid-template-columns: 1.3fr 0.8fr 0.9fr 1fr 1fr 22px;
+    gap: 10px; align-items: center; text-align: left;
+    transition: background 0.1s;
+  }
+  .pos-toggle:hover { background: var(--bg-card-hover); }
+  .pos-ticker { font-weight: 500; font-size: 14px; color: var(--text-primary); }
+  .pos-meta { font-size: 11.5px; color: var(--text-secondary); margin-top: 1px; }
+  .pos-col-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 2px; }
+  .pos-col-val { font-size: 13.5px; color: var(--text-primary); }
+  .pos-pct { font-size: 13.5px; font-weight: 500; text-align: right; }
+  .pos-dol { font-size: 11.5px; color: var(--text-secondary); text-align: right; margin-top: 1px; }
+  .pos-chevron { font-size: 18px; color: var(--text-secondary); text-align: center; transition: transform 0.15s; user-select: none; }
+  .pos-detail {
+    display: none; padding: 0 18px 14px;
+    border-top: 0.5px solid rgba(255,255,255,0.05);
+  }
+  .pos-detail-label { font-size: 11.5px; color: var(--text-secondary); font-weight: 500; margin: 12px 0 4px; }
+  .pos-detail-text { font-size: 13px; line-height: 1.65; color: var(--text-body); }
+  .hint { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; }
+  /* Morning / afternoon sections */
+  .info-card {
+    background: var(--bg-card); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); padding: 16px 18px; margin-bottom: 16px;
+  }
+  .info-card-title { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 10px; }
+  .info-card ul { padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+  .info-card li { font-size: 13px; line-height: 1.65; color: var(--text-body); }
+  .info-card li b { color: var(--text-primary); font-weight: 500; }
+  .info-card-footer {
+    font-size: 13px; line-height: 1.6; color: var(--text-body);
+    padding-top: 10px; border-top: 0.5px solid var(--border); margin-top: 10px;
+  }
+  .badge {
+    font-size: 11.5px; padding: 3px 10px; border-radius: 20px; font-weight: 500;
+    display: inline-block; white-space: nowrap;
+  }
+  .badge-green { background: rgba(93,202,165,0.12); color: var(--green); }
+  .badge-red { background: rgba(226,80,79,0.12); color: var(--red); }
+  .badge-amber { background: rgba(239,159,39,0.14); color: var(--amber); }
+  .badge-gray { background: rgba(255,255,255,0.06); color: #aeada5; }
+  .badge-blue { background: rgba(91,155,213,0.14); color: var(--blue); }
+  .row-space { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  /* News cards */
+  .news-card {
+    border: 0.5px solid var(--border); border-radius: var(--radius-lg);
+    padding: 14px 18px; background: var(--bg-card); margin-bottom: 12px;
+  }
+  .news-header { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
+  .news-title { font-weight: 500; font-size: 14px; color: var(--text-primary); line-height: 1.4; }
+  .news-link { font-size: 11.5px; color: var(--blue); white-space: nowrap; text-decoration: none; flex-shrink: 0; }
+  .news-link:hover { text-decoration: underline; }
+  /* Industry candidate cards */
+  .candidate-card {
+    border: 0.5px solid var(--border); border-radius: var(--radius-lg);
+    padding: 16px 18px; background: var(--bg-card); margin-bottom: 12px;
+  }
+  .candidate-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .candidate-title { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+  .candidate-sub { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+  .candidate-stocks { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .stock-chip {
+    font-size: 11.5px; padding: 4px 10px; border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.05); color: var(--text-primary);
+  }
+  /* VIX grid */
+  .vix-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 14px; }
+  .vix-label { font-size: 11.5px; color: var(--text-secondary); }
+  .vix-val { font-size: 17px; font-weight: 500; color: var(--text-primary); margin-top: 2px; }
+  /* Assistant */
+  .desk-wrap {
+    border: 0.5px solid var(--border); border-radius: var(--radius-lg);
+    background: var(--bg-card); padding: 18px; display: flex; flex-direction: column;
+    min-height: 420px;
+  }
+  .desk-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 0.5px solid var(--border); }
+  .desk-avatar { width: 34px; height: 34px; border-radius: 50%; background: rgba(127,119,221,0.18); display: flex; align-items: center; justify-content: center; font-size: 15px; color: #a59ce8; }
+  .desk-name { font-weight: 500; font-size: 14px; color: var(--text-primary); }
+  .desk-desc { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+  .desk-messages { flex: 1; display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; overflow-y: auto; max-height: 340px; }
+  .msg-user {
+    align-self: flex-end; max-width: 80%;
+    background: rgba(127,119,221,0.16); border-radius: var(--radius-lg);
+    padding: 10px 14px; font-size: 13.5px; line-height: 1.6; color: var(--text-primary);
+  }
+  .msg-assistant {
+    align-self: flex-start; max-width: 85%;
+    background: rgba(255,255,255,0.04); border-radius: var(--radius-lg);
+    padding: 10px 14px; font-size: 13.5px; line-height: 1.65; color: var(--text-body);
+  }
+  .desk-input-row { display: flex; gap: 8px; }
+  .desk-input {
+    flex: 1; background: #1a1920; border: 0.5px solid var(--border-mid);
+    color: var(--text-primary); border-radius: var(--radius-md);
+    padding: 9px 14px; font-size: 13.5px; outline: none;
+    font-family: inherit;
+  }
+  .desk-input:focus { border-color: rgba(127,119,221,0.4); }
+  .desk-send {
+    background: rgba(127,119,221,0.16); border: 0.5px solid rgba(127,119,221,0.3);
+    color: #c4bdf2; border-radius: var(--radius-md);
+    padding: 0 18px; font-size: 13.5px; cursor: pointer; font-family: inherit;
+    transition: background 0.15s;
+  }
+  .desk-send:hover { background: rgba(127,119,221,0.25); }
+  .loading { color: var(--text-muted); font-size: 13px; font-style: italic; }
+  /* Notable moves */
+  .move-row { display: flex; flex-direction: column; gap: 6px; }
+  .move-item { font-size: 13px; line-height: 1.65; color: var(--text-body); padding: 7px 0; border-bottom: 0.5px solid rgba(255,255,255,0.04); }
+  .move-item:last-child { border-bottom: none; }
+  .move-ticker { font-weight: 500; color: var(--text-primary); }
+  /* Edit cash modal */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 100; align-items: center; justify-content: center; }
+  .modal-bg.open { display: flex; }
+  .modal { background: #1a1920; border: 0.5px solid var(--border-mid); border-radius: var(--radius-lg); padding: 24px; width: 320px; }
+  .modal-title { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 16px; }
+  .modal-input { width: 100%; background: var(--bg-base); border: 0.5px solid var(--border-mid); color: var(--text-primary); border-radius: var(--radius-md); padding: 10px 14px; font-size: 14px; font-family: inherit; margin-bottom: 14px; outline: none; }
+  .modal-row { display: flex; gap: 8px; }
+  .btn { padding: 9px 18px; border-radius: var(--radius-md); font-size: 13.5px; cursor: pointer; font-family: inherit; border: none; }
+  .btn-primary { background: rgba(127,119,221,0.2); color: #c4bdf2; border: 0.5px solid rgba(127,119,221,0.3); flex: 1; }
+  .btn-ghost { background: transparent; color: var(--text-secondary); border: 0.5px solid var(--border-mid); }
+  @media (max-width: 700px) {
+    .cards-5 { grid-template-columns: repeat(2, 1fr); }
+    .cards-4 { grid-template-columns: repeat(2, 1fr); }
+    .alloc-grid { grid-template-columns: 1fr; }
+    .pos-toggle { grid-template-columns: 1.2fr 1fr 1fr 26px; }
+    .pos-toggle .hide-mobile { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">&#9650;</div>
+      <div>
+        <div class="header-title">Investment Desk</div>
+        <div class="header-sub" id="last-run">Last updated: —</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="regime-badge regime-bullish" id="regime-badge">Bullish</span>
+      <span class="last-updated" id="market-status">Market closed</span>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="portfolio">Portfolio</button>
+    <button class="tab-btn" data-tab="morning">Morning briefing</button>
+    <button class="tab-btn" data-tab="afternoon">Afternoon update</button>
+    <button class="tab-btn" data-tab="assistant">Ask the desk</button>
+  </nav>
+
+  <!-- PORTFOLIO TAB -->
+  <div class="tab-panel active" id="tab-portfolio">
+
+    <div class="cards cards-5" id="summary-cards">
+      <div class="card">
+        <div class="card-label">Total portfolio value</div>
+        <div class="card-value" id="s-total">—</div>
+        <div class="card-sub muted" id="s-total-sub">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Invested</div>
+        <div class="card-value" id="s-invested">—</div>
+        <div class="card-sub muted" id="s-invested-sub">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Total gain / loss</div>
+        <div class="card-value" id="s-gain">—</div>
+        <div class="card-sub" id="s-gain-sub">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Cash balance</div>
+        <div class="card-value" id="s-cash">—</div>
+        <button class="btn btn-ghost" id="edit-cash-btn" style="margin-top:6px;font-size:11px;padding:2px 8px;">Edit</button>
+      </div>
+      <div class="card">
+        <div class="card-label">Vs S&amp;P 500</div>
+        <div class="card-value" id="s-vs-spy">—</div>
+        <div class="card-sub muted" id="s-vs-spy-sub">since inception</div>
+      </div>
+    </div>
+
+    <div class="chart-legend">
+      <span style="display:flex;align-items:center;gap:5px;">
+        <span class="legend-dot" style="background:#8077e0;height:2px;"></span> Your portfolio
+      </span>
+      <span style="display:flex;align-items:center;gap:5px;">
+        <span class="legend-dot" style="background:#5f5e58;height:2px;border-top:1px dashed #5f5e58;"></span> S&amp;P 500 equal investment
+      </span>
+    </div>
+    <div class="chart-wrap section-gap" style="height:220px;">
+      <canvas id="perf-chart" aria-label="Portfolio performance versus S&P 500 over time"></canvas>
+    </div>
+
+    <h2 class="section-title">Capital allocation</h2>
+    <div class="alloc-grid section-gap">
+      <div class="alloc-canvas-wrap">
+        <canvas id="alloc-chart" aria-label="Capital allocation by industry and category"></canvas>
+      </div>
+      <div class="alloc-legend" id="alloc-legend"></div>
+    </div>
+
+    <h2 class="section-title">Open positions</h2>
+    <p class="section-sub">Click any position for details &middot; prices refresh on page load</p>
+    <div class="pos-list" id="pos-list"></div>
+    <p class="hint">Prices pulled live from Yahoo Finance &middot; balances reflect quantity &times; current price</p>
+
+  </div>
+
+  <!-- MORNING TAB -->
+  <div class="tab-panel" id="tab-morning">
+
+    <div class="info-card">
+      <div class="row-space">
+        <div class="info-card-title">Market snapshot</div>
+        <span class="badge" id="market-open-badge">—</span>
+      </div>
+      <div class="vix-grid" id="vix-grid">
+        <div><div class="vix-label">VIX</div><div class="vix-val" id="vix-val">—</div></div>
+        <div><div class="vix-label">5d avg</div><div class="vix-val" id="vix-avg">—</div></div>
+        <div><div class="vix-label">Trend</div><div class="vix-val" id="vix-trend">—</div></div>
+        <div><div class="vix-label">Regime</div><div class="vix-val" id="vix-regime">—</div></div>
+      </div>
+      <hr class="divider">
+      <ul id="market-bullets"></ul>
+    </div>
+
+    <h2 class="section-title">News intelligence</h2>
+    <div id="news-list" class="section-gap"></div>
+
+    <h2 class="section-title">Position review</h2>
+    <div id="position-review" class="section-gap"></div>
+
+    <h2 class="section-title">Industry opportunities</h2>
+    <div id="industry-opportunities"></div>
+
+  </div>
+
+  <!-- AFTERNOON TAB -->
+  <div class="tab-panel" id="tab-afternoon">
+
+    <div class="info-card section-gap" id="what-changed">
+      <div class="info-card-title">What changed since this morning</div>
+      <ul id="what-changed-list"></ul>
+    </div>
+
+    <div class="info-card section-gap" id="notable-moves-card">
+      <div class="info-card-title">Notable price moves today</div>
+      <p class="hint" style="margin-bottom:10px;">Includes moves outside your direct holdings that relate through sector, supply chain, or competitive overlap</p>
+      <div class="move-row" id="notable-moves"></div>
+    </div>
+
+    <h2 class="section-title">Portfolio actions before close</h2>
+    <div id="afternoon-positions" class="section-gap"></div>
+
+    <h2 class="section-title">New or strengthened candidates</h2>
+    <div id="afternoon-candidates"></div>
+
+  </div>
+
+  <!-- ASK THE DESK TAB -->
+  <div class="tab-panel" id="tab-assistant">
+    <div class="desk-wrap">
+      <div class="desk-header">
+        <div class="desk-avatar">$</div>
+        <div>
+          <div class="desk-name">Ask the desk</div>
+          <div class="desk-desc">Has full context on your portfolio, holdings, and today&rsquo;s briefing</div>
+        </div>
+      </div>
+      <div class="desk-messages" id="desk-messages">
+        <div class="msg-assistant">Ready. Ask me anything about your portfolio, a specific holding, market conditions, or what you should be watching today.</div>
+      </div>
+      <div class="desk-input-row">
+        <input class="desk-input" id="desk-input" type="text" placeholder="Ask about your portfolio or the markets&hellip;" />
+        <button class="desk-send" id="desk-send">Ask</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Edit cash modal -->
+<div class="modal-bg" id="cash-modal">
+  <div class="modal">
+    <div class="modal-title">Update cash balance</div>
+    <input class="modal-input" id="cash-input" type="number" placeholder="e.g. 6400" />
+    <div class="modal-row">
+      <button class="btn btn-ghost" id="cash-cancel">Cancel</button>
+      <button class="btn btn-primary" id="cash-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA — injected by the pipeline on each run
+// ============================================================
+const BRIEFING_DATA = window.BRIEFING_DATA || {
+  last_updated: "Not yet run",
+  regime: "Bullish",
+  regime_confidence: "High",
+  market_open: false,
+  vix: null,
+  vix_avg: null,
+  vix_trend: null,
+  vix_regime: null,
+  market_bullets: [],
+  positions: [],
+  performance_dates: [],
+  performance_portfolio: [],
+  performance_spy: [],
+  cash: 0,
+  cost_basis: 0,
+  news: [],
+  position_review: [],
+  industry_opportunities: [],
+  what_changed: [],
+  notable_moves: [],
+  afternoon_positions: [],
+  afternoon_candidates: [],
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+const fmt = (n) => n == null ? '—' : '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+const fmtPct = (n) => n == null ? '—' : (n >= 0 ? '+' : '') + Number(n).toFixed(1) + '%';
+const fmtPctRaw = (n) => n == null ? '—' : (n >= 0 ? '+' : '') + Number(n).toFixed(1);
+const fmtDol = (n) => n == null ? '—' : (n >= 0 ? '+$' : '-$') + Math.abs(Number(n)).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+// ============================================================
+// HEADER
+// ============================================================
+document.getElementById('last-run').textContent = 'Last updated: ' + (BRIEFING_DATA.last_updated || '—');
+
+const regimeBadge = document.getElementById('regime-badge');
+const regime = (BRIEFING_DATA.regime || '').toLowerCase();
+regimeBadge.textContent = BRIEFING_DATA.regime || '—';
+regimeBadge.className = 'regime-badge ' + (regime.includes('bull') ? 'regime-bullish' : regime.includes('bear') ? 'regime-bearish' : 'regime-neutral');
+
+const mktStatus = document.getElementById('market-status');
+mktStatus.textContent = BRIEFING_DATA.market_open ? 'Market open' : 'Market closed';
+
+// ============================================================
+// POSITIONS + SUMMARY CARDS
+// ============================================================
+const positions = BRIEFING_DATA.positions || [];
+const cashBalance = BRIEFING_DATA.cash || 0;
+const costBasis = BRIEFING_DATA.cost_basis || 0;
+
+let totalInvested = 0;
+positions.forEach(p => { totalInvested += (p.balance || 0); });
+
+const totalValue = totalInvested + cashBalance;
+const totalGain = totalValue - costBasis - cashBalance;
+const totalGainPct = costBasis > 0 ? (totalGain / costBasis * 100) : 0;
+
+document.getElementById('s-total').textContent = fmt(totalValue);
+document.getElementById('s-total-sub').textContent = 'All holdings + cash';
+document.getElementById('s-invested').textContent = fmt(totalInvested);
+document.getElementById('s-invested-sub').textContent = totalValue > 0 ? (totalInvested / totalValue * 100).toFixed(1) + '% of portfolio' : '—';
+
+const gainEl = document.getElementById('s-gain');
+gainEl.textContent = fmtDol(totalGain);
+gainEl.className = 'card-value ' + (totalGain >= 0 ? 'pos' : 'neg');
+const gainSubEl = document.getElementById('s-gain-sub');
+gainSubEl.textContent = fmtPct(totalGainPct) + ' since inception';
+gainSubEl.className = 'card-sub ' + (totalGain >= 0 ? 'pos' : 'neg');
+
+document.getElementById('s-cash').textContent = fmt(cashBalance);
+
+const vsSpyEl = document.getElementById('s-vs-spy');
+const vsSpy = BRIEFING_DATA.vs_spy_pp;
+vsSpyEl.textContent = vsSpy != null ? (vsSpy >= 0 ? '+' : '') + vsSpy.toFixed(1) + 'pp' : '—';
+vsSpyEl.className = 'card-value ' + (vsSpy >= 0 ? 'pos' : 'neg');
+
+// Cash edit
+let currentCash = cashBalance;
+document.getElementById('edit-cash-btn').onclick = () => {
+  document.getElementById('cash-input').value = currentCash;
+  document.getElementById('cash-modal').classList.add('open');
+};
+document.getElementById('cash-cancel').onclick = () => document.getElementById('cash-modal').classList.remove('open');
+document.getElementById('cash-save').onclick = () => {
+  const val = parseFloat(document.getElementById('cash-input').value);
+  if (!isNaN(val)) {
+    currentCash = val;
+    document.getElementById('s-cash').textContent = fmt(val);
+  }
+  document.getElementById('cash-modal').classList.remove('open');
+};
+
+// ============================================================
+// PERFORMANCE CHART
+// ============================================================
+const perfDates = BRIEFING_DATA.performance_dates || [];
+const perfPort = BRIEFING_DATA.performance_portfolio || [];
+const perfSpy = BRIEFING_DATA.performance_spy || [];
+
+new Chart(document.getElementById('perf-chart'), {
+  type: 'line',
+  data: {
+    labels: perfDates.length ? perfDates : ['No data'],
+    datasets: [
+      { data: perfPort, borderColor: '#8077e0', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.3 },
+      { data: perfSpy, borderColor: '#5f5e58', backgroundColor: 'transparent', borderWidth: 2, borderDash: [4,4], pointRadius: 0, tension: 0.3 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (c) => (c.datasetIndex === 0 ? 'Portfolio' : 'S&P 500') + ': ' + (c.parsed.y != null ? c.parsed.y.toFixed(1) + '%' : '—') }}
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#87867c', maxTicksLimit: 8 }},
+      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { font: { size: 11 }, color: '#87867c', callback: (v) => v + '%' }}
+    }
+  }
+});
+
+// ============================================================
+// ALLOCATION CHART
+// ============================================================
+const ALLOC_COLORS = ['#7F77DD','#5DCAA5','#D85A30','#378ADD','#D4537E','#EF9F27','#3a9e7a','#6b4fa8','#3a3938'];
+
+function buildAllocData(positions, cash) {
+  const rows = positions.map((p, i) => ({
+    label: (p.industry || p.ticker) + ' (' + p.ticker + ')',
+    value: p.balance || 0,
+    color: ALLOC_COLORS[i % ALLOC_COLORS.length],
+  }));
+  rows.push({ label: 'Cash', value: cash, color: '#3a3938' });
+  return rows;
+}
+
+const allocData = buildAllocData(positions, cashBalance);
+const allocTotal = allocData.reduce((s, d) => s + d.value, 0);
+
+new Chart(document.getElementById('alloc-chart'), {
+  type: 'doughnut',
+  data: {
+    labels: allocData.map(d => d.label),
+    datasets: [{ data: allocData.map(d => d.value), backgroundColor: allocData.map(d => d.color), borderColor: '#09090c', borderWidth: 2 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false, cutout: '62%',
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (c) => c.label + ': ' + (c.parsed / allocTotal * 100).toFixed(1) + '%' }}
+    }
+  }
+});
+
+const legend = document.getElementById('alloc-legend');
+allocData.forEach(d => {
+  const pct = allocTotal > 0 ? (d.value / allocTotal * 100).toFixed(1) : '0.0';
+  const row = document.createElement('div');
+  row.className = 'alloc-row';
+  row.innerHTML = '<span class="alloc-label"><span class="alloc-dot" style="background:' + d.color + '"></span>' + d.label + '</span><span class="alloc-val">' + fmt(d.value) + ' &nbsp; ' + pct + '%</span>';
+  legend.appendChild(row);
+});
+
+// ============================================================
+// POSITION ROWS
+// ============================================================
+const posList = document.getElementById('pos-list');
+positions.forEach((p, i) => {
+  const pct = p.pct_change || 0;
+  const dol = p.dollar_change || 0;
+  const pctColor = pct >= 0 ? 'var(--green)' : 'var(--red)';
+  const row = document.createElement('div');
+  row.className = 'pos-row';
+  row.innerHTML = `
+    <button class="pos-toggle" data-idx="${i}">
+      <div><div class="pos-ticker">${p.ticker}</div><div class="pos-meta">${p.type || 'Stock'} &middot; ${p.term || '—'}</div></div>
+      <div class="hide-mobile"><div class="pos-col-label">Qty</div><div class="pos-col-val">${p.qty || '—'}</div></div>
+      <div class="hide-mobile"><div class="pos-col-label">Price</div><div class="pos-col-val">${p.current_price != null ? '$' + Number(p.current_price).toLocaleString() : '—'}</div></div>
+      <div><div class="pos-col-label">Balance</div><div class="pos-col-val">${fmt(p.balance)}</div></div>
+      <div><div class="pos-pct" style="color:${pctColor}">${fmtPct(pct)}</div><div class="pos-dol">${fmtDol(dol)}</div></div>
+      <div class="pos-chevron" data-idx="${i}">&#8964;</div>
+    </button>
+    <div class="pos-detail" data-idx="${i}">
+      <div class="pos-detail-label">What it is</div>
+      <div class="pos-detail-text">${p.summary || '—'}</div>
+      <div class="pos-detail-label">Catalyst</div>
+      <div class="pos-detail-text">${p.catalyst || '—'}</div>
+      <div class="pos-detail-label">Why ${(p.term || '').toLowerCase()}</div>
+      <div class="pos-detail-text">${p.why || '—'}</div>
+    </div>`;
+  posList.appendChild(row);
+});
+
+document.querySelectorAll('.pos-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const idx = btn.dataset.idx;
+    const detail = document.querySelector('.pos-detail[data-idx="' + idx + '"]');
+    const chev = document.querySelector('.pos-chevron[data-idx="' + idx + '"]');
+    const open = detail.style.display === 'block';
+    detail.style.display = open ? 'none' : 'block';
+    chev.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+  });
+});
+
+// ============================================================
+// MORNING TAB
+// ============================================================
+// Market status badge
+const mobBadge = document.getElementById('market-open-badge');
+if (BRIEFING_DATA.market_open) {
+  mobBadge.textContent = 'Market open'; mobBadge.className = 'badge badge-green';
+} else {
+  mobBadge.textContent = 'Market closed'; mobBadge.className = 'badge badge-gray';
+}
+
+document.getElementById('vix-val').textContent = BRIEFING_DATA.vix || '—';
+document.getElementById('vix-avg').textContent = BRIEFING_DATA.vix_avg || '—';
+document.getElementById('vix-trend').textContent = BRIEFING_DATA.vix_trend || '—';
+const vixRegEl = document.getElementById('vix-regime');
+vixRegEl.textContent = BRIEFING_DATA.vix_regime || '—';
+if ((BRIEFING_DATA.vix_regime || '').toLowerCase() === 'green') vixRegEl.style.color = 'var(--green)';
+else if ((BRIEFING_DATA.vix_regime || '').toLowerCase() === 'red') vixRegEl.style.color = 'var(--red)';
+else vixRegEl.style.color = 'var(--amber)';
+
+const bulletList = document.getElementById('market-bullets');
+(BRIEFING_DATA.market_bullets || []).forEach(b => {
+  const li = document.createElement('li');
+  li.innerHTML = b;
+  bulletList.appendChild(li);
+});
+
+// News
+const newsList = document.getElementById('news-list');
+(BRIEFING_DATA.news || []).forEach(n => {
+  const card = document.createElement('div');
+  card.className = 'news-card';
+  card.innerHTML = `
+    <div class="news-header">
+      <div class="news-title">${n.headline || '—'}</div>
+      ${n.url ? '<a class="news-link" href="' + n.url + '" target="_blank" rel="noopener">Source ↗</a>' : ''}
+    </div>
+    <ul>${(n.bullets || []).map(b => '<li>' + b + '</li>').join('')}</ul>`;
+  newsList.appendChild(card);
+});
+if (!BRIEFING_DATA.news || !BRIEFING_DATA.news.length) {
+  newsList.innerHTML = '<p class="hint">No briefing data yet. Check back after 9 AM on a trading day.</p>';
+}
+
+// Position review
+const posReview = document.getElementById('position-review');
+(BRIEFING_DATA.position_review || []).forEach(p => {
+  const badgeClass = {
+    'Hold': 'badge-gray', 'Watch': 'badge-gray', 'Buy More': 'badge-green',
+    'Trim': 'badge-amber', 'Sell': 'badge-red', 'Reduce': 'badge-amber'
+  }[p.action] || 'badge-gray';
+  const reasonColor = {
+    'Hold': '#aeada5', 'Watch': '#aeada5', 'Buy More': 'var(--green)',
+    'Trim': 'var(--amber)', 'Sell': 'var(--red)', 'Reduce': 'var(--amber)'
+  }[p.action] || '#aeada5';
+  const card = document.createElement('div');
+  card.className = 'info-card';
+  card.style.marginBottom = '12px';
+  card.innerHTML = `
+    <div class="row-space">
+      <div class="info-card-title" style="margin:0;">${p.ticker}</div>
+      <span class="badge ${badgeClass}">${p.action}</span>
+    </div>
+    <ul style="margin-top:8px;">${(p.bullets || []).map(b => '<li>' + b + '</li>').join('')}</ul>
+    ${p.reasoning ? '<div class="info-card-footer"><b style="color:' + reasonColor + '">Why ' + p.action.toLowerCase() + ':</b> ' + p.reasoning + '</div>' : ''}`;
+  posReview.appendChild(card);
+});
+if (!BRIEFING_DATA.position_review || !BRIEFING_DATA.position_review.length) {
+  posReview.innerHTML = '<p class="hint">No position review yet.</p>';
+}
+
+// Industry opportunities
+const indOpps = document.getElementById('industry-opportunities');
+(BRIEFING_DATA.industry_opportunities || []).forEach(ind => {
+  const card = document.createElement('div');
+  card.className = 'candidate-card';
+  card.innerHTML = `
+    <div class="candidate-header">
+      <div>
+        <div class="candidate-title">${ind.industry}</div>
+        <div class="candidate-sub">${ind.term || ''} &middot; ${ind.etf || ''}</div>
+      </div>
+      <span class="badge badge-green">${ind.conviction}/100</span>
+    </div>
+    <ul>${(ind.bullets || []).map(b => '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">' + b + '</li>').join('')}</ul>
+    ${ind.vehicle ? '<div style="font-size:13px;color:var(--text-body);margin-top:10px;"><b style="color:var(--text-primary);">Vehicle:</b> ' + ind.vehicle + '</div>' : ''}
+    ${ind.why_now ? '<div class="info-card-footer"><b style="color:var(--green);">Why buy now:</b> ' + ind.why_now + '</div>' : ''}
+    ${ind.stocks && ind.stocks.length ? '<div class="candidate-stocks">' + ind.stocks.map(s => '<span class="stock-chip">' + s + '</span>').join('') + '</div>' : ''}`;
+  indOpps.appendChild(card);
+});
+if (!BRIEFING_DATA.industry_opportunities || !BRIEFING_DATA.industry_opportunities.length) {
+  indOpps.innerHTML = '<p class="hint">No high-conviction opportunities today.</p>';
+}
+
+// ============================================================
+// AFTERNOON TAB
+// ============================================================
+const wcList = document.getElementById('what-changed-list');
+(BRIEFING_DATA.what_changed || []).forEach(b => {
+  const li = document.createElement('li');
+  li.innerHTML = b;
+  wcList.appendChild(li);
+});
+
+const moveRow = document.getElementById('notable-moves');
+(BRIEFING_DATA.notable_moves || []).forEach(m => {
+  const div = document.createElement('div');
+  div.className = 'move-item';
+  div.innerHTML = '<span class="move-ticker">' + m.ticker + ' ' + (m.move || '') + '</span> &mdash; ' + (m.reason || '');
+  moveRow.appendChild(div);
+});
+
+const aftPos = document.getElementById('afternoon-positions');
+(BRIEFING_DATA.afternoon_positions || []).forEach(p => {
+  const badgeClass = { 'Hold': 'badge-gray', 'Watch': 'badge-gray', 'Buy More': 'badge-green', 'Trim': 'badge-amber', 'Sell': 'badge-red' }[p.action] || 'badge-gray';
+  const reasonColor = { 'Hold': '#aeada5', 'Watch': '#aeada5', 'Buy More': 'var(--green)', 'Trim': 'var(--amber)', 'Sell': 'var(--red)' }[p.action] || '#aeada5';
+  const card = document.createElement('div');
+  card.className = 'info-card';
+  card.style.marginBottom = '12px';
+  card.innerHTML = `
+    <div class="row-space"><div class="info-card-title" style="margin:0;">${p.ticker}</div><span class="badge ${badgeClass}">${p.action}</span></div>
+    <ul style="margin-top:8px;">${(p.bullets || []).map(b => '<li>' + b + '</li>').join('')}</ul>
+    ${p.reasoning ? '<div class="info-card-footer"><b style="color:' + reasonColor + '">Why ' + p.action.toLowerCase() + ':</b> ' + p.reasoning + '</div>' : ''}`;
+  aftPos.appendChild(card);
+});
+
+const aftCand = document.getElementById('afternoon-candidates');
+(BRIEFING_DATA.afternoon_candidates || []).forEach(ind => {
+  const card = document.createElement('div');
+  card.className = 'candidate-card';
+  card.innerHTML = `
+    <div class="candidate-header">
+      <div><div class="candidate-title">${ind.industry}</div><div class="candidate-sub">${ind.term || ''}</div></div>
+      <span class="badge badge-green">${ind.conviction}/100</span>
+    </div>
+    <ul>${(ind.bullets || []).map(b => '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">' + b + '</li>').join('')}</ul>
+    ${ind.why_now ? '<div class="info-card-footer"><b style="color:var(--green);">Why buy now:</b> ' + ind.why_now + '</div>' : ''}`;
+  aftCand.appendChild(card);
+});
+if (!BRIEFING_DATA.afternoon_candidates || !BRIEFING_DATA.afternoon_candidates.length) {
+  aftCand.innerHTML = '<p class="hint">No new candidates emerged since this morning.</p>';
+}
+
+// ============================================================
+// ASK THE DESK
+// ============================================================
+const messagesEl = document.getElementById('desk-messages');
+const inputEl = document.getElementById('desk-input');
+const sendBtn = document.getElementById('desk-send');
+
+function addMessage(text, role) {
+  const div = document.createElement('div');
+  div.className = role === 'user' ? 'msg-user' : 'msg-assistant';
+  div.textContent = text;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return div;
+}
+
+async function sendMessage() {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  inputEl.value = '';
+  addMessage(text, 'user');
+  const loadingDiv = addMessage('Thinking…', 'assistant');
+  loadingDiv.classList.add('loading');
+
+  const portfolioContext = JSON.stringify({
+    regime: BRIEFING_DATA.regime,
+    vix: BRIEFING_DATA.vix,
+    positions: (BRIEFING_DATA.positions || []).map(p => ({
+      ticker: p.ticker, term: p.term, balance: p.balance,
+      pct_change: p.pct_change, thesis: p.summary, catalyst: p.catalyst
+    })),
+    cash: BRIEFING_DATA.cash,
+    top_industries: (BRIEFING_DATA.industry_opportunities || []).map(i => ({ industry: i.industry, conviction: i.conviction })),
+    recent_news_headlines: (BRIEFING_DATA.news || []).map(n => n.headline).slice(0, 8),
+  });
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: 'You are a no-fluff investment strategist with full context on the user\'s portfolio. Be direct, specific, and reference actual numbers from the portfolio context. Think in second-order effects. Never recommend options, short selling, or margin. Context: ' + portfolioContext,
+        messages: [{ role: 'user', content: text }]
+      })
+    });
+    const data = await res.json();
+    loadingDiv.classList.remove('loading');
+    loadingDiv.textContent = data.content?.[0]?.text || 'No response.';
+  } catch (e) {
+    loadingDiv.classList.remove('loading');
+    loadingDiv.textContent = 'Error reaching the API. Check your connection.';
+  }
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+sendBtn.addEventListener('click', sendMessage);
+inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+// ============================================================
+// TABS
+// ============================================================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

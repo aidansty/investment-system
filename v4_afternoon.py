@@ -86,6 +86,7 @@ def main():
     # Afternoon news and macro
     news_package = fetch_complete_news_package()
     news = news_package.get("recent_news", [])
+    forward_catalysts = news_package.get("forward_catalysts", [])
     macro = fetch_macro_data()
 
     # Run afternoon industry scan
@@ -121,6 +122,22 @@ def main():
         for i in afternoon_top
         if i["industry"] not in morning_names
     ]
+
+    # Write dashboard data
+    try:
+        write_dashboard_data(
+            macro=macro,
+            industry_results=industry_results,
+            news_package=news_package,
+            positions=positions,
+            briefing=update,
+            run_type="afternoon",
+            today=today,
+            cash=0,
+            cost_basis=0,
+        )
+    except Exception as e:
+        log(f"Dashboard write error (non-fatal): {e}")
 
     # Send Telegram only
     try:
