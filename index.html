@@ -507,7 +507,7 @@ rebuildAllocChart(POSITIONS_CONFIG, currentCash);
 // POSITION ROWS
 // ============================================================
 const posList = document.getElementById('pos-list');
-positions.forEach((p, i) => {
+POSITIONS_CONFIG.forEach((p, i) => {
   const pct = p.pct_change || 0;
   const dol = p.dollar_change || 0;
   const pctColor = pct >= 0 ? 'var(--green)' : 'var(--red)';
