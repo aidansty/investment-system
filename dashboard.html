@@ -596,6 +596,8 @@ POSITIONS_CONFIG.forEach((p, i) => {
       <div class="pos-detail-text">${p.catalyst || '—'}</div>
       <div class="pos-detail-label">Why ${(p.term || '').toLowerCase()}</div>
       <div class="pos-detail-text">${p.why || '—'}</div>
+      <div class="pos-detail-label" style="margin-top:12px;color:#EF9F27;">What to do</div>
+      <div class="pos-detail-text" style="color:#c8c7c0;">${p.what_to_do || 'See morning briefing for today\'s recommendation.'}</div>
     </div>`;
   posList.appendChild(row);
 });
