@@ -428,9 +428,16 @@ async function fetchSpyComparison(livePositions) {
       const portLast = chartPort[chartPort.length - 1] || 0;
       const spyDiff = round2(portLast - spyLast);
       const spyVsEl = document.getElementById('s-vs-spy');
-      if (spyVsEl) { spyVsEl.textContent = (spyDiff >= 0 ? '+' : '') + spyDiff.toFixed(1) + 'pp'; spyVsEl.className = 'card-value ' + (spyDiff >= 0 ? 'pos' : 'neg'); }
+      if (spyVsEl) {
+        spyVsEl.textContent = (spyDiff >= 0 ? '+' : '') + spyDiff.toFixed(1) + '%';
+        spyVsEl.className = 'card-value ' + (spyDiff >= 0 ? 'pos' : 'neg');
+      }
       const spySubEl = document.getElementById('s-vs-spy-sub');
-      if (spySubEl) spySubEl.textContent = spyDiff >= 0 ? 'outperforming S&P 500' : 'underperforming S&P 500';
+      if (spySubEl) {
+        const pLast = chartPort[chartPort.length - 1] || 0;
+        const sLast = chartSpy[chartSpy.length - 1] || 0;
+        spySubEl.textContent = 'You: ' + (pLast >= 0 ? '+' : '') + pLast.toFixed(1) + '% vs S&P: ' + (sLast >= 0 ? '+' : '') + sLast.toFixed(1) + '%';
+      }
       return;
     }
 
@@ -446,9 +453,17 @@ async function fetchSpyComparison(livePositions) {
     const spyAlpha = round2(spyPortReturn - spyBenchReturn);
 
     const spyVsEl2 = document.getElementById('s-vs-spy');
-    if (spyVsEl2) { spyVsEl2.textContent = (spyAlpha >= 0 ? '+' : '') + spyAlpha.toFixed(1) + 'pp'; spyVsEl2.className = 'card-value ' + (spyAlpha >= 0 ? 'pos' : 'neg'); }
+    if (spyVsEl2) {
+      const sign = spyAlpha >= 0 ? '+' : '';
+      spyVsEl2.textContent = sign + spyAlpha.toFixed(1) + '%';
+      spyVsEl2.className = 'card-value ' + (spyAlpha >= 0 ? 'pos' : 'neg');
+    }
     const spySubEl2 = document.getElementById('s-vs-spy-sub');
-    if (spySubEl2) spySubEl2.textContent = spyAlpha >= 0 ? 'outperforming S&P 500' : 'underperforming S&P 500';
+    if (spySubEl2) {
+      const you = spyPortReturn >= 0 ? '+' : '';
+      const sp = spyBenchReturn >= 0 ? '+' : '';
+      spySubEl2.textContent = 'You: ' + you + spyPortReturn.toFixed(1) + '% vs S&P: ' + sp + spyBenchReturn.toFixed(1) + '%';
+    }
 
     // Build approximate chart
     const chartN = 60;
