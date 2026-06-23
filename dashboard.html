@@ -470,18 +470,7 @@ async function fetchSpyComparison(positions) {
       spyPcts.push(round2((i / (n-1)) * spyReturn));
     }
 
-    // Portfolio return — using total current value vs total cost basis
-    const totalCost = COST_BASIS;
-    const totalCurrent = positions.reduce((s, p) => s + (p.balance || 0), 0);
-    const portReturn = totalCost > 0 ? round2((totalCurrent - totalCost) / totalCost * 100) : 0;
 
-    // Build portfolio line as linear approximation from 0 to portReturn
-    // This gives a meaningful visual comparison until we track daily portfolio history
-    const n = spyPcts.length;
-    const portPcts = spyPcts.map((v, i) => {
-      if (v == null) return null;
-      return round2((i / Math.max(n - 1, 1)) * portReturn);
-    });
 
     // Update the performance chart
     if (window._perfChart) {
