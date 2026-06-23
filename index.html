@@ -413,35 +413,62 @@ async function fetchAndUpdatePrices() {
 
 async function fetchSpyComparison(positions) {
   try {
-    // Fetch SPY candle data via Finnhub for benchmark comparison
-    if (!FINNHUB_KEY) return;
-    const now = Math.floor(Date.now() / 1000);
-    const from = now - (90 * 86400); // 90 days back
-    const url = `https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=D&from=${from}&to=${now}&token=${FINNHUB_KEY}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (data.s !== 'ok' || !data.c?.length) return;
-
-    const closes = data.c;
-    const timestamps = data.t;
-
-    // Find earliest entry date index
-    const earliestEntry = new Date('2026-04-14').getTime() / 1000;
-    let startIdx = 0;
-    for (let i = 0; i < timestamps.length; i++) {
-      if (timestamps[i] >= earliestEntry) { startIdx = i; break; }
+    // Use pre-built performance data from pipeline if available
+    const perfData = window.BRIEFING_DATA?.performance_dates;
+    if (perfData && perfData.length > 0) {
+      const dates = window.BRIEFING_DATA.performance_dates;
+      const portPcts = window.BRIEFING_DATA.performance_portfolio;
+      const spyPcts = window.BRIEFING_DATA.performance_spy;
+      if (window._perfChart) {
+        window._perfChart.data.labels = dates;
+        window._perfChart.data.datasets[0].data = portPcts;
+        window._perfChart.data.datasets[1].data = spyPcts;
+        window._perfChart.update();
+      }
+      const latestSpy = spyPcts[spyPcts.length - 1] || 0;
+      const portReturn = portPcts[portPcts.length - 1] || 0;
+      const diff = round2(portReturn - latestSpy);
+      const vsEl = document.getElementById('s-vs-spy');
+      vsEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + 'pp';
+      vsEl.className = 'card-value ' + (diff >= 0 ? 'pos' : 'neg');
+      document.getElementById('s-vs-spy-sub').textContent = diff >= 0 ? 'outperforming S&P 500' : 'underperforming S&P 500';
+      return;
     }
 
-    const slicedCloses = closes.slice(startIdx);
-    const slicedTimestamps = timestamps.slice(startIdx);
+    // Fallback: simple portfolio return vs SPY current return estimate
+    const totalCost = COST_BASIS;
+    const totalCurrent = (window._livePositions || POSITIONS_CONFIG).reduce((s, p) => s + (p.balance || 0), 0);
+    const portReturn = totalCost > 0 ? round2((totalCurrent - totalCost) / totalCost * 100) : 0;
 
-    const firstSpy = slicedCloses[0];
-    const spyPcts = slicedCloses.map(c => c != null ? round2((c - firstSpy) / firstSpy * 100) : null);
+    // Get SPY current price to estimate SPY return since Apr 14
+    // SPY entry price from our positions: $659.44
+    const spyEntry = 659.44;
+    const spyPos = (window._livePositions || POSITIONS_CONFIG).find(p => p.ticker === 'SPY');
+    const spyCurrent = spyPos?.current_price || spyEntry;
+    const spyReturn = round2((spyCurrent - spyEntry) / spyEntry * 100);
+    const diff = round2(portReturn - spyReturn);
 
-    const dates = slicedTimestamps.map(ts => {
-      const d = new Date(ts * 1000);
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    });
+    const vsEl = document.getElementById('s-vs-spy');
+    if (vsEl) {
+      vsEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + 'pp';
+      vsEl.className = 'card-value ' + (diff >= 0 ? 'pos' : 'neg');
+    }
+    document.getElementById('s-vs-spy-sub').textContent = diff >= 0 ? 'outperforming S&P 500' : 'underperforming S&P 500';
+
+    // Build simple chart — linear portfolio line vs flat SPY estimate
+    const n = 60;
+    const dates = [];
+    const portPcts = [];
+    const spyPcts = [];
+    const startDate = new Date('2026-04-14');
+    for (let i = 0; i < n; i++) {
+      const d = new Date(startDate);
+      d.setDate(d.getDate() + i);
+      if (d.getDay() === 0 || d.getDay() === 6) continue;
+      dates.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      portPcts.push(round2((i / (n-1)) * portReturn));
+      spyPcts.push(round2((i / (n-1)) * spyReturn));
+    }
 
     // Portfolio return — using total current value vs total cost basis
     const totalCost = COST_BASIS;
@@ -899,36 +926,36 @@ async function fetchIntradayChart(ticker, canvasId) {
     const isCrypto = !!CRYPTO_TICKERS[ticker];
 
     if (isCrypto) {
-      // Coinbase hourly data for crypto
+      // Coinbase 24h price history for crypto
       const pair = CRYPTO_TICKERS[ticker];
-      const end = Math.floor(Date.now() / 1000);
-      const start = end - 86400; // 24 hours
-      const url = `https://api.coinbase.com/v2/prices/${pair}/historic?period=day`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const prices = (data?.data?.prices || []).reverse();
-      closes = prices.map(p => parseFloat(p.price));
-      labels = prices.map(p => {
-        const d = new Date(p.time);
-        return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-      });
+      try {
+        const url = `https://api.coinbase.com/v2/prices/${pair}/historic?period=day`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const prices = (data?.data?.prices || []).reverse();
+        closes = prices.map(p => parseFloat(p.price));
+        labels = prices.map(p => {
+          const d = new Date(p.time);
+          return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        });
+      } catch(e) {
+        console.warn('Coinbase historic failed:', e);
+      }
     } else {
-      // Finnhub candles for stocks — 1-minute resolution today
-      if (!FINNHUB_KEY) return;
-      const now = Math.floor(Date.now() / 1000);
-      const from = now - 86400;
-      const url = `https://finnhub.io/api/v1/stock/candle?symbol=${ticker}&resolution=5&from=${from}&to=${now}&token=${FINNHUB_KEY}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      if (data.s !== 'ok' || !data.c?.length) {
-        console.warn('No candle data for', ticker, data.s);
+      // Stock intraday data comes from pipeline — check briefing data first
+      const chartData = window.BRIEFING_DATA?.intraday?.[ticker];
+      if (chartData && chartData.closes?.length) {
+        closes = chartData.closes;
+        labels = chartData.labels;
+      } else {
+        // Show placeholder when market is closed or no pipeline data yet
+        const canvas = document.getElementById(canvasId);
+        if (canvas) {
+          const wrap = canvas.parentElement;
+          wrap.innerHTML = '<p style="font-size:12px;color:#5a5956;padding:20px 0;text-align:center;">Intraday chart available during market hours after morning briefing runs</p>';
+        }
         return;
       }
-      closes = data.c;
-      labels = data.t.map(ts => {
-        const d = new Date(ts * 1000);
-        return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-      });
     }
 
     if (!closes.length) return;
