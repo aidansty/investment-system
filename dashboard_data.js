@@ -1,3 +1,4 @@
+/* v=1782245436 */
 window.BRIEFING_DATA = {
   "finnhub_key": "d8fo751r01qn443av1rgd8fo751r01qn443av1s0",
   "last_updated": "Initialized \u2014 first pipeline run pending",
@@ -152,23 +153,6 @@ window.BRIEFING_DATA = {
       "what_to_do": "Hold with a hard stop at $120. Down 10.4% from entry, which is approaching the mandatory review threshold. The decline is macro-driven, not thesis-driven \u2014 the Fed's hawkish signal hurt all high-multiple growth stocks. If PLTR holds above $120, the thesis is intact. If it breaks $120 on volume, exit and reassess."
     },
     {
-      "ticker": "UFO",
-      "type": "ETF",
-      "term": "Long-term",
-      "qty": 1.00896,
-      "entry_price": 66.95,
-      "current_price": 48.72,
-      "balance": 49.16,
-      "cost_basis": 67.55,
-      "pct_change": -27.23,
-      "dollar_change": -18.39,
-      "industry": "Aerospace & Space",
-      "summary": "UFO is the Procure Space ETF, which holds a basket of companies across the space industry including satellite operators, launch companies, and space technology providers. It provides broad exposure to the space economy but is highly diversified across many companies, diluting the impact of any individual winner.",
-      "catalyst": "There is no near-term identifiable catalyst for UFO specifically. The space industry broadly has underperformed the market for an extended period, and the ETF has been in a consistent downtrend since your entry.",
-      "why": "This position was entered without a clearly defined thesis or exit criteria, which is inconsistent with your investment framework. Every position should have a reason for being in the portfolio and a pre-defined exit condition.",
-      "what_to_do": "Seriously consider exiting this position. Down 27.2% from entry with no catalyst and no defined thesis. You told the system earlier to not even include UFO in the investment system. The capital tied up here could be redeployed into a high-conviction opportunity or held as cash. The longer you hold a position with no thesis and no catalyst, the more capital you lose to a position that is not working for you."
-    },
-    {
       "ticker": "BTC",
       "type": "Crypto",
       "term": "Long-term",
@@ -288,7 +272,7 @@ window.BRIEFING_DATA = {
       "what_to_do": "Hold. Position is up 1.44% and the thesis is intact. Nokia continues to win 5G contracts and the Huawei replacement narrative strengthens over time. No immediate action needed \u2014 this is a patient medium-term hold waiting for the 5G infrastructure buildout to accelerate."
     }
   ],
-  "cash": 0,
+  "cash": 49.16,
   "cost_basis": 9514.23,
   "vs_spy_pp": null,
   "performance_dates": [],
