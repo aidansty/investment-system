@@ -410,32 +410,28 @@ async function fetchAndUpdatePrices() {
 
 async function fetchSpyComparison(positions) {
   try {
-    // Fetch SPY daily data for 3 months — covers all entry dates
-    const url = 'https://query1.finance.yahoo.com/v8/finance/spark?symbols=SPY&range=3mo&interval=1d';
+    // Fetch SPY candle data via Finnhub for benchmark comparison
+    if (!FINNHUB_KEY) return;
+    const now = Math.floor(Date.now() / 1000);
+    const from = now - (90 * 86400); // 90 days back
+    const url = `https://finnhub.io/api/v1/stock/candle?symbol=SPY&resolution=D&from=${from}&to=${now}&token=${FINNHUB_KEY}`;
     const res = await fetch(url);
     const data = await res.json();
-    const result = data?.spark?.result?.[0]?.response?.[0];
-    if (!result) return;
+    if (data.s !== 'ok' || !data.c?.length) return;
 
-    const timestamps = result.timestamp || [];
-    const closes = result.indicators?.quote?.[0]?.close || [];
-    if (!timestamps.length || !closes.length) return;
+    const closes = data.c;
+    const timestamps = data.t;
 
-    // Find the earliest position entry date
-    // Earliest known entry: 2026-04-14 (SPY)
-    const earliestEntry = new Date('2026-04-14');
-
-    // Find index of first timestamp >= earliest entry
+    // Find earliest entry date index
+    const earliestEntry = new Date('2026-04-14').getTime() / 1000;
     let startIdx = 0;
     for (let i = 0; i < timestamps.length; i++) {
-      const d = new Date(timestamps[i] * 1000);
-      if (d >= earliestEntry) { startIdx = i; break; }
+      if (timestamps[i] >= earliestEntry) { startIdx = i; break; }
     }
 
-    const slicedTimestamps = timestamps.slice(startIdx);
     const slicedCloses = closes.slice(startIdx);
+    const slicedTimestamps = timestamps.slice(startIdx);
 
-    // Normalize SPY to % return from start
     const firstSpy = slicedCloses[0];
     const spyPcts = slicedCloses.map(c => c != null ? round2((c - firstSpy) / firstSpy * 100) : null);
 
@@ -894,28 +890,52 @@ const intradayCharts = {};
 
 async function fetchIntradayChart(ticker, canvasId) {
   try {
-    const yfTicker = {'BTC':'BTC-USD','ETH':'ETH-USD','XRP':'XRP-USD','ZEC':'ZEC-USD'}[ticker] || ticker;
-    const url = 'https://query1.finance.yahoo.com/v8/finance/spark?symbols=' + encodeURIComponent(yfTicker) + '&range=1d&interval=5m';
-    const res = await fetch(url);
-    const data = await res.json();
-    const result = data?.spark?.result?.[0]?.response?.[0];
-    if (!result) return;
+    let closes = [];
+    let labels = [];
 
-    const closes = result.indicators?.quote?.[0]?.close || [];
-    const timestamps = result.timestamp || [];
+    const isCrypto = !!CRYPTO_TICKERS[ticker];
+
+    if (isCrypto) {
+      // Coinbase hourly data for crypto
+      const pair = CRYPTO_TICKERS[ticker];
+      const end = Math.floor(Date.now() / 1000);
+      const start = end - 86400; // 24 hours
+      const url = `https://api.coinbase.com/v2/prices/${pair}/historic?period=day`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const prices = (data?.data?.prices || []).reverse();
+      closes = prices.map(p => parseFloat(p.price));
+      labels = prices.map(p => {
+        const d = new Date(p.time);
+        return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      });
+    } else {
+      // Finnhub candles for stocks — 1-minute resolution today
+      if (!FINNHUB_KEY) return;
+      const now = Math.floor(Date.now() / 1000);
+      const from = now - 86400;
+      const url = `https://finnhub.io/api/v1/stock/candle?symbol=${ticker}&resolution=5&from=${from}&to=${now}&token=${FINNHUB_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.s !== 'ok' || !data.c?.length) {
+        console.warn('No candle data for', ticker, data.s);
+        return;
+      }
+      closes = data.c;
+      labels = data.t.map(ts => {
+        const d = new Date(ts * 1000);
+        return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      });
+    }
+
     if (!closes.length) return;
 
-    const validCloses = closes.filter(c => c != null);
+    const validCloses = closes.filter(c => c != null && !isNaN(c));
     const firstClose = validCloses[0];
     const lastClose = validCloses[validCloses.length - 1];
     const isUp = lastClose >= firstClose;
     const lineColor = isUp ? '#5DCAA5' : '#e2504f';
     const fillColor = isUp ? 'rgba(93,202,165,0.08)' : 'rgba(226,80,79,0.08)';
-
-    const labels = timestamps.map(ts => {
-      const d = new Date(ts * 1000);
-      return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-    });
 
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
@@ -941,10 +961,7 @@ async function fetchIntradayChart(ticker, canvasId) {
         plugins: { legend: { display: false }, tooltip: {
           callbacks: { label: (c) => '$' + (c.parsed.y != null ? c.parsed.y.toFixed(2) : '—') }
         }},
-        scales: {
-          x: { display: false },
-          y: { display: false }
-        }
+        scales: { x: { display: false }, y: { display: false } }
       }
     });
   } catch(e) {
