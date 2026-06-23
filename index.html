@@ -584,7 +584,7 @@ document.querySelectorAll('.pos-toggle').forEach(btn => {
       if (!document.getElementById(canvasId)) {
         const chartDiv = document.createElement('div');
         chartDiv.className = 'intraday-wrap';
-        chartDiv.innerHTML = '<div class="intraday-label">Today's price movement</div><div class="intraday-canvas-wrap"><canvas id="' + canvasId + '"></canvas></div>';
+        chartDiv.innerHTML = '<div class="intraday-label">Today\'s price movement</div><div class="intraday-canvas-wrap"><canvas id="' + canvasId + '"></canvas></div>';
         detail.appendChild(chartDiv);
       }
       fetchIntradayChart(p.ticker, canvasId);
