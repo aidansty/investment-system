@@ -231,36 +231,61 @@ mktStatus.textContent = BRIEFING_DATA.market_open ? 'Market open' : 'Market clos
 const POSITIONS_CONFIG = BRIEFING_DATA.positions || [];
 const COST_BASIS = BRIEFING_DATA.cost_basis || 0;
 
-// Map crypto tickers to Yahoo Finance symbols
-const YF_TICKER_MAP = {
-  'BTC': 'BTC-USD', 'ETH': 'ETH-USD', 'XRP': 'XRP-USD', 'ZEC': 'ZEC-USD',
-};
+// Crypto tickers mapped to Coinbase pairs
+const CRYPTO_TICKERS = { 'BTC': 'BTC-USD', 'ETH': 'ETH-USD', 'XRP': 'XRP-USD', 'ZEC': 'ZEC-USD' };
+const STOCK_TICKERS_LIST = ['SPY','MU','AMD','SPCX','CRWV','NVDA','HUM','PLTR','UFO'];
+
+// Finnhub API key injected by pipeline
+const FINNHUB_KEY = window.BRIEFING_DATA?.finnhub_key || '';
+
+async function fetchStockPrice(ticker) {
+  if (!FINNHUB_KEY) return null;
+  try {
+    const url = `https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data.c > 0 ? data.c : null;
+  } catch(e) {
+    console.warn('Finnhub fetch failed for', ticker, e);
+    return null;
+  }
+}
+
+async function fetchCryptoPrice(ticker) {
+  const pair = CRYPTO_TICKERS[ticker];
+  if (!pair) return null;
+  try {
+    const url = `https://api.coinbase.com/v2/prices/${pair}/spot`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data?.data?.amount ? parseFloat(data.data.amount) : null;
+  } catch(e) {
+    console.warn('Coinbase fetch failed for', ticker, e);
+    return null;
+  }
+}
 
 async function fetchLivePrices(tickers) {
   const prices = {};
-  const chunks = [];
-  for (let i = 0; i < tickers.length; i += 5) chunks.push(tickers.slice(i, i + 5));
 
-  for (const chunk of chunks) {
-    const yfTickers = chunk.map(t => YF_TICKER_MAP[t] || t).join(',');
-    try {
-      const url = `https://query1.finance.yahoo.com/v8/finance/spark?symbols=${encodeURIComponent(yfTickers)}&range=1d&interval=1d`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const spark = data?.spark?.result || [];
-      spark.forEach(item => {
-        const sym = item.symbol;
-        const closes = item?.response?.[0]?.meta?.regularMarketPrice;
-        if (closes != null) {
-          // Map back from YF ticker to our ticker
-          const ourTicker = Object.entries(YF_TICKER_MAP).find(([k,v]) => v === sym)?.[0] || sym;
-          prices[ourTicker] = closes;
-        }
-      });
-    } catch(e) {
-      console.warn('Price fetch failed for chunk:', chunk, e);
-    }
+  // Fetch stocks via Finnhub (sequential to respect rate limits)
+  const stocks = tickers.filter(t => !CRYPTO_TICKERS[t]);
+  for (const ticker of stocks) {
+    const price = await fetchStockPrice(ticker);
+    if (price != null) prices[ticker] = price;
+    await new Promise(r => setTimeout(r, 120)); // 120ms between calls = ~8/sec max
   }
+
+  // Fetch crypto via Coinbase (parallel, no rate limit issues)
+  const cryptos = tickers.filter(t => CRYPTO_TICKERS[t]);
+  const cryptoResults = await Promise.all(cryptos.map(async t => {
+    const price = await fetchCryptoPrice(t);
+    return { ticker: t, price };
+  }));
+  cryptoResults.forEach(({ ticker, price }) => {
+    if (price != null) prices[ticker] = price;
+  });
+
   return prices;
 }
 
@@ -593,10 +618,71 @@ document.querySelectorAll('.pos-toggle').forEach(btn => {
   });
 });
 
-// Now that position rows exist in the DOM, fetch live prices
-// Then refresh every 5 seconds
+// Fetch all prices on load
 fetchAndUpdatePrices();
-setInterval(fetchAndUpdatePrices, 5000);
+
+// Crypto refreshes every 10 seconds via Coinbase
+async function fetchCryptoOnly() {
+  try {
+    const cryptoTickers = POSITIONS_CONFIG.filter(p => CRYPTO_TICKERS[p.ticker]).map(p => p.ticker);
+    const prices = {};
+    const results = await Promise.all(cryptoTickers.map(async t => {
+      const price = await fetchCryptoPrice(t);
+      return { ticker: t, price };
+    }));
+    results.forEach(({ ticker, price }) => {
+      if (price != null) prices[ticker] = price;
+    });
+
+    // Update crypto rows only
+    const updatedPositions = (window._livePositions || POSITIONS_CONFIG).map(p => {
+      if (!CRYPTO_TICKERS[p.ticker] || prices[p.ticker] == null) return p;
+      const livePrice = prices[p.ticker];
+      return {
+        ...p,
+        current_price: livePrice,
+        balance: round2(livePrice * p.qty),
+        pct_change: p.entry_price > 0 ? round2((livePrice - p.entry_price) / p.entry_price * 100) : 0,
+        dollar_change: round2((livePrice - p.entry_price) * p.qty),
+      };
+    });
+
+    window._livePositions = updatedPositions;
+    updateSummaryCards(updatedPositions);
+    rebuildAllocChart(updatedPositions, currentCash);
+
+    updatedPositions.filter(p => CRYPTO_TICKERS[p.ticker]).forEach((p, _) => {
+      const i = POSITIONS_CONFIG.findIndex(x => x.ticker === p.ticker);
+      if (i < 0) return;
+      const priceEl = document.getElementById('price-' + i);
+      const balanceEl = document.getElementById('balance-' + i);
+      const pctEl = document.getElementById('pct-' + i);
+      const dolEl = document.getElementById('dol-' + i);
+      if (priceEl) {
+        const prev = prevPrices[p.ticker];
+        priceEl.textContent = '$' + Number(p.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        if (prev != null && p.current_price !== prev) {
+          const flashClass = p.current_price > prev ? 'flash-green' : 'flash-red';
+          priceEl.classList.remove('flash-green', 'flash-red');
+          void priceEl.offsetWidth;
+          priceEl.classList.add(flashClass);
+          setTimeout(() => priceEl.classList.remove(flashClass), 1000);
+        }
+        prevPrices[p.ticker] = p.current_price;
+      }
+      if (balanceEl) balanceEl.textContent = fmt(p.balance);
+      if (pctEl) { pctEl.textContent = fmtPct(p.pct_change); pctEl.style.color = p.pct_change >= 0 ? 'var(--green)' : 'var(--red)'; }
+      if (dolEl) dolEl.textContent = fmtDol(p.dollar_change);
+    });
+  } catch(e) {
+    console.warn('Crypto refresh error:', e);
+  }
+}
+
+// Stock prices refresh every 60 seconds via Finnhub
+setInterval(fetchAndUpdatePrices, 60000);
+// Crypto refreshes every 10 seconds via Coinbase
+setInterval(fetchCryptoOnly, 10000);
 
 // ============================================================
 // MORNING TAB

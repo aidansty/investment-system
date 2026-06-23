@@ -1,4 +1,5 @@
 window.BRIEFING_DATA = {
+  "finnhub_key": "d8fo751r01qn443av1rgd8fo751r01qn443av1s0",
   "last_updated": "Initialized \u2014 first pipeline run pending",
   "run_type": "init",
   "regime": "Bullish",

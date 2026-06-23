@@ -144,6 +144,7 @@ def write_dashboard_data(
 
     data = {
         "last_updated": now,
+        "finnhub_key": os.environ.get("FINNHUB_KEY", ""),
         "run_type": run_type,
         "regime": regime_label,
         "regime_confidence": "High",
