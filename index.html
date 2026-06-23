@@ -385,7 +385,7 @@ async function fetchAndUpdatePrices() {
 
 async function fetchSpyComparison(positions) {
   try {
-    // Use 3mo range to get daily data for the chart
+    // Fetch SPY daily data for 3 months — covers all entry dates
     const url = 'https://query1.finance.yahoo.com/v8/finance/spark?symbols=SPY&range=3mo&interval=1d';
     const res = await fetch(url);
     const data = await res.json();
@@ -396,28 +396,43 @@ async function fetchSpyComparison(positions) {
     const closes = result.indicators?.quote?.[0]?.close || [];
     if (!timestamps.length || !closes.length) return;
 
-    // Normalize to percentage from first data point
-    const firstClose = closes[0];
-    const spyPcts = closes.map(c => c != null ? round2((c - firstClose) / firstClose * 100) : null);
-    const dates = timestamps.map(ts => {
+    // Find the earliest position entry date
+    // Earliest known entry: 2026-04-14 (SPY)
+    const earliestEntry = new Date('2026-04-14');
+
+    // Find index of first timestamp >= earliest entry
+    let startIdx = 0;
+    for (let i = 0; i < timestamps.length; i++) {
+      const d = new Date(timestamps[i] * 1000);
+      if (d >= earliestEntry) { startIdx = i; break; }
+    }
+
+    const slicedTimestamps = timestamps.slice(startIdx);
+    const slicedCloses = closes.slice(startIdx);
+
+    // Normalize SPY to % return from start
+    const firstSpy = slicedCloses[0];
+    const spyPcts = slicedCloses.map(c => c != null ? round2((c - firstSpy) / firstSpy * 100) : null);
+
+    const dates = slicedTimestamps.map(ts => {
       const d = new Date(ts * 1000);
       return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
 
-    // Portfolio comparison — approximate using total cost basis and current value
+    // Portfolio return — using total current value vs total cost basis
     const totalCost = COST_BASIS;
     const totalCurrent = positions.reduce((s, p) => s + (p.balance || 0), 0);
     const portReturn = totalCost > 0 ? round2((totalCurrent - totalCost) / totalCost * 100) : 0;
 
-    // Build portfolio line — flat until today, ending at portReturn
-    // This is a simplified single-point comparison until we have daily history
-    const portPcts = spyPcts.map((_, i) => {
-      if (spyPcts[i] == null) return null;
-      // Linear interpolation from 0 to portReturn
-      return round2((i / (spyPcts.length - 1)) * portReturn);
+    // Build portfolio line as linear approximation from 0 to portReturn
+    // This gives a meaningful visual comparison until we track daily portfolio history
+    const n = spyPcts.length;
+    const portPcts = spyPcts.map((v, i) => {
+      if (v == null) return null;
+      return round2((i / Math.max(n - 1, 1)) * portReturn);
     });
 
-    // Update the chart
+    // Update the performance chart
     if (window._perfChart) {
       window._perfChart.data.labels = dates;
       window._perfChart.data.datasets[0].data = portPcts;
@@ -425,13 +440,16 @@ async function fetchSpyComparison(positions) {
       window._perfChart.update();
     }
 
-    // Update vs SPY card
-    const latestSpy = spyPcts[spyPcts.length - 1] || 0;
+    // Update vs SPY summary card
+    const latestSpy = spyPcts.filter(v => v != null).pop() || 0;
     const diff = round2(portReturn - latestSpy);
     const vsEl = document.getElementById('s-vs-spy');
     vsEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + 'pp';
     vsEl.className = 'card-value ' + (diff >= 0 ? 'pos' : 'neg');
-    document.getElementById('s-vs-spy-sub').textContent = 'vs S&P 500 (3mo)';
+    document.getElementById('s-vs-spy-sub').textContent =
+      diff >= 0 ? 'outperforming S&P 500' : 'underperforming S&P 500';
+
+    console.log('SPY comparison loaded — portfolio:', portReturn.toFixed(1) + '%', 'SPY:', latestSpy.toFixed(1) + '%', 'diff:', diff.toFixed(1) + 'pp');
 
   } catch(e) {
     console.warn('SPY comparison fetch failed:', e);
