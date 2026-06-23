@@ -918,8 +918,10 @@ async function fetchIntradayChart(ticker, canvasId) {
         const prices = (data?.data?.prices || []).reverse();
         closes = prices.map(p => parseFloat(p.price));
         labels = prices.map(p => {
-          const d = new Date(p.time);
-          return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+          // Safari requires ISO strings without timezone issues
+          const d = new Date(p.time.replace(' ', 'T'));
+          if (isNaN(d.getTime())) return '';
+          return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
         });
       } catch(e) {
         console.warn('Coinbase historic failed:', e);
@@ -980,8 +982,9 @@ async function fetchIntradayChart(ticker, canvasId) {
             ticks: {
               color: '#5a5956',
               font: { size: 10 },
-              maxTicksLimit: 6,
+              maxTicksLimit: 5,
               maxRotation: 0,
+              autoSkip: true,
             },
             grid: { display: false },
           },
