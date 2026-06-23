@@ -342,40 +342,40 @@ async function fetchAndUpdatePrices() {
     window._livePositions = updatedPositions;
     updateSummaryCards(updatedPositions);
 
-    // Update each position row
+    // Update each position row using data attributes for reliable targeting
     updatedPositions.forEach((p, i) => {
       try {
-        const toggle = document.querySelector('.pos-toggle[data-idx="' + i + '"]');
-        if (!toggle) return;
-        toggle.querySelectorAll('.pos-col-val').forEach(el => {
-          const label = el.previousElementSibling ? el.previousElementSibling.textContent.trim() : '';
-          if (label === 'Price') {
-            const newPrice = '$' + Number(p.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            const prev = prevPrices[p.ticker];
-            el.textContent = newPrice;
-            if (prev != null && p.current_price !== prev) {
-              const flashClass = p.current_price > prev ? 'flash-green' : 'flash-red';
-              el.classList.remove('flash-green', 'flash-red');
-              void el.offsetWidth; // force reflow
-              el.classList.add(flashClass);
-              setTimeout(() => el.classList.remove(flashClass), 1000);
-            }
+        const priceEl = document.getElementById('price-' + i);
+        const balanceEl = document.getElementById('balance-' + i);
+        const pctEl = document.getElementById('pct-' + i);
+        const dolEl = document.getElementById('dol-' + i);
+
+        if (priceEl) {
+          const prev = prevPrices[p.ticker];
+          priceEl.textContent = '$' + Number(p.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          if (prev != null && p.current_price !== prev) {
+            const flashClass = p.current_price > prev ? 'flash-green' : 'flash-red';
+            priceEl.classList.remove('flash-green', 'flash-red');
+            void priceEl.offsetWidth;
+            priceEl.classList.add(flashClass);
+            setTimeout(() => priceEl.classList.remove(flashClass), 1000);
           }
-          if (label === 'Balance') el.textContent = fmt(p.balance);
-        });
-        prevPrices[p.ticker] = p.current_price;
-        const pctEl = toggle.querySelector('.pos-pct');
-        const dolEl = toggle.querySelector('.pos-dol');
+        }
+        if (balanceEl) balanceEl.textContent = fmt(p.balance);
         if (pctEl) { pctEl.textContent = fmtPct(p.pct_change); pctEl.style.color = p.pct_change >= 0 ? 'var(--green)' : 'var(--red)'; }
         if (dolEl) dolEl.textContent = fmtDol(p.dollar_change);
-      } catch(e) { console.warn('Row update error:', e); }
+        prevPrices[p.ticker] = p.current_price;
+      } catch(e) { console.warn('Row update error for ' + p.ticker + ':', e); }
     });
 
     rebuildAllocChart(updatedPositions, currentCash);
     document.getElementById('last-run').textContent = 'Prices updated live · ' + new Date().toLocaleTimeString();
 
-    // Fetch SPY performance for benchmark comparison
-    await fetchSpyComparison(updatedPositions);
+    // Fetch SPY comparison only on first load
+    if (!window._spyLoaded) {
+      window._spyLoaded = true;
+      fetchSpyComparison(updatedPositions);
+    }
 
   } catch(e) {
     console.warn('Live price fetch failed:', e);
@@ -550,9 +550,9 @@ POSITIONS_CONFIG.forEach((p, i) => {
     <button class="pos-toggle" data-idx="${i}">
       <div><div class="pos-ticker">${p.ticker}</div><div class="pos-meta">${p.type || 'Stock'} &middot; ${p.term || '—'}</div></div>
       <div class="hide-mobile"><div class="pos-col-label">Qty</div><div class="pos-col-val">${p.qty || '—'}</div></div>
-      <div class="hide-mobile"><div class="pos-col-label">Price</div><div class="pos-col-val">${p.current_price != null ? '$' + Number(p.current_price).toLocaleString() : '—'}</div></div>
-      <div><div class="pos-col-label">Balance</div><div class="pos-col-val">${fmt(p.balance)}</div></div>
-      <div><div class="pos-pct" style="color:${pctColor}">${fmtPct(pct)}</div><div class="pos-dol">${fmtDol(dol)}</div></div>
+      <div class="hide-mobile"><div class="pos-col-label">Price</div><div class="pos-col-val" id="price-${i}">${p.current_price != null ? '$' + Number(p.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '—'}</div></div>
+      <div><div class="pos-col-label">Balance</div><div class="pos-col-val" id="balance-${i}">${fmt(p.balance)}</div></div>
+      <div><div class="pos-pct" id="pct-${i}" style="color:${pctColor}">${fmtPct(pct)}</div><div class="pos-dol" id="dol-${i}">${fmtDol(dol)}</div></div>
       <div class="pos-chevron" data-idx="${i}">&#8964;</div>
     </button>
     <div class="pos-detail" data-idx="${i}">
@@ -587,7 +587,8 @@ document.querySelectorAll('.pos-toggle').forEach(btn => {
         chartDiv.innerHTML = '<div class="intraday-label">Today\'s price movement</div><div class="intraday-canvas-wrap"><canvas id="' + canvasId + '"></canvas></div>';
         detail.appendChild(chartDiv);
       }
-      fetchIntradayChart(p.ticker, canvasId);
+      // Small delay lets the detail div become visible before Chart.js measures height
+      setTimeout(() => fetchIntradayChart(p.ticker, canvasId), 50);
     }
   });
 });
