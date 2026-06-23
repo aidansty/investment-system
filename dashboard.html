@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Investment Desk</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="dashboard_data.js"></script>
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+<div class="shell">
+
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">&#9650;</div>
+      <div>
+        <div class="header-title">Investment Desk</div>
+        <div class="header-sub" id="last-run">Last updated: —</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="regime-badge regime-bullish" id="regime-badge">Bullish</span>
+      <span class="last-updated" id="market-status">Market closed</span>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="portfolio">Portfolio</button>
+    <button class="tab-btn" data-tab="morning">Morning briefing</button>
+    <button class="tab-btn" data-tab="afternoon">Afternoon update</button>
+    <button class="tab-btn" data-tab="assistant">Ask the desk</button>
+  </nav>
+
+  <!-- PORTFOLIO TAB -->
+  <div class="tab-panel active" id="tab-portfolio">
+
+    <div class="cards cards-5" id="summary-cards">
+      <div class="card">
+        <div class="card-label">Total portfolio value</div>
+        <div class="card-value" id="s-total">—</div>
+        <div class="card-sub muted" id="s-total-sub">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Invested</div>
+        <div class="card-value" id="s-invested">—</div>
+        <div class="card-sub muted" id="s-invested-sub">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Total gain / loss</div>
+        <div class="card-value" id="s-gain">—</div>
+        <div class="card-sub" id="s-gain-sub">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Cash balance</div>
+        <div class="card-value" id="s-cash">—</div>
+        <button class="btn btn-ghost" id="edit-cash-btn" style="margin-top:6px;font-size:11px;padding:2px 8px;">Edit</button>
+      </div>
+      <div class="card">
+        <div class="card-label">Vs S&amp;P 500</div>
+        <div class="card-value" id="s-vs-spy">—</div>
+        <div class="card-sub muted" id="s-vs-spy-sub">since inception</div>
+      </div>
+    </div>
+
+    <div class="chart-legend">
+      <span style="display:flex;align-items:center;gap:5px;">
+        <span class="legend-dot" style="background:#8077e0;height:2px;"></span> Your portfolio
+      </span>
+      <span style="display:flex;align-items:center;gap:5px;">
+        <span class="legend-dot" style="background:#5f5e58;height:2px;border-top:1px dashed #5f5e58;"></span> S&amp;P 500 equal investment
+      </span>
+    </div>
+    <div class="chart-wrap section-gap" style="height:220px;">
+      <canvas id="perf-chart" aria-label="Portfolio performance versus S&P 500 over time"></canvas>
+    </div>
+
+    <h2 class="section-title">Capital allocation</h2>
+    <div class="alloc-grid section-gap">
+      <div class="alloc-canvas-wrap">
+        <canvas id="alloc-chart" aria-label="Capital allocation by industry and category"></canvas>
+      </div>
+      <div class="alloc-legend" id="alloc-legend"></div>
+    </div>
+
+    <h2 class="section-title">Open positions</h2>
+    <p class="section-sub">Click any position for details &middot; prices refresh on page load</p>
+    <div class="pos-list" id="pos-list"></div>
+    <p class="hint">Prices pulled live from Yahoo Finance &middot; balances reflect quantity &times; current price</p>
+
+  </div>
+
+  <!-- MORNING TAB -->
+  <div class="tab-panel" id="tab-morning">
+
+    <div class="info-card">
+      <div class="row-space">
+        <div class="info-card-title">Market snapshot</div>
+        <span class="badge" id="market-open-badge">—</span>
+      </div>
+      <div class="vix-grid" id="vix-grid">
+        <div><div class="vix-label">VIX</div><div class="vix-val" id="vix-val">—</div></div>
+        <div><div class="vix-label">5d avg</div><div class="vix-val" id="vix-avg">—</div></div>
+        <div><div class="vix-label">Trend</div><div class="vix-val" id="vix-trend">—</div></div>
+        <div><div class="vix-label">Regime</div><div class="vix-val" id="vix-regime">—</div></div>
+      </div>
+      <hr class="divider">
+      <ul id="market-bullets"></ul>
+    </div>
+
+    <h2 class="section-title">News intelligence</h2>
+    <div id="news-list" class="section-gap"></div>
+
+    <h2 class="section-title">Position review</h2>
+    <div id="position-review" class="section-gap"></div>
+
+    <h2 class="section-title">Industry opportunities</h2>
+    <div id="industry-opportunities"></div>
+
+  </div>
+
+  <!-- AFTERNOON TAB -->
+  <div class="tab-panel" id="tab-afternoon">
+
+    <div class="info-card section-gap" id="what-changed">
+      <div class="info-card-title">What changed since this morning</div>
+      <ul id="what-changed-list"></ul>
+    </div>
+
+    <div class="info-card section-gap" id="notable-moves-card">
+      <div class="info-card-title">Notable price moves today</div>
+      <p class="hint" style="margin-bottom:10px;">Includes moves outside your direct holdings that relate through sector, supply chain, or competitive overlap</p>
+      <div class="move-row" id="notable-moves"></div>
+    </div>
+
+    <h2 class="section-title">Portfolio actions before close</h2>
+    <div id="afternoon-positions" class="section-gap"></div>
+
+    <h2 class="section-title">New or strengthened candidates</h2>
+    <div id="afternoon-candidates"></div>
+
+  </div>
+
+  <!-- ASK THE DESK TAB -->
+  <div class="tab-panel" id="tab-assistant">
+    <div class="desk-wrap">
+      <div class="desk-header">
+        <div class="desk-avatar">$</div>
+        <div>
+          <div class="desk-name">Ask the desk</div>
+          <div class="desk-desc">Has full context on your portfolio, holdings, and today&rsquo;s briefing</div>
+        </div>
+      </div>
+      <div class="desk-messages" id="desk-messages">
+        <div class="msg-assistant">Ready. Ask me anything about your portfolio, a specific holding, market conditions, or what you should be watching today.</div>
+      </div>
+      <div class="desk-input-row">
+        <input class="desk-input" id="desk-input" type="text" placeholder="Ask about your portfolio or the markets&hellip;" />
+        <button class="desk-send" id="desk-send">Ask</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Edit cash modal -->
+<div class="modal-bg" id="cash-modal">
+  <div class="modal">
+    <div class="modal-title">Update cash balance</div>
+    <input class="modal-input" id="cash-input" type="number" placeholder="e.g. 6400" />
+    <div class="modal-row">
+      <button class="btn btn-ghost" id="cash-cancel">Cancel</button>
+      <button class="btn btn-primary" id="cash-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA — injected by the pipeline on each run
+// ============================================================
+const BRIEFING_DATA = window.BRIEFING_DATA || {
+  last_updated: "Not yet run",
+  regime: "Bullish",
+  regime_confidence: "High",
+  market_open: false,
+  vix: null,
+  vix_avg: null,
+  vix_trend: null,
+  vix_regime: null,
+  market_bullets: [],
+  positions: [],
+  performance_dates: [],
+  performance_portfolio: [],
+  performance_spy: [],
+  cash: 0,
+  cost_basis: 0,
+  news: [],
+  position_review: [],
+  industry_opportunities: [],
+  what_changed: [],
+  notable_moves: [],
+  afternoon_positions: [],
+  afternoon_candidates: [],
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+const fmt = (n) => n == null ? '—' : '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+const fmtPct = (n) => n == null ? '—' : (n >= 0 ? '+' : '') + Number(n).toFixed(1) + '%';
+const fmtPctRaw = (n) => n == null ? '—' : (n >= 0 ? '+' : '') + Number(n).toFixed(1);
+const fmtDol = (n) => n == null ? '—' : (n >= 0 ? '+$' : '-$') + Math.abs(Number(n)).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+// ============================================================
+// HEADER
+// ============================================================
+document.getElementById('last-run').textContent = 'Last updated: ' + (BRIEFING_DATA.last_updated || '—');
+
+const regimeBadge = document.getElementById('regime-badge');
+const regime = (BRIEFING_DATA.regime || '').toLowerCase();
+regimeBadge.textContent = BRIEFING_DATA.regime || '—';
+regimeBadge.className = 'regime-badge ' + (regime.includes('bull') ? 'regime-bullish' : regime.includes('bear') ? 'regime-bearish' : 'regime-neutral');
+
+const mktStatus = document.getElementById('market-status');
+mktStatus.textContent = BRIEFING_DATA.market_open ? 'Market open' : 'Market closed';
+
+// ============================================================
+// LIVE PRICE FETCHING
+// ============================================================
+const POSITIONS_CONFIG = BRIEFING_DATA.positions || [];
+const COST_BASIS = BRIEFING_DATA.cost_basis || 0;
+
+// Crypto tickers mapped to Coinbase pairs
+const CRYPTO_TICKERS = { 'BTC': 'BTC-USD', 'ETH': 'ETH-USD', 'XRP': 'XRP-USD', 'ZEC': 'ZEC-USD' };
+const STOCK_TICKERS_LIST = ['SPY','MU','AMD','SPCX','CRWV','NVDA','HUM','PLTR','UFO'];
+
+// Finnhub API key injected by pipeline
+const FINNHUB_KEY = window.BRIEFING_DATA?.finnhub_key || '';
+
+async function fetchStockPrice(ticker) {
+  if (!FINNHUB_KEY) return null;
+  try {
+    const url = `https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data.c > 0 ? data.c : null;
+  } catch(e) {
+    console.warn('Finnhub fetch failed for', ticker, e);
+    return null;
+  }
+}
+
+async function fetchCryptoPrice(ticker) {
+  const pair = CRYPTO_TICKERS[ticker];
+  if (!pair) return null;
+  try {
+    const url = `https://api.coinbase.com/v2/prices/${pair}/spot`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data?.data?.amount ? parseFloat(data.data.amount) : null;
+  } catch(e) {
+    console.warn('Coinbase fetch failed for', ticker, e);
+    return null;
+  }
+}
+
+async function fetchLivePrices(tickers) {
+  const prices = {};
+
+  // Fetch stocks via Finnhub (sequential to respect rate limits)
+  const stocks = tickers.filter(t => !CRYPTO_TICKERS[t]);
+  for (const ticker of stocks) {
+    const price = await fetchStockPrice(ticker);
+    if (price != null) prices[ticker] = price;
+    await new Promise(r => setTimeout(r, 120)); // 120ms between calls = ~8/sec max
+  }
+
+  // Fetch crypto via Coinbase (parallel, no rate limit issues)
+  const cryptos = tickers.filter(t => CRYPTO_TICKERS[t]);
+  const cryptoResults = await Promise.all(cryptos.map(async t => {
+    const price = await fetchCryptoPrice(t);
+    return { ticker: t, price };
+  }));
+  cryptoResults.forEach(({ ticker, price }) => {
+    if (price != null) prices[ticker] = price;
+  });
+
+  return prices;
+}
+
+// ============================================================
+// POSITIONS + SUMMARY CARDS
+// ============================================================
+
+// Cash — persisted in localStorage, never resets on reload
+const CASH_KEY = 'investment_desk_cash';
+let currentCash = parseFloat(localStorage.getItem(CASH_KEY) || '0');
+document.getElementById('s-cash').textContent = fmt(currentCash);
+
+// Cash edit modal
+document.getElementById('edit-cash-btn').onclick = () => {
+  document.getElementById('cash-input').value = currentCash;
+  document.getElementById('cash-modal').classList.add('open');
+};
+document.getElementById('cash-cancel').onclick = () => document.getElementById('cash-modal').classList.remove('open');
+document.getElementById('cash-save').onclick = () => {
+  const val = parseFloat(document.getElementById('cash-input').value);
+  if (!isNaN(val)) {
+    currentCash = val;
+    localStorage.setItem(CASH_KEY, String(val));
+    document.getElementById('s-cash').textContent = fmt(val);
+    updateSummaryCards(window._livePositions || POSITIONS_CONFIG);
+  }
+  document.getElementById('cash-modal').classList.remove('open');
+};
+
+function updateSummaryCards(positions) {
+  let totalInvested = 0;
+  positions.forEach(p => { totalInvested += (p.balance || 0); });
+
+  const totalValue = totalInvested + currentCash;
+  const totalGain = totalInvested - COST_BASIS;
+  const totalGainPct = COST_BASIS > 0 ? (totalGain / COST_BASIS * 100) : 0;
+
+  document.getElementById('s-total').textContent = fmt(totalValue);
+  document.getElementById('s-total-sub').textContent = 'All holdings + cash';
+  document.getElementById('s-invested').textContent = fmt(totalInvested);
+  document.getElementById('s-invested-sub').textContent = totalValue > 0 ? (totalInvested / totalValue * 100).toFixed(1) + '% of portfolio' : '—';
+
+  const gainEl = document.getElementById('s-gain');
+  gainEl.textContent = fmtDol(totalGain);
+  gainEl.className = 'card-value ' + (totalGain >= 0 ? 'pos' : 'neg');
+  const gainSubEl = document.getElementById('s-gain-sub');
+  gainSubEl.textContent = fmtPct(totalGainPct) + ' since inception';
+  gainSubEl.className = 'card-sub ' + (totalGain >= 0 ? 'pos' : 'neg');
+
+  const vsSpyEl = document.getElementById('s-vs-spy');
+  const vsSpy = BRIEFING_DATA.vs_spy_pp;
+  vsSpyEl.textContent = vsSpy != null ? (vsSpy >= 0 ? '+' : '') + vsSpy.toFixed(1) + 'pp' : '—';
+  vsSpyEl.className = 'card-value ' + (vsSpy >= 0 ? 'pos' : 'neg');
+}
+
+// Initial render with data from pipeline
+updateSummaryCards(POSITIONS_CONFIG);
+
+function round2(n) { return Math.round(n * 100) / 100; }
+
+// Fetch live prices and update — runs AFTER position rows are built
+// Store previous prices for flash coloring
+const prevPrices = {};
+
+async function fetchAndUpdatePrices() {
+  try {
+    const tickers = POSITIONS_CONFIG.map(p => p.ticker);
+    const prices = await fetchLivePrices(tickers);
+
+    const updatedPositions = POSITIONS_CONFIG.map(p => {
+      const livePrice = prices[p.ticker];
+      if (livePrice == null) return p;
+      const balance = round2(livePrice * p.qty);
+      const pctChange = p.entry_price > 0 ? round2((livePrice - p.entry_price) / p.entry_price * 100) : 0;
+      const dollarChange = round2((livePrice - p.entry_price) * p.qty);
+      return { ...p, current_price: livePrice, balance, pct_change: pctChange, dollar_change: dollarChange };
+    });
+
+    window._livePositions = updatedPositions;
+    updateSummaryCards(updatedPositions);
+
+    // Update each position row using data attributes for reliable targeting
+    updatedPositions.forEach((p, i) => {
+      try {
+        const priceEl = document.getElementById('price-' + i);
+        const balanceEl = document.getElementById('balance-' + i);
+        const pctEl = document.getElementById('pct-' + i);
+        const dolEl = document.getElementById('dol-' + i);
+
+        if (priceEl) {
+          const prev = prevPrices[p.ticker];
+          priceEl.textContent = '$' + Number(p.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          if (prev != null && p.current_price !== prev) {
+            const flashClass = p.current_price > prev ? 'flash-green' : 'flash-red';
+            priceEl.classList.remove('flash-green', 'flash-red');
+            void priceEl.offsetWidth;
+            priceEl.classList.add(flashClass);
+            setTimeout(() => priceEl.classList.remove(flashClass), 1000);
+          }
+        }
+        if (balanceEl) balanceEl.textContent = fmt(p.balance);
+        if (pctEl) { pctEl.textContent = fmtPct(p.pct_change); pctEl.style.color = p.pct_change >= 0 ? 'var(--green)' : 'var(--red)'; }
+        if (dolEl) dolEl.textContent = fmtDol(p.dollar_change);
+        prevPrices[p.ticker] = p.current_price;
+      } catch(e) { console.warn('Row update error for ' + p.ticker + ':', e); }
+    });
+
+    rebuildAllocChart(updatedPositions, currentCash);
+    document.getElementById('last-run').textContent = 'Prices updated live · ' + new Date().toLocaleTimeString();
+
+    // Fetch SPY comparison only on first load
+    if (!window._spyLoaded) {
+      window._spyLoaded = true;
+      fetchSpyComparison(updatedPositions);
+    }
+
+  } catch(e) {
+    console.warn('Live price fetch failed:', e);
+    document.getElementById('last-run').textContent = 'Price fetch failed — showing last known data';
+  }
+}
+
+async function fetchSpyComparison(positions) {
+  try {
+    // Use pre-built performance data from pipeline if available
+    const perfData = window.BRIEFING_DATA?.performance_dates;
+    if (perfData && perfData.length > 0) {
+      const dates = window.BRIEFING_DATA.performance_dates;
+      const portPcts = window.BRIEFING_DATA.performance_portfolio;
+      const spyPcts = window.BRIEFING_DATA.performance_spy;
+      if (window._perfChart) {
+        window._perfChart.data.labels = dates;
+        window._perfChart.data.datasets[0].data = portPcts;
+        window._perfChart.data.datasets[1].data = spyPcts;
+        window._perfChart.update();
+      }
+      const latestSpy = spyPcts[spyPcts.length - 1] || 0;
+      const portReturn = portPcts[portPcts.length - 1] || 0;
+      const diff = round2(portReturn - latestSpy);
+      const vsEl = document.getElementById('s-vs-spy');
+      vsEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + 'pp';
+      vsEl.className = 'card-value ' + (diff >= 0 ? 'pos' : 'neg');
+      document.getElementById('s-vs-spy-sub').textContent = diff >= 0 ? 'outperforming S&P 500' : 'underperforming S&P 500';
+      return;
+    }
+
+    // Fallback: simple portfolio return vs SPY current return estimate
+    const totalCost = COST_BASIS;
+    const totalCurrent = (window._livePositions || POSITIONS_CONFIG).reduce((s, p) => s + (p.balance || 0), 0);
+    const portReturn = totalCost > 0 ? round2((totalCurrent - totalCost) / totalCost * 100) : 0;
+
+    // Get SPY current price to estimate SPY return since Apr 14
+    // SPY entry price from our positions: $659.44
+    const spyEntry = 659.44;
+    const spyPos = (window._livePositions || POSITIONS_CONFIG).find(p => p.ticker === 'SPY');
+    const spyCurrent = spyPos?.current_price || spyEntry;
+    const spyReturn = round2((spyCurrent - spyEntry) / spyEntry * 100);
+    const diff = round2(portReturn - spyReturn);
+
+    const vsEl = document.getElementById('s-vs-spy');
+    if (vsEl) {
+      vsEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + 'pp';
+      vsEl.className = 'card-value ' + (diff >= 0 ? 'pos' : 'neg');
+    }
+    document.getElementById('s-vs-spy-sub').textContent = diff >= 0 ? 'outperforming S&P 500' : 'underperforming S&P 500';
+
+    // Build simple chart — linear portfolio line vs flat SPY estimate
+    const n = 60;
+    const dates = [];
+    const portPcts = [];
+    const spyPcts = [];
+    const startDate = new Date('2026-04-14');
+    for (let i = 0; i < n; i++) {
+      const d = new Date(startDate);
+      d.setDate(d.getDate() + i);
+      if (d.getDay() === 0 || d.getDay() === 6) continue;
+      dates.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      portPcts.push(round2((i / (n-1)) * portReturn));
+      spyPcts.push(round2((i / (n-1)) * spyReturn));
+    }
+
+    // Portfolio return — using total current value vs total cost basis
+    const totalCost = COST_BASIS;
+    const totalCurrent = positions.reduce((s, p) => s + (p.balance || 0), 0);
+    const portReturn = totalCost > 0 ? round2((totalCurrent - totalCost) / totalCost * 100) : 0;
+
+    // Build portfolio line as linear approximation from 0 to portReturn
+    // This gives a meaningful visual comparison until we track daily portfolio history
+    const n = spyPcts.length;
+    const portPcts = spyPcts.map((v, i) => {
+      if (v == null) return null;
+      return round2((i / Math.max(n - 1, 1)) * portReturn);
+    });
+
+    // Update the performance chart
+    if (window._perfChart) {
+      window._perfChart.data.labels = dates;
+      window._perfChart.data.datasets[0].data = portPcts;
+      window._perfChart.data.datasets[1].data = spyPcts;
+      window._perfChart.update();
+    }
+
+    // Update vs SPY summary card
+    const latestSpy = spyPcts.filter(v => v != null).pop() || 0;
+    const diff = round2(portReturn - latestSpy);
+    const vsEl = document.getElementById('s-vs-spy');
+    vsEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + 'pp';
+    vsEl.className = 'card-value ' + (diff >= 0 ? 'pos' : 'neg');
+    document.getElementById('s-vs-spy-sub').textContent =
+      diff >= 0 ? 'outperforming S&P 500' : 'underperforming S&P 500';
+
+    console.log('SPY comparison loaded — portfolio:', portReturn.toFixed(1) + '%', 'SPY:', latestSpy.toFixed(1) + '%', 'diff:', diff.toFixed(1) + 'pp');
+
+  } catch(e) {
+    console.warn('SPY comparison fetch failed:', e);
+  }
+}
+
+// ============================================================
+// PERFORMANCE CHART
+// ============================================================
+const perfDates = BRIEFING_DATA.performance_dates || [];
+const perfPort = BRIEFING_DATA.performance_portfolio || [];
+const perfSpy = BRIEFING_DATA.performance_spy || [];
+
+window._perfChart = new Chart(document.getElementById('perf-chart'), {
+  type: 'line',
+  data: {
+    labels: perfDates.length ? perfDates : ['No data'],
+    datasets: [
+      { data: perfPort, borderColor: '#8077e0', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.3 },
+      { data: perfSpy, borderColor: '#5f5e58', backgroundColor: 'transparent', borderWidth: 2, borderDash: [4,4], pointRadius: 0, tension: 0.3 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (c) => (c.datasetIndex === 0 ? 'Portfolio' : 'S&P 500') + ': ' + (c.parsed.y != null ? c.parsed.y.toFixed(1) + '%' : '—') }}
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#87867c', maxTicksLimit: 8 }},
+      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { font: { size: 11 }, color: '#87867c', callback: (v) => v + '%' }}
+    }
+  }
+});
+
+// ============================================================
+// ALLOCATION CHART — rebuildable with live data
+// ============================================================
+let allocChartInstance = null;
+function rebuildAllocChart(positions, cash) {
+  const allocData = buildAllocData(positions, cash);
+  const allocTotal = allocData.reduce((s, d) => s + d.value, 0);
+  if (allocChartInstance) allocChartInstance.destroy();
+  allocChartInstance = new Chart(document.getElementById('alloc-chart'), {
+    type: 'doughnut',
+    data: {
+      labels: allocData.map(d => d.label),
+      datasets: [{ data: allocData.map(d => d.value), backgroundColor: allocData.map(d => d.color), borderColor: '#09090c', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: (c) => c.label + ': ' + (c.parsed / allocTotal * 100).toFixed(1) + '%' }}
+      }
+    }
+  });
+  const legend = document.getElementById('alloc-legend');
+  legend.innerHTML = '';
+  allocData.forEach(d => {
+    const pct = allocTotal > 0 ? (d.value / allocTotal * 100).toFixed(1) : '0.0';
+    const row = document.createElement('div');
+    row.className = 'alloc-row';
+    row.innerHTML = '<span class="alloc-label"><span class="alloc-dot" style="background:' + d.color + '"></span>' + d.label + '</span><span class="alloc-val">' + fmt(d.value) + ' &nbsp; ' + pct + '%</span>';
+    legend.appendChild(row);
+  });
+}
+
+// ============================================================
+// ALLOCATION CHART — initial render
+const ALLOC_COLORS = ['#7F77DD','#5DCAA5','#D85A30','#378ADD','#D4537E','#EF9F27','#3a9e7a','#6b4fa8','#3a3938'];
+
+function buildAllocData(positions, cash) {
+  const rows = positions.map((p, i) => ({
+    label: (p.industry || p.ticker) + ' (' + p.ticker + ')',
+    value: p.balance || 0,
+    color: ALLOC_COLORS[i % ALLOC_COLORS.length],
+  }));
+  rows.push({ label: 'Cash', value: cash, color: '#3a3938' });
+  return rows;
+}
+
+// Initial alloc chart built from pipeline data, rebuilt with live prices after fetch
+rebuildAllocChart(POSITIONS_CONFIG, currentCash);
+
+// ============================================================
+// POSITION ROWS
+// ============================================================
+const posList = document.getElementById('pos-list');
+POSITIONS_CONFIG.forEach((p, i) => {
+  const pct = p.pct_change || 0;
+  const dol = p.dollar_change || 0;
+  const pctColor = pct >= 0 ? 'var(--green)' : 'var(--red)';
+  const row = document.createElement('div');
+  row.className = 'pos-row';
+  row.innerHTML = `
+    <button class="pos-toggle" data-idx="${i}">
+      <div><div class="pos-ticker">${p.ticker}</div><div class="pos-meta">${p.type || 'Stock'} &middot; ${p.term || '—'}</div></div>
+      <div class="hide-mobile"><div class="pos-col-label">Qty</div><div class="pos-col-val">${p.qty || '—'}</div></div>
+      <div class="hide-mobile"><div class="pos-col-label">Price</div><div class="pos-col-val" id="price-${i}">${p.current_price != null ? '$' + Number(p.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '—'}</div></div>
+      <div><div class="pos-col-label">Balance</div><div class="pos-col-val" id="balance-${i}">${fmt(p.balance)}</div></div>
+      <div><div class="pos-pct" id="pct-${i}" style="color:${pctColor}">${fmtPct(pct)}</div><div class="pos-dol" id="dol-${i}">${fmtDol(dol)}</div></div>
+      <div class="pos-chevron" data-idx="${i}">&#8964;</div>
+    </button>
+    <div class="pos-detail" data-idx="${i}">
+      <div class="pos-detail-label">What it is</div>
+      <div class="pos-detail-text">${p.summary || '—'}</div>
+      <div class="pos-detail-label">Catalyst</div>
+      <div class="pos-detail-text">${p.catalyst || '—'}</div>
+      <div class="pos-detail-label">Why ${(p.term || '').toLowerCase()}</div>
+      <div class="pos-detail-text">${p.why || '—'}</div>
+    </div>`;
+  posList.appendChild(row);
+});
+
+document.querySelectorAll('.pos-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const idx = btn.dataset.idx;
+    const detail = document.querySelector('.pos-detail[data-idx="' + idx + '"]');
+    const chev = document.querySelector('.pos-chevron[data-idx="' + idx + '"]');
+    const open = detail.style.display === 'block';
+    detail.style.display = open ? 'none' : 'block';
+    chev.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+
+    // Load intraday chart when opening
+    if (!open) {
+      const p = POSITIONS_CONFIG[parseInt(idx)];
+      if (!p) return;
+      const canvasId = 'intraday-' + idx;
+      // Add chart section if not already there
+      if (!document.getElementById(canvasId)) {
+        const chartDiv = document.createElement('div');
+        chartDiv.className = 'intraday-wrap';
+        chartDiv.innerHTML = '<div class="intraday-label">Today\'s price movement</div><div class="intraday-canvas-wrap"><canvas id="' + canvasId + '"></canvas></div>';
+        detail.appendChild(chartDiv);
+      }
+      // Small delay lets the detail div become visible before Chart.js measures height
+      setTimeout(() => fetchIntradayChart(p.ticker, canvasId), 50);
+    }
+  });
+});
+
+// Fetch all prices on load
+fetchAndUpdatePrices();
+
+// Crypto refreshes every 10 seconds via Coinbase
+async function fetchCryptoOnly() {
+  try {
+    const cryptoTickers = POSITIONS_CONFIG.filter(p => CRYPTO_TICKERS[p.ticker]).map(p => p.ticker);
+    const prices = {};
+    const results = await Promise.all(cryptoTickers.map(async t => {
+      const price = await fetchCryptoPrice(t);
+      return { ticker: t, price };
+    }));
+    results.forEach(({ ticker, price }) => {
+      if (price != null) prices[ticker] = price;
+    });
+
+    // Update crypto rows only
+    const updatedPositions = (window._livePositions || POSITIONS_CONFIG).map(p => {
+      if (!CRYPTO_TICKERS[p.ticker] || prices[p.ticker] == null) return p;
+      const livePrice = prices[p.ticker];
+      return {
+        ...p,
+        current_price: livePrice,
+        balance: round2(livePrice * p.qty),
+        pct_change: p.entry_price > 0 ? round2((livePrice - p.entry_price) / p.entry_price * 100) : 0,
+        dollar_change: round2((livePrice - p.entry_price) * p.qty),
+      };
+    });
+
+    window._livePositions = updatedPositions;
+    updateSummaryCards(updatedPositions);
+    rebuildAllocChart(updatedPositions, currentCash);
+
+    updatedPositions.filter(p => CRYPTO_TICKERS[p.ticker]).forEach((p, _) => {
+      const i = POSITIONS_CONFIG.findIndex(x => x.ticker === p.ticker);
+      if (i < 0) return;
+      const priceEl = document.getElementById('price-' + i);
+      const balanceEl = document.getElementById('balance-' + i);
+      const pctEl = document.getElementById('pct-' + i);
+      const dolEl = document.getElementById('dol-' + i);
+      if (priceEl) {
+        const prev = prevPrices[p.ticker];
+        priceEl.textContent = '$' + Number(p.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        if (prev != null && p.current_price !== prev) {
+          const flashClass = p.current_price > prev ? 'flash-green' : 'flash-red';
+          priceEl.classList.remove('flash-green', 'flash-red');
+          void priceEl.offsetWidth;
+          priceEl.classList.add(flashClass);
+          setTimeout(() => priceEl.classList.remove(flashClass), 1000);
+        }
+        prevPrices[p.ticker] = p.current_price;
+      }
+      if (balanceEl) balanceEl.textContent = fmt(p.balance);
+      if (pctEl) { pctEl.textContent = fmtPct(p.pct_change); pctEl.style.color = p.pct_change >= 0 ? 'var(--green)' : 'var(--red)'; }
+      if (dolEl) dolEl.textContent = fmtDol(p.dollar_change);
+    });
+  } catch(e) {
+    console.warn('Crypto refresh error:', e);
+  }
+}
+
+// Stock prices refresh every 60 seconds via Finnhub
+setInterval(fetchAndUpdatePrices, 60000);
+// Crypto refreshes every 10 seconds via Coinbase
+setInterval(fetchCryptoOnly, 10000);
+
+// ============================================================
+// MORNING TAB
+// ============================================================
+// Market status badge
+const mobBadge = document.getElementById('market-open-badge');
+if (BRIEFING_DATA.market_open) {
+  mobBadge.textContent = 'Market open'; mobBadge.className = 'badge badge-green';
+} else {
+  mobBadge.textContent = 'Market closed'; mobBadge.className = 'badge badge-gray';
+}
+
+document.getElementById('vix-val').textContent = BRIEFING_DATA.vix || '—';
+document.getElementById('vix-avg').textContent = BRIEFING_DATA.vix_avg || '—';
+document.getElementById('vix-trend').textContent = BRIEFING_DATA.vix_trend || '—';
+const vixRegEl = document.getElementById('vix-regime');
+vixRegEl.textContent = BRIEFING_DATA.vix_regime || '—';
+if ((BRIEFING_DATA.vix_regime || '').toLowerCase() === 'green') vixRegEl.style.color = 'var(--green)';
+else if ((BRIEFING_DATA.vix_regime || '').toLowerCase() === 'red') vixRegEl.style.color = 'var(--red)';
+else vixRegEl.style.color = 'var(--amber)';
+
+const bulletList = document.getElementById('market-bullets');
+(BRIEFING_DATA.market_bullets || []).forEach(b => {
+  const li = document.createElement('li');
+  li.innerHTML = b;
+  bulletList.appendChild(li);
+});
+
+// News
+const newsList = document.getElementById('news-list');
+(BRIEFING_DATA.news || []).forEach(n => {
+  const card = document.createElement('div');
+  card.className = 'news-card';
+  card.innerHTML = `
+    <div class="news-header">
+      <div class="news-title">${n.headline || '—'}</div>
+      ${n.url ? '<a class="news-link" href="' + n.url + '" target="_blank" rel="noopener">Source ↗</a>' : ''}
+    </div>
+    <ul>${(n.bullets || []).map(b => '<li>' + b + '</li>').join('')}</ul>`;
+  newsList.appendChild(card);
+});
+if (!BRIEFING_DATA.news || !BRIEFING_DATA.news.length) {
+  newsList.innerHTML = '<p class="hint">No briefing data yet. Check back after 9 AM on a trading day.</p>';
+}
+
+// Position review
+const posReview = document.getElementById('position-review');
+(BRIEFING_DATA.position_review || []).forEach(p => {
+  const badgeClass = {
+    'Hold': 'badge-gray', 'Watch': 'badge-gray', 'Buy More': 'badge-green',
+    'Trim': 'badge-amber', 'Sell': 'badge-red', 'Reduce': 'badge-amber'
+  }[p.action] || 'badge-gray';
+  const reasonColor = {
+    'Hold': '#aeada5', 'Watch': '#aeada5', 'Buy More': 'var(--green)',
+    'Trim': 'var(--amber)', 'Sell': 'var(--red)', 'Reduce': 'var(--amber)'
+  }[p.action] || '#aeada5';
+  const card = document.createElement('div');
+  card.className = 'info-card';
+  card.style.marginBottom = '12px';
+  card.innerHTML = `
+    <div class="row-space">
+      <div class="info-card-title" style="margin:0;">${p.ticker}</div>
+      <span class="badge ${badgeClass}">${p.action}</span>
+    </div>
+    <ul style="margin-top:8px;">${(p.bullets || []).map(b => '<li>' + b + '</li>').join('')}</ul>
+    ${p.reasoning ? '<div class="info-card-footer"><b style="color:' + reasonColor + '">Why ' + p.action.toLowerCase() + ':</b> ' + p.reasoning + '</div>' : ''}`;
+  posReview.appendChild(card);
+});
+if (!BRIEFING_DATA.position_review || !BRIEFING_DATA.position_review.length) {
+  posReview.innerHTML = '<p class="hint">No position review yet.</p>';
+}
+
+// Industry opportunities
+const indOpps = document.getElementById('industry-opportunities');
+(BRIEFING_DATA.industry_opportunities || []).forEach(ind => {
+  const card = document.createElement('div');
+  card.className = 'candidate-card';
+  card.innerHTML = `
+    <div class="candidate-header">
+      <div>
+        <div class="candidate-title">${ind.industry}</div>
+        <div class="candidate-sub">${ind.term || ''} &middot; ${ind.etf || ''}</div>
+      </div>
+      <span class="badge badge-green">${ind.conviction}/100</span>
+    </div>
+    <ul>${(ind.bullets || []).map(b => '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">' + b + '</li>').join('')}</ul>
+    ${ind.vehicle ? '<div style="font-size:13px;color:var(--text-body);margin-top:10px;"><b style="color:var(--text-primary);">Vehicle:</b> ' + ind.vehicle + '</div>' : ''}
+    ${ind.why_now ? '<div class="info-card-footer"><b style="color:var(--green);">Why buy now:</b> ' + ind.why_now + '</div>' : ''}
+    ${ind.stocks && ind.stocks.length ? '<div class="candidate-stocks">' + ind.stocks.map(s => '<span class="stock-chip">' + s + '</span>').join('') + '</div>' : ''}`;
+  indOpps.appendChild(card);
+});
+if (!BRIEFING_DATA.industry_opportunities || !BRIEFING_DATA.industry_opportunities.length) {
+  indOpps.innerHTML = '<p class="hint">No high-conviction opportunities today.</p>';
+}
+
+// ============================================================
+// AFTERNOON TAB
+// ============================================================
+const wcList = document.getElementById('what-changed-list');
+(BRIEFING_DATA.what_changed || []).forEach(b => {
+  const li = document.createElement('li');
+  li.innerHTML = b;
+  wcList.appendChild(li);
+});
+
+const moveRow = document.getElementById('notable-moves');
+(BRIEFING_DATA.notable_moves || []).forEach(m => {
+  const div = document.createElement('div');
+  div.className = 'move-item';
+  div.innerHTML = '<span class="move-ticker">' + m.ticker + ' ' + (m.move || '') + '</span> &mdash; ' + (m.reason || '');
+  moveRow.appendChild(div);
+});
+
+const aftPos = document.getElementById('afternoon-positions');
+(BRIEFING_DATA.afternoon_positions || []).forEach(p => {
+  const badgeClass = { 'Hold': 'badge-gray', 'Watch': 'badge-gray', 'Buy More': 'badge-green', 'Trim': 'badge-amber', 'Sell': 'badge-red' }[p.action] || 'badge-gray';
+  const reasonColor = { 'Hold': '#aeada5', 'Watch': '#aeada5', 'Buy More': 'var(--green)', 'Trim': 'var(--amber)', 'Sell': 'var(--red)' }[p.action] || '#aeada5';
+  const card = document.createElement('div');
+  card.className = 'info-card';
+  card.style.marginBottom = '12px';
+  card.innerHTML = `
+    <div class="row-space"><div class="info-card-title" style="margin:0;">${p.ticker}</div><span class="badge ${badgeClass}">${p.action}</span></div>
+    <ul style="margin-top:8px;">${(p.bullets || []).map(b => '<li>' + b + '</li>').join('')}</ul>
+    ${p.reasoning ? '<div class="info-card-footer"><b style="color:' + reasonColor + '">Why ' + p.action.toLowerCase() + ':</b> ' + p.reasoning + '</div>' : ''}`;
+  aftPos.appendChild(card);
+});
+
+const aftCand = document.getElementById('afternoon-candidates');
+(BRIEFING_DATA.afternoon_candidates || []).forEach(ind => {
+  const card = document.createElement('div');
+  card.className = 'candidate-card';
+  card.innerHTML = `
+    <div class="candidate-header">
+      <div><div class="candidate-title">${ind.industry}</div><div class="candidate-sub">${ind.term || ''}</div></div>
+      <span class="badge badge-green">${ind.conviction}/100</span>
+    </div>
+    <ul>${(ind.bullets || []).map(b => '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">' + b + '</li>').join('')}</ul>
+    ${ind.why_now ? '<div class="info-card-footer"><b style="color:var(--green);">Why buy now:</b> ' + ind.why_now + '</div>' : ''}`;
+  aftCand.appendChild(card);
+});
+if (!BRIEFING_DATA.afternoon_candidates || !BRIEFING_DATA.afternoon_candidates.length) {
+  aftCand.innerHTML = '<p class="hint">No new candidates emerged since this morning.</p>';
+}
+
+// ============================================================
+// ASK THE DESK
+// ============================================================
+const messagesEl = document.getElementById('desk-messages');
+const inputEl = document.getElementById('desk-input');
+const sendBtn = document.getElementById('desk-send');
+
+function addMessage(text, role) {
+  const div = document.createElement('div');
+  div.className = role === 'user' ? 'msg-user' : 'msg-assistant';
+  div.textContent = text;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return div;
+}
+
+async function sendMessage() {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  inputEl.value = '';
+  addMessage(text, 'user');
+  const loadingDiv = addMessage('Thinking…', 'assistant');
+  loadingDiv.classList.add('loading');
+
+  const portfolioContext = JSON.stringify({
+    regime: BRIEFING_DATA.regime,
+    vix: BRIEFING_DATA.vix,
+    positions: (BRIEFING_DATA.positions || []).map(p => ({
+      ticker: p.ticker, term: p.term, balance: p.balance,
+      pct_change: p.pct_change, thesis: p.summary, catalyst: p.catalyst
+    })),
+    cash: BRIEFING_DATA.cash,
+    top_industries: (BRIEFING_DATA.industry_opportunities || []).map(i => ({ industry: i.industry, conviction: i.conviction })),
+    recent_news_headlines: (BRIEFING_DATA.news || []).map(n => n.headline).slice(0, 8),
+  });
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: 'You are a no-fluff investment strategist with full context on the user\'s portfolio. Be direct, specific, and reference actual numbers from the portfolio context. Think in second-order effects. Never recommend options, short selling, or margin. Context: ' + portfolioContext,
+        messages: [{ role: 'user', content: text }]
+      })
+    });
+    const data = await res.json();
+    loadingDiv.classList.remove('loading');
+    loadingDiv.textContent = data.content?.[0]?.text || 'No response.';
+  } catch (e) {
+    loadingDiv.classList.remove('loading');
+    loadingDiv.textContent = 'Error reaching the API. Check your connection.';
+  }
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+sendBtn.addEventListener('click', sendMessage);
+inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+// ============================================================
+// INTRADAY CHARTS
+// ============================================================
+const intradayCharts = {};
+
+async function fetchIntradayChart(ticker, canvasId) {
+  try {
+    let closes = [];
+    let labels = [];
+
+    const isCrypto = !!CRYPTO_TICKERS[ticker];
+
+    if (isCrypto) {
+      // Coinbase 24h price history for crypto
+      const pair = CRYPTO_TICKERS[ticker];
+      try {
+        const url = `https://api.coinbase.com/v2/prices/${pair}/historic?period=day`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const prices = (data?.data?.prices || []).reverse();
+        closes = prices.map(p => parseFloat(p.price));
+        labels = prices.map(p => {
+          const d = new Date(p.time);
+          return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        });
+      } catch(e) {
+        console.warn('Coinbase historic failed:', e);
+      }
+    } else {
+      // Stock intraday data comes from pipeline — check briefing data first
+      const chartData = window.BRIEFING_DATA?.intraday?.[ticker];
+      if (chartData && chartData.closes?.length) {
+        closes = chartData.closes;
+        labels = chartData.labels;
+      } else {
+        // Show placeholder when market is closed or no pipeline data yet
+        const canvas = document.getElementById(canvasId);
+        if (canvas) {
+          const wrap = canvas.parentElement;
+          wrap.innerHTML = '<p style="font-size:12px;color:#5a5956;padding:20px 0;text-align:center;">Intraday chart available during market hours after morning briefing runs</p>';
+        }
+        return;
+      }
+    }
+
+    if (!closes.length) return;
+
+    const validCloses = closes.filter(c => c != null && !isNaN(c));
+    const firstClose = validCloses[0];
+    const lastClose = validCloses[validCloses.length - 1];
+    const isUp = lastClose >= firstClose;
+    const lineColor = isUp ? '#5DCAA5' : '#e2504f';
+    const fillColor = isUp ? 'rgba(93,202,165,0.08)' : 'rgba(226,80,79,0.08)';
+
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    if (intradayCharts[canvasId]) intradayCharts[canvasId].destroy();
+
+    intradayCharts[canvasId] = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: closes,
+          borderColor: lineColor,
+          backgroundColor: fillColor,
+          fill: true,
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.3,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: {
+          callbacks: { label: (c) => '$' + (c.parsed.y != null ? c.parsed.y.toFixed(2) : '—') }
+        }},
+        scales: { x: { display: false }, y: { display: false } }
+      }
+    });
+  } catch(e) {
+    console.warn('Intraday chart error for', ticker, e);
+  }
+}
+
+// ============================================================
+// TABS
+// ============================================================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
