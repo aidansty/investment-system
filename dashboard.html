@@ -411,88 +411,67 @@ async function fetchAndUpdatePrices() {
   }
 }
 
-async function fetchSpyComparison(positions) {
+async function fetchSpyComparison(livePositions) {
   try {
-    // Use pre-built performance data from pipeline if available
     const perfData = window.BRIEFING_DATA?.performance_dates;
     if (perfData && perfData.length > 0) {
-      const dates = window.BRIEFING_DATA.performance_dates;
-      const portPcts = window.BRIEFING_DATA.performance_portfolio;
-      const spyPcts = window.BRIEFING_DATA.performance_spy;
+      const chartDates = window.BRIEFING_DATA.performance_dates;
+      const chartPort = window.BRIEFING_DATA.performance_portfolio;
+      const chartSpy = window.BRIEFING_DATA.performance_spy;
       if (window._perfChart) {
-        window._perfChart.data.labels = dates;
-        window._perfChart.data.datasets[0].data = portPcts;
-        window._perfChart.data.datasets[1].data = spyPcts;
+        window._perfChart.data.labels = chartDates;
+        window._perfChart.data.datasets[0].data = chartPort;
+        window._perfChart.data.datasets[1].data = chartSpy;
         window._perfChart.update();
       }
-      const latestSpy = spyPcts[spyPcts.length - 1] || 0;
-      const portReturn = portPcts[portPcts.length - 1] || 0;
-      const diff = round2(portReturn - latestSpy);
-      const vsEl = document.getElementById('s-vs-spy');
-      vsEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + 'pp';
-      vsEl.className = 'card-value ' + (diff >= 0 ? 'pos' : 'neg');
-      document.getElementById('s-vs-spy-sub').textContent = diff >= 0 ? 'outperforming S&P 500' : 'underperforming S&P 500';
+      const spyLast = chartSpy[chartSpy.length - 1] || 0;
+      const portLast = chartPort[chartPort.length - 1] || 0;
+      const spyDiff = round2(portLast - spyLast);
+      const spyVsEl = document.getElementById('s-vs-spy');
+      if (spyVsEl) { spyVsEl.textContent = (spyDiff >= 0 ? '+' : '') + spyDiff.toFixed(1) + 'pp'; spyVsEl.className = 'card-value ' + (spyDiff >= 0 ? 'pos' : 'neg'); }
+      const spySubEl = document.getElementById('s-vs-spy-sub');
+      if (spySubEl) spySubEl.textContent = spyDiff >= 0 ? 'outperforming S&P 500' : 'underperforming S&P 500';
       return;
     }
 
-    // Fallback: simple portfolio return vs SPY current return estimate
-    const totalCost = COST_BASIS;
-    const totalCurrent = (window._livePositions || POSITIONS_CONFIG).reduce((s, p) => s + (p.balance || 0), 0);
-    const portReturn = totalCost > 0 ? round2((totalCurrent - totalCost) / totalCost * 100) : 0;
+    // Fallback: estimate from live prices
+    const spyCostBasis = COST_BASIS;
+    const spyCurrentTotal = livePositions.reduce((s, p) => s + (p.balance || 0), 0);
+    const spyPortReturn = spyCostBasis > 0 ? round2((spyCurrentTotal - spyCostBasis) / spyCostBasis * 100) : 0;
 
-    // Get SPY current price to estimate SPY return since Apr 14
-    // SPY entry price from our positions: $659.44
-    const spyEntry = 659.44;
-    const spyPos = (window._livePositions || POSITIONS_CONFIG).find(p => p.ticker === 'SPY');
-    const spyCurrent = spyPos?.current_price || spyEntry;
-    const spyReturn = round2((spyCurrent - spyEntry) / spyEntry * 100);
-    const diff = round2(portReturn - spyReturn);
+    const spyEntryPrice = 659.44;
+    const spyPosition = livePositions.find(p => p.ticker === 'SPY');
+    const spyCurrentPrice = spyPosition?.current_price || spyEntryPrice;
+    const spyBenchReturn = round2((spyCurrentPrice - spyEntryPrice) / spyEntryPrice * 100);
+    const spyAlpha = round2(spyPortReturn - spyBenchReturn);
 
-    const vsEl = document.getElementById('s-vs-spy');
-    if (vsEl) {
-      vsEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + 'pp';
-      vsEl.className = 'card-value ' + (diff >= 0 ? 'pos' : 'neg');
+    const spyVsEl2 = document.getElementById('s-vs-spy');
+    if (spyVsEl2) { spyVsEl2.textContent = (spyAlpha >= 0 ? '+' : '') + spyAlpha.toFixed(1) + 'pp'; spyVsEl2.className = 'card-value ' + (spyAlpha >= 0 ? 'pos' : 'neg'); }
+    const spySubEl2 = document.getElementById('s-vs-spy-sub');
+    if (spySubEl2) spySubEl2.textContent = spyAlpha >= 0 ? 'outperforming S&P 500' : 'underperforming S&P 500';
+
+    // Build approximate chart
+    const chartN = 60;
+    const chartDates2 = [];
+    const chartPort2 = [];
+    const chartSpy2 = [];
+    const chartStart = new Date('2026-04-14');
+    for (let ci = 0; ci < chartN; ci++) {
+      const cd = new Date(chartStart);
+      cd.setDate(cd.getDate() + ci);
+      if (cd.getDay() === 0 || cd.getDay() === 6) continue;
+      chartDates2.push(cd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      chartPort2.push(round2((ci / (chartN - 1)) * spyPortReturn));
+      chartSpy2.push(round2((ci / (chartN - 1)) * spyBenchReturn));
     }
-    document.getElementById('s-vs-spy-sub').textContent = diff >= 0 ? 'outperforming S&P 500' : 'underperforming S&P 500';
-
-    // Build simple chart — linear portfolio line vs flat SPY estimate
-    const n = 60;
-    const dates = [];
-    const portPcts = [];
-    const spyPcts = [];
-    const startDate = new Date('2026-04-14');
-    for (let i = 0; i < n; i++) {
-      const d = new Date(startDate);
-      d.setDate(d.getDate() + i);
-      if (d.getDay() === 0 || d.getDay() === 6) continue;
-      dates.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-      portPcts.push(round2((i / (n-1)) * portReturn));
-      spyPcts.push(round2((i / (n-1)) * spyReturn));
-    }
-
-
-
-    // Update the performance chart
     if (window._perfChart) {
-      window._perfChart.data.labels = dates;
-      window._perfChart.data.datasets[0].data = portPcts;
-      window._perfChart.data.datasets[1].data = spyPcts;
+      window._perfChart.data.labels = chartDates2;
+      window._perfChart.data.datasets[0].data = chartPort2;
+      window._perfChart.data.datasets[1].data = chartSpy2;
       window._perfChart.update();
     }
-
-    // Update vs SPY summary card
-    const latestSpy = spyPcts.filter(v => v != null).pop() || 0;
-    const diff = round2(portReturn - latestSpy);
-    const vsEl = document.getElementById('s-vs-spy');
-    vsEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(1) + 'pp';
-    vsEl.className = 'card-value ' + (diff >= 0 ? 'pos' : 'neg');
-    document.getElementById('s-vs-spy-sub').textContent =
-      diff >= 0 ? 'outperforming S&P 500' : 'underperforming S&P 500';
-
-    console.log('SPY comparison loaded — portfolio:', portReturn.toFixed(1) + '%', 'SPY:', latestSpy.toFixed(1) + '%', 'diff:', diff.toFixed(1) + 'pp');
-
   } catch(e) {
-    console.warn('SPY comparison fetch failed:', e);
+    console.warn('SPY comparison failed:', e);
   }
 }
 
