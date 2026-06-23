@@ -543,11 +543,26 @@ function rebuildAllocChart(positions, cash) {
 const ALLOC_COLORS = ['#7F77DD','#5DCAA5','#D85A30','#378ADD','#D4537E','#EF9F27','#3a9e7a','#6b4fa8','#3a3938'];
 
 function buildAllocData(positions, cash) {
-  const rows = positions.map((p, i) => ({
-    label: (p.industry || p.ticker) + ' (' + p.ticker + ')',
-    value: p.balance || 0,
+  // Group positions by industry — same industry = same slice and color
+  const industryMap = {};
+  positions.forEach(p => {
+    const industry = p.industry || p.ticker;
+    if (!industryMap[industry]) {
+      industryMap[industry] = { label: industry, value: 0, tickers: [] };
+    }
+    industryMap[industry].value += (p.balance || 0);
+    industryMap[industry].tickers.push(p.ticker);
+  });
+
+  const industryList = Object.values(industryMap);
+  const rows = industryList.map((ind, i) => ({
+    label: ind.tickers.length > 1
+      ? ind.label + ' (' + ind.tickers.join(', ') + ')'
+      : ind.label + ' (' + ind.tickers[0] + ')',
+    value: round2(ind.value),
     color: ALLOC_COLORS[i % ALLOC_COLORS.length],
   }));
+
   rows.push({ label: 'Cash', value: cash, color: '#3a3938' });
   return rows;
 }
@@ -959,7 +974,29 @@ async function fetchIntradayChart(ticker, canvasId) {
         plugins: { legend: { display: false }, tooltip: {
           callbacks: { label: (c) => '$' + (c.parsed.y != null ? c.parsed.y.toFixed(2) : '—') }
         }},
-        scales: { x: { display: false }, y: { display: false } }
+        scales: {
+          x: {
+            display: true,
+            ticks: {
+              color: '#5a5956',
+              font: { size: 10 },
+              maxTicksLimit: 6,
+              maxRotation: 0,
+            },
+            grid: { display: false },
+          },
+          y: {
+            display: true,
+            position: 'right',
+            ticks: {
+              color: '#5a5956',
+              font: { size: 10 },
+              maxTicksLimit: 4,
+              callback: (v) => '$' + Number(v).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}),
+            },
+            grid: { color: 'rgba(255,255,255,0.04)' },
+          }
+        }
       }
     });
   } catch(e) {

@@ -3,140 +3,280 @@ from v4.utils.logger import log
 from v4.utils.telegram import send_telegram
 
 
-def build_morning_telegram(
+def build_and_send_morning_telegram(
     macro: dict,
     industry_results: dict,
+    news_package: dict,
     positions: list,
-    briefing_sections: dict,
+    briefing: dict,
     forward_catalysts: list,
     today: str,
-) -> str:
+) -> None:
     """
-    Morning Telegram message.
-    Short, scannable, under 60 seconds to read.
-    Full analysis available on web dashboard.
+    Send two Telegram messages every morning.
+    Message 1: Market overview + news + forward catalysts
+    Message 2: Position review + alerts + action items
     """
+    sections = briefing.get("sections", {}) if briefing else {}
     vix = macro.get("vix", 0)
     vix_regime = macro.get("vix_regime", "Yellow")
     vix_trend = macro.get("vix_trend", "Flat")
+    vix_avg = macro.get("vix_5d_avg", 0)
+    top_industries = industry_results.get("top_industries", []) if industry_results else []
+    high_conviction = industry_results.get("high_conviction", []) if industry_results else []
+    recent_news = news_package.get("recent_news", []) if news_package else []
+
     regime_emoji = "🟢" if vix_regime == "Green" else "🔴" if vix_regime == "Red" else "🟡"
-    trend_arrow = "↓" if vix_trend == "Falling" else "↑" if vix_trend in ("Rising", "Spiking") else "→"
 
-    top = industry_results.get("top_industries", [])
-    high = industry_results.get("high_conviction", [])
+    # ─── MESSAGE 1: Market + News ───────────────────────────────────────────
 
-    lines = []
-    lines.append(f"<b>📊 {today} — Morning Briefing</b>")
-    lines.append(f"{regime_emoji} VIX {vix} {trend_arrow} ({vix_regime}) | {len(high)} high-conviction")
-    lines.append("")
+    msg1 = []
+    msg1.append(f"<b>📊 Morning Briefing — {today}</b>")
+    msg1.append("")
 
-    # Critical market note — only if something major
-    market_overview = briefing_sections.get("Market Overview", "")
+    # Regime with reasoning
+    msg1.append(f"<b>{regime_emoji} Market Regime</b>")
+    market_overview = sections.get("Market Overview", "")
     if market_overview:
-        # Extract first sentence only
-        first_sentence = market_overview.split(".")[0].strip()
-        if first_sentence:
-            lines.append(f"<i>{first_sentence}.</i>")
-            lines.append("")
+        # First 2 sentences of market overview
+        sentences = [s.strip() for s in market_overview.replace("\n", " ").split(".") if len(s.strip()) > 20]
+        regime_summary = ". ".join(sentences[:2]) + "." if sentences else market_overview[:300]
+        msg1.append(regime_summary)
+    else:
+        trend_word = "falling" if vix_trend == "Falling" else "rising" if vix_trend in ("Rising", "Spiking") else "flat"
+        msg1.append(f"VIX at {vix} ({vix_regime}), {trend_word} from {vix_avg} five-day average. {len(high_conviction)} high-conviction industries identified today.")
+    msg1.append("")
 
-    # Top industries
-    if top:
-        lines.append("<b>Top Industries</b>")
-        for ind in top[:4]:
+    # Top industries with bullet reasoning
+    if top_industries:
+        msg1.append(f"<b>🏭 Top Industries ({len(high_conviction)} high conviction)</b>")
+        for ind in top_industries[:4]:
             score = ind.get("conviction_score", 0)
             name = ind["industry"]
             etf = ind["etf"]
             excess = ind.get("excess_63d", 0)
-            emoji = "🔥" if score >= 70 else "👀" if score >= 45 else "—"
-            lines.append(f"{emoji} {name} ({etf}) | +{excess:.1f}pp | {score}/100")
-    else:
-        lines.append("⚪ No high-conviction industries today — consider holding cash")
-    lines.append("")
+            ripple = ind.get("ripple_benefits", [])
+            news_count = ind.get("news_count", 0)
+            msg1.append(f"<b>{name} ({etf})</b> — {score}/100")
+            msg1.append(f"  • +{excess:.1f}pp vs SPY over 63 days")
+            if ripple:
+                msg1.append(f"  • Macro tailwind: {', '.join(ripple[:2])}")
+            if news_count >= 2:
+                msg1.append(f"  • {news_count} confirming news catalysts today")
+            rel_news = ind.get("relevant_news", [])
+            if rel_news:
+                msg1.append(f"  • {rel_news[0].get('headline', '')[:80]}")
+        msg1.append("")
 
-    # Position alerts only — skip if all clear
-    alerts = []
+    # Important news
+    if recent_news:
+        msg1.append("<b>📰 Key News &amp; Events</b>")
+        for n in recent_news[:4]:
+            headline = n.get("headline", "")
+            summary = n.get("summary", "")
+            if headline:
+                msg1.append(f"<b>{headline[:70]}</b>")
+                if summary:
+                    sentences = [s.strip() for s in summary.split(".") if len(s.strip()) > 15]
+                    if sentences:
+                        msg1.append(sentences[0][:150] + ".")
+        msg1.append("")
+
+    # Forward catalysts
+    if forward_catalysts:
+        msg1.append("<b>📅 Coming Up</b>")
+        sorted_cats = sorted(forward_catalysts, key=lambda c: c.get("date", "9999"))
+        for cat in sorted_cats[:4]:
+            date = cat.get("date", "")
+            event = cat.get("event", "")
+            action = cat.get("action", "Hold")
+            holdings = cat.get("affected_holdings", [])
+            action_emoji = "🟢" if action in ("Buy", "Buy More") else "🔴" if action in ("Sell", "Trim") else "⚪"
+            holdings_str = f" → {', '.join(holdings)}" if holdings else ""
+            msg1.append(f"{action_emoji} [{date}] {event[:60]}{holdings_str}")
+        msg1.append("")
+
+    msg1.append("→ Full briefing on dashboard")
+
+    # ─── MESSAGE 2: Positions + Alerts ──────────────────────────────────────
+
+    msg2 = []
+    msg2.append(f"<b>💼 Portfolio Update — {today}</b>")
+    msg2.append("")
+
+    if positions:
+        msg2.append("<b>Position Review</b>")
+        for p in positions:
+            ticker = p.get("ticker", "")
+            entry = p.get("entry_price", 0) or 0
+            current = p.get("current_price", 0) or 0
+            stop = p.get("stop_price", 0) or 0
+            pnl = round((current - entry) / entry * 100, 1) if entry > 0 else 0
+            dist_stop = round((current - stop) / current * 100, 1) if current > 0 and stop > 0 else None
+            pnl_str = f"{pnl:+.1f}%"
+            pnl_emoji = "🟢" if pnl >= 0 else "🔴"
+
+            # Determine action and reason from briefing
+            pos_review = sections.get("Open Position Review", "")
+            action = "HOLD"
+            reason = "Thesis intact, no material changes today."
+
+            if ticker in pos_review:
+                # Extract the line for this ticker
+                for line in pos_review.split("\n"):
+                    if ticker in line:
+                        if "EXIT" in line.upper():
+                            action = "EXIT"
+                        elif "REDUCE" in line.upper() or "TRIM" in line.upper():
+                            action = "TRIM"
+                        elif "WATCH" in line.upper():
+                            action = "WATCH"
+                        break
+
+            # Override with specific known situations
+            if pnl <= -10 and dist_stop and dist_stop < 5:
+                action = "WATCH"
+                reason = f"Down {pnl_str} and within {dist_stop:.1f}% of stop ${stop:.2f}. Monitor closely."
+            elif pnl <= -15:
+                action = "REVIEW"
+                reason = f"Down {pnl_str} — mandatory thesis review triggered. Has anything changed?"
+
+            action_emoji = {"EXIT": "🔴", "TRIM": "🟠", "WATCH": "🟡", "REVIEW": "🟡"}.get(action, "🟢")
+            msg2.append(f"{action_emoji} <b>{ticker}</b> {pnl_str} — {action}")
+            msg2.append(f"   {reason}")
+
+        msg2.append("")
+
+    # Explicit action items
+    action_items = _build_action_items(positions, forward_catalysts)
+    if action_items:
+        msg2.append("<b>⚡ Action Items Today</b>")
+        for item in action_items:
+            msg2.append(item)
+        msg2.append("")
+
+    msg2.append("→ Full analysis on dashboard")
+
+    # Send both messages
+    send_telegram("\n".join(msg1))
+    import time
+    time.sleep(1)
+    send_telegram("\n".join(msg2))
+
+    log("Morning Telegram: 2 messages sent")
+
+
+def _build_action_items(positions: list, forward_catalysts: list) -> list:
+    """
+    Generate specific action items based on position state and upcoming catalysts.
+    Only fires when there is a specific data-driven reason.
+    """
+    items = []
+
     for p in positions:
         ticker = p.get("ticker", "")
         entry = p.get("entry_price", 0) or 0
         current = p.get("current_price", 0) or 0
         stop = p.get("stop_price", 0) or 0
-        pnl = ((current - entry) / entry * 100) if entry > 0 else 0
-        dist_stop = ((current - stop) / current * 100) if current > 0 and stop > 0 else 0
+        pnl = round((current - entry) / entry * 100, 1) if entry > 0 else 0
+        dist_stop = round((current - stop) / current * 100, 1) if current > 0 and stop > 0 else None
 
-        if dist_stop < 3 and stop > 0:
-            alerts.append(f"⚠️ {ticker} near stop ({dist_stop:.1f}% away)")
-        elif pnl <= -10:
-            alerts.append(f"🔴 {ticker} down {pnl:.1f}% — review required")
-        elif pnl >= 15:
-            alerts.append(f"✅ {ticker} up {pnl:.1f}% — consider taking profits")
-
-    if alerts:
-        lines.append("<b>Position Alerts</b>")
-        for alert in alerts:
-            lines.append(alert)
-    else:
-        lines.append("✅ All positions stable")
-
-    # Surface the single nearest catalyst affecting current holdings
-    if forward_catalysts:
-        holding_tickers = {p.get("ticker") for p in positions}
-        relevant = [
+        # Check for upcoming earnings within 10 days
+        upcoming_earnings = [
             c for c in forward_catalysts
-            if set(c.get("affected_holdings", [])) & holding_tickers
+            if ticker in c.get("affected_holdings", [])
+            and c.get("category", "") == "earnings"
         ]
-        if relevant:
-            relevant.sort(key=lambda c: c.get("date", "9999"))
-            nearest = relevant[0]
-            lines.append("")
-            lines.append(f"📅 Next: {nearest.get('date')} — {nearest.get('event')}")
+        if upcoming_earnings:
+            cat = upcoming_earnings[0]
+            items.append(f"⏰ {ticker}: earnings {cat.get('date', 'soon')} — decide hold/trim/exit before then")
 
-    return "\n".join(lines)
+        # Stop proximity warning
+        if dist_stop is not None and dist_stop < 3:
+            items.append(f"⚠️ {ticker}: only {dist_stop:.1f}% above stop ${stop:.2f} — watch closely at open")
+
+        # Large loss with no stop buffer
+        if pnl <= -15:
+            items.append(f"🔴 {ticker}: down {pnl:+.1f}% — mandatory review, has the thesis changed?")
+
+    return items
 
 
-def build_afternoon_telegram(
+def build_and_send_afternoon_telegram(
     positions: list,
-    update_sections: dict,
+    update: dict,
     new_opportunities: list,
+    notable_moves: list,
     today: str,
-) -> str:
+) -> None:
     """
-    Afternoon Telegram message.
-    Portfolio status and any action required before close.
+    Send afternoon portfolio update via Telegram.
+    Two messages: what changed + positions, then opportunities.
     """
-    lines = []
-    lines.append(f"<b>📈 {today} — Afternoon Update</b>")
-    lines.append("")
+    sections = update.get("sections", {}) if update else {}
 
-    # Position review
-    portfolio_review = update_sections.get("Portfolio Review", "")
-    if portfolio_review:
-        lines.append("<b>Portfolio</b>")
-        # Show each line of portfolio review
-        for line in portfolio_review.strip().split("\n"):
-            line = line.strip()
-            if line:
-                if "EXIT" in line:
-                    lines.append(f"🔴 {line}")
-                elif "REDUCE" in line:
-                    lines.append(f"🟠 {line}")
-                elif "WATCH" in line:
-                    lines.append(f"🟡 {line}")
-                elif "HOLD" in line:
-                    lines.append(f"🟢 {line}")
-                else:
-                    lines.append(line)
-        lines.append("")
+    msg1 = []
+    msg1.append(f"<b>📈 Afternoon Update — {today}</b>")
+    msg1.append("")
 
-    # New opportunities
+    # What changed
+    what_changed = sections.get("What Changed", "") or sections.get("Portfolio Review", "")
+    if what_changed:
+        msg1.append("<b>What Changed Today</b>")
+        sentences = [s.strip() for s in what_changed.replace("\n", " ").split(".") if len(s.strip()) > 15]
+        for s in sentences[:3]:
+            msg1.append(f"• {s}.")
+        msg1.append("")
+
+    # Notable moves
+    if notable_moves:
+        msg1.append("<b>Notable Price Moves</b>")
+        for m in notable_moves[:4]:
+            ticker = m.get("ticker", "")
+            move = m.get("move", "")
+            reason = m.get("reason", "")
+            msg1.append(f"• <b>{ticker} {move}</b> — {reason[:100]}")
+        msg1.append("")
+
+    # Position updates
+    if positions:
+        msg1.append("<b>Your Positions</b>")
+        for p in positions:
+            ticker = p.get("ticker", "")
+            entry = p.get("entry_price", 0) or 0
+            current = p.get("current_price", 0) or 0
+            pnl = round((current - entry) / entry * 100, 1) if entry > 0 else 0
+            pnl_emoji = "🟢" if pnl >= 0 else "🔴"
+            msg1.append(f"{pnl_emoji} {ticker}: {pnl:+.1f}%")
+
+    msg1.append("")
+    msg1.append("→ Full update on dashboard")
+
+    msg2 = []
     if new_opportunities:
-        lines.append("<b>New Opportunities</b>")
-        for opp in new_opportunities[:2]:
-            lines.append(f"• {opp}")
-        lines.append("")
+        msg2.append("<b>🏭 New Opportunities Since Morning</b>")
+        for opp in new_opportunities[:3]:
+            if isinstance(opp, dict):
+                msg2.append(f"• <b>{opp.get('industry', '')} ({opp.get('etf', '')})</b> — {opp.get('conviction', 0)}/100")
+                bullets = opp.get("bullets", [])
+                for b in bullets[:2]:
+                    msg2.append(f"  · {b[:100]}")
+            else:
+                msg2.append(f"• {str(opp)[:120]}")
+        msg2.append("")
 
-    # Close watch
-    close_watch = update_sections.get("Market Close Watch", "")
+    close_watch = sections.get("Market Close Watch", "")
     if close_watch and "no urgent" not in close_watch.lower():
-        lines.append(f"⏰ {close_watch.strip()}")
+        msg2.append(f"<b>⏰ Before Close</b>")
+        msg2.append(close_watch.strip()[:300])
+        msg2.append("")
 
-    return "\n".join(lines)
+    msg2.append("→ Full analysis on dashboard")
+
+    send_telegram("\n".join(msg1))
+    if len(msg2) > 3:
+        import time
+        time.sleep(1)
+        send_telegram("\n".join(msg2))
+
+    log("Afternoon Telegram: messages sent")

@@ -22,7 +22,7 @@ from v4.intelligence.industry_scanner import run_industry_scan
 from v4.intelligence.event_engine import enrich_industries_with_events
 from v4.ai.afternoon_update import generate_afternoon_update
 from v4.output.notion_writer import get_open_positions, update_position_prices
-from v4.output.telegram_output import build_afternoon_telegram
+from v4.output.telegram_output import build_and_send_afternoon_telegram
 from v4.config.settings import BENCHMARK_ETF
 
 
@@ -139,16 +139,15 @@ def main():
     except Exception as e:
         log(f"Dashboard write error (non-fatal): {e}")
 
-    # Send Telegram only
+    # Send Telegram (2 messages)
     try:
-        msg = build_afternoon_telegram(
+        build_and_send_afternoon_telegram(
             positions=positions,
-            update_sections=update.get("sections", {}),
-            new_opportunities=new_opps,
+            update=update,
+            new_opportunities=[industry_results.get("top_industries", [])],
+            notable_moves=[],
             today=str(today),
         )
-        send_telegram(msg)
-        log("Telegram afternoon message sent")
     except Exception as e:
         log(f"Telegram error: {e}")
 

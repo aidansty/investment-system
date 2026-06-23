@@ -22,7 +22,7 @@ from v4.intelligence.industry_scanner import run_industry_scan
 from v4.intelligence.event_engine import enrich_industries_with_events
 from v4.ai.morning_briefing import generate_morning_briefing
 from v4.output.notion_writer import get_open_positions, update_position_prices
-from v4.output.telegram_output import build_morning_telegram
+from v4.output.telegram_output import build_and_send_morning_telegram
 from v4.config.settings import BENCHMARK_ETF
 
 
@@ -121,21 +121,17 @@ def main():
     # Step 8 — Save morning snapshot for afternoon comparison
     save_morning_snapshot(industry_results.get("top_industries", []), today)
 
-    # Step 9 — Send Telegram only
+    # Step 9 — Send Telegram (2 messages)
     try:
-        msg = build_morning_telegram(
+        build_and_send_morning_telegram(
             macro=macro,
             industry_results=industry_results,
+            news_package=news_package,
             positions=positions,
-            briefing_sections=briefing.get("sections", {}),
+            briefing=briefing,
             forward_catalysts=forward_catalysts,
             today=str(today),
         )
-        sent = send_telegram(msg)
-        if sent:
-            log("Telegram morning message sent")
-        else:
-            log("Telegram morning message NOT sent — check credentials")
     except Exception as e:
         log(f"Telegram error: {e}")
         send_telegram(f"⚠️ V4 briefing error: {str(e)[:200]}")
