@@ -918,8 +918,9 @@ async function fetchIntradayChart(ticker, canvasId) {
         const prices = (data?.data?.prices || []).reverse();
         closes = prices.map(p => parseFloat(p.price));
         labels = prices.map(p => {
-          // Safari requires ISO strings without timezone issues
-          const d = new Date(p.time.replace(' ', 'T'));
+          // Coinbase returns Unix timestamps as strings — multiply by 1000 for JS
+          const ts = parseInt(p.time, 10);
+          const d = new Date(ts * 1000);
           if (isNaN(d.getTime())) return '';
           return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
         });
