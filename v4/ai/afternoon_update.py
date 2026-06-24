@@ -79,10 +79,14 @@ Today's news for this ticker:
 Generate a concise afternoon portfolio update.
 
 ## Portfolio Review
-For each position write:
-TICKER — HOLD / WATCH / REDUCE / EXIT
-One sentence: what happened today and why this recommendation.
-Base on: news, price vs stop/target, thesis integrity.
+For each position that requires attention (WATCH, REDUCE, or EXIT only — skip clean HOLDs):
+TICKER — WATCH / REDUCE / EXIT
+Then write 2-3 bullet points explaining:
+- What specifically happened today that affects this position (news, price action, data)
+- How this changes or confirms the thesis
+- What the investor should do and why
+Base reasoning on: news, price vs stop/target, thesis integrity, upcoming catalysts.
+If all positions are clean holds with nothing new, write: "No position changes warranted — hold into close."
 
 ## New Opportunities
 If new high-conviction industries emerged since morning:
