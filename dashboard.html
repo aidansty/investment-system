@@ -7,6 +7,25 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Investment Desk</title>
+<style>
+.pos-section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #87867c; margin: 20px 0 10px; display: block; }
+.pos-grid { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 10px; margin-bottom: 6px; }
+.pos-card { background: #131217; border: 0.5px solid rgba(255,255,255,0.07); border-radius: 14px; overflow: hidden; }
+.pos-toggle { width: 100%; background: none; border: none; cursor: pointer; padding: 13px 14px 11px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.pos-toggle:hover { background: #18171d; }
+.pos-toggle-top { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; }
+.pos-toggle-mid { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; }
+.pos-price-block { display: flex; flex-direction: column; gap: 1px; }
+.pos-pnl-block { text-align: right; }
+.pos-action-badge { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 4px; margin-top: 6px; text-transform: uppercase; }
+.badge-hold, .badge-watch { background: rgba(239,159,39,0.15); color: #EF9F27; }
+.badge-buy  { background: rgba(93,202,165,0.15); color: #5DCAA5; }
+.badge-sell, .badge-close { background: rgba(226,80,79,0.15); color: #e2504f; }
+.badge-trim { background: rgba(216,90,48,0.15); color: #D85A30; }
+.pos-what-to-do { font-size: 12.5px; line-height: 1.6; color: #c8c7c0; }
+@media (max-width: 900px) { .pos-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+@media (max-width: 500px) { .pos-grid { grid-template-columns: 1fr !important; } }
+</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="dashboard_data.js?v=1782246265"></script>
 <link rel="stylesheet" href="dashboard.css?v=1782246265">
