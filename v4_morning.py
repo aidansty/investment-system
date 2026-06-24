@@ -21,8 +21,29 @@ from v4.data.fetch_macro import fetch_macro_data
 from v4.intelligence.industry_scanner import run_industry_scan
 from v4.intelligence.event_engine import enrich_industries_with_events
 from v4.ai.morning_briefing import generate_morning_briefing
-from v4.output.notion_writer import get_open_positions, update_position_prices
 from v4.output.telegram_output import build_and_send_morning_telegram
+from v4.output.dashboard_writer import write_dashboard_data
+from v4.data.fetch_intraday import fetch_intraday_candles
+
+
+def get_open_positions():
+    import json, os
+    path = os.path.join(os.path.dirname(__file__), 'v4', 'config', 'positions.json')
+    with open(path) as f:
+        return json.load(f).get('positions', [])
+
+
+def update_position_prices(positions, price_cache):
+    for p in positions:
+        ticker = p.get('ticker')
+        if ticker in price_cache:
+            current = price_cache[ticker]
+            p['current_price'] = current
+            entry = p.get('entry', 0)
+            qty = p.get('qty', 0)
+            if entry and qty:
+                p['pnl'] = round((current - entry) * qty, 2)
+                p['pnl_pct'] = round((current - entry) / entry * 100, 2)
 from v4.config.settings import BENCHMARK_ETF
 
 
@@ -86,6 +107,14 @@ def main():
     except Exception as e:
         log(f"Portfolio load error: {e}")
 
+    # Step 4b — Intraday candles for stock charts
+    log("Fetching intraday candles...")
+    intraday_data = {}
+    try:
+        intraday_data = fetch_intraday_candles(positions)
+    except Exception as e:
+        log(f"Intraday fetch error (non-fatal): {e}")
+
     # Step 5 — Industry scan
     log("Running industry scan...")
     industry_results = run_industry_scan(prices, news, macro)
@@ -135,6 +164,25 @@ def main():
     except Exception as e:
         log(f"Telegram error: {e}")
         send_telegram(f"⚠️ V4 briefing error: {str(e)[:200]}")
+
+    # Step 10 — Write dashboard data
+    log("Writing dashboard data...")
+    try:
+        cost_basis = sum(p.get("cost_basis", 0) for p in positions)
+        write_dashboard_data(
+            macro=macro,
+            industry_results=industry_results,
+            news_package=news_package,
+            positions=positions,
+            briefing=briefing,
+            run_type="morning",
+            today=str(today),
+            cost_basis=cost_basis,
+            intraday=intraday_data,
+        )
+        log("Dashboard data written successfully.")
+    except Exception as e:
+        log(f"Dashboard write error: {e}")
 
     elapsed = time.time() - start
     log(f"=== V4 Morning Complete: {today} | Runtime: {elapsed:.1f}s ===")

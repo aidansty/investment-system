@@ -19,6 +19,7 @@ def write_dashboard_data(
     cash: float = 0,
     cost_basis: float = 0,
     performance_history: list = None,
+    intraday: dict = None,
 ) -> None:
     """
     Write structured briefing data to dashboard_data.js.
@@ -180,6 +181,7 @@ def write_dashboard_data(
         "notable_moves": notable_moves,
         "afternoon_positions": afternoon_positions,
         "afternoon_candidates": afternoon_candidates,
+        "intraday": intraday or {},
     }
 
     js_content = "window.BRIEFING_DATA = " + json.dumps(data, indent=2, default=str) + ";"
