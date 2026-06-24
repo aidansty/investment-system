@@ -706,47 +706,56 @@ TERM_ORDER.forEach(term => {
     const termLabel = meta.term || p.term || '—';
     const whatToDo = p.what_to_do || '';
 
+    // Build card using createElement to guarantee correct DOM structure
     const card = document.createElement('div');
     card.className = 'pos-card';
-    card.innerHTML = `
-      <button class="pos-toggle" data-idx="${i}">
-        <div class="pos-toggle-top">
-          <div>
-            <div class="pos-ticker">${p.ticker}</div>
-            <div class="pos-meta">${typeLabel} &middot; ${termLabel}</div>
-          </div>
-          <div class="pos-chevron" data-idx="${i}">&#8964;</div>
-        </div>
-        <div class="pos-toggle-mid">
-          <div class="pos-price-block">
-            <div class="pos-col-label">Price</div>
-            <div class="pos-col-val" id="price-${i}">${p.current_price != null ? '$' + Number(p.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '—'}</div>
-            <div class="pos-col-label" style="margin-top:4px;">Balance</div>
-            <div class="pos-col-val" id="balance-${i}">${fmt(p.balance)}</div>
-          </div>
-          <div class="pos-pnl-block">
-            <div class="pos-pct" id="pct-${i}" style="color:${pctColor}">${fmtPct(pct)}</div>
-            <div class="pos-dol" id="dol-${i}">${fmtDol(dol)}</div>
-          </div>
-        </div>
-        ${actionBadge(whatToDo)}
-      </button>
-      <div class="pos-detail" data-idx="${i}">
-        <div class="pos-detail-label">What it is</div>
-        <div class="pos-detail-text">${p.summary || '—'}</div>
-        <div class="pos-detail-label">Catalyst</div>
-        <div class="pos-detail-text">${p.catalyst || '—'}</div>
-        <div class="pos-detail-label">Why ${termLabel.toLowerCase()}</div>
-        <div class="pos-detail-text">${p.why || '—'}</div>
-        <div class="pos-detail-label" style="margin-top:12px;">What to do</div>
-        <div class="pos-what-to-do">${whatToDo || "See morning briefing for today's recommendation."}</div>
-      </div>`;
 
-    // Attach click handler directly at creation with direct element references
-    const toggleBtn = card.querySelector('.pos-toggle');
-    const detailDiv = card.querySelector('.pos-detail');
-    const chevDiv = card.querySelector('.pos-chevron');
+    // Button (toggle header)
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'pos-toggle';
+    toggleBtn.dataset.idx = i;
+    toggleBtn.innerHTML = `
+      <div class="pos-toggle-top">
+        <div>
+          <div class="pos-ticker">${p.ticker}</div>
+          <div class="pos-meta">${typeLabel} &middot; ${termLabel}</div>
+        </div>
+        <div class="pos-chevron">&#8964;</div>
+      </div>
+      <div class="pos-toggle-mid">
+        <div class="pos-price-block">
+          <div class="pos-col-label">Price</div>
+          <div class="pos-col-val" id="price-${i}">${p.current_price != null ? '$' + Number(p.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '—'}</div>
+          <div class="pos-col-label" style="margin-top:4px;">Balance</div>
+          <div class="pos-col-val" id="balance-${i}">${fmt(p.balance)}</div>
+        </div>
+        <div class="pos-pnl-block">
+          <div class="pos-pct" id="pct-${i}" style="color:${pctColor}">${fmtPct(pct)}</div>
+          <div class="pos-dol" id="dol-${i}">${fmtDol(dol)}</div>
+        </div>
+      </div>
+      ${actionBadge(whatToDo)}`;
 
+    // Detail panel (sibling of button, inside card)
+    const detailDiv = document.createElement('div');
+    detailDiv.className = 'pos-detail';
+    detailDiv.style.display = 'none';
+    detailDiv.innerHTML = `
+      <div class="pos-detail-label">What it is</div>
+      <div class="pos-detail-text">${p.summary || '—'}</div>
+      <div class="pos-detail-label">Catalyst</div>
+      <div class="pos-detail-text">${p.catalyst || '—'}</div>
+      <div class="pos-detail-label">Why ${termLabel.toLowerCase()}</div>
+      <div class="pos-detail-text">${p.why || '—'}</div>
+      <div class="pos-detail-label" style="margin-top:12px;">What to do</div>
+      <div class="pos-what-to-do">${whatToDo || "See morning briefing for today's recommendation."}</div>`;
+
+    card.appendChild(toggleBtn);
+    card.appendChild(detailDiv);
+
+    const chevDiv = toggleBtn.querySelector('.pos-chevron');
+
+    // Click handler — references are direct and scoped to this card only
     toggleBtn.addEventListener('click', () => {
       const open = detailDiv.style.display === 'block';
       detailDiv.style.display = open ? 'none' : 'block';
