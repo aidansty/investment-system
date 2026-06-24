@@ -13,7 +13,7 @@ INDUSTRY_ETF_MAP = {
     "Cybersecurity":         {"etf": "CIBR", "sector": "Technology"},
     "AI Infrastructure":     {"etf": "BOTZ", "sector": "Technology"},
     "Cloud Computing":       {"etf": "SKYY", "sector": "Technology"},
-    "Networking":            {"etf": "IGN",  "sector": "Technology"},
+    "Networking":            {"etf": "FIVG",  "sector": "Technology"},
     "Biotech":               {"etf": "IBB",  "sector": "Healthcare"},
     "Medical Devices":       {"etf": "IHI",  "sector": "Healthcare"},
     "Managed Care":          {"etf": "IHF",  "sector": "Healthcare"},
