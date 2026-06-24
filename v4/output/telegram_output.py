@@ -28,65 +28,53 @@ def build_and_send_morning_telegram(
 
     regime_emoji = "🟢" if vix_regime == "Green" else "🔴" if vix_regime == "Red" else "🟡"
 
-    # ─── MESSAGE 1: Market + News ───────────────────────────────────────────
+    # ─── MESSAGE 1: Market Regime + News + Catalysts ───────────────────────
 
     msg1 = []
     msg1.append(f"<b>📊 Morning Briefing — {today}</b>")
     msg1.append("")
 
-    # Regime with reasoning
+    # Regime with plain English reasoning
     msg1.append(f"<b>{regime_emoji} Market Regime</b>")
     market_overview = sections.get("Market Overview", "")
     if market_overview:
-        # First 2 sentences of market overview
         sentences = [s.strip() for s in market_overview.replace("\n", " ").split(".") if len(s.strip()) > 20]
         regime_summary = ". ".join(sentences[:2]) + "." if sentences else market_overview[:300]
         msg1.append(regime_summary)
     else:
         trend_word = "falling" if vix_trend == "Falling" else "rising" if vix_trend in ("Rising", "Spiking") else "flat"
-        msg1.append(f"VIX at {vix} ({vix_regime}), {trend_word} from {vix_avg} five-day average. {len(high_conviction)} high-conviction industries identified today.")
+        msg1.append(f"VIX at {vix} ({vix_regime}), {trend_word} from {vix_avg} five-day average.")
     msg1.append("")
 
-    # Top industries with bullet reasoning
-    if top_industries:
-        msg1.append(f"<b>🏭 Top Industries ({len(high_conviction)} high conviction)</b>")
-        for ind in top_industries[:4]:
-            score = ind.get("conviction_score", 0)
-            name = ind["industry"]
-            etf = ind["etf"]
-            excess = ind.get("excess_63d", 0)
-            ripple = ind.get("ripple_benefits", [])
-            news_count = ind.get("news_count", 0)
-            msg1.append(f"<b>{name} ({etf})</b> — Conviction {score}/100")
-            # Plain English bullets
-            if excess > 0:
-                msg1.append(f"  • Has been outperforming the S&P 500 by {excess:.1f}% over the last 3 months — sustained strength, not a one-day move.")
-            else:
-                msg1.append(f"  • Underperforming SPY recently but showing early reversal signals.")
-            if ripple:
-                ripple_clean = [r.replace("_", " ") for r in ripple[:2]]
-                msg1.append(f"  • Getting a boost from spillover activity in: {', '.join(ripple_clean)}.")
-            if news_count >= 2:
-                msg1.append(f"  • {news_count} separate news stories today are all pointing in the same direction for this industry.")
-            rel_news = ind.get("relevant_news", [])
-            if rel_news:
-                headline = rel_news[0].get("headline", "")
-                if headline:
-                    msg1.append(f"  • Latest catalyst: {headline[:90]}")
-        msg1.append("")
-
-    # Important news
+    # Key news labeled by how it affects you
+    current_tickers = {p.get("ticker", "") for p in positions}
     if recent_news:
         msg1.append("<b>📰 Key News &amp; Events</b>")
-        for n in recent_news[:4]:
+        for n in recent_news[:5]:
             headline = n.get("headline", "")
             summary = n.get("summary", "")
-            if headline:
-                msg1.append(f"<b>{headline[:70]}</b>")
-                if summary:
-                    sentences = [s.strip() for s in summary.split(".") if len(s.strip()) > 15]
-                    if sentences:
-                        msg1.append(sentences[0][:150] + ".")
+            portfolio_impact = n.get("portfolio_impact", "")
+            affected = n.get("affected_tickers", [])
+            sentiment = n.get("sentiment", "").lower()
+            if not headline:
+                continue
+            held = [t for t in affected if t in current_tickers]
+            not_held = [t for t in affected if t not in current_tickers]
+            if held:
+                sentiment_word = "📈 Bullish" if sentiment == "bullish" else "📉 Bearish" if sentiment == "bearish" else "⚪ Neutral"
+                label = f"{sentiment_word} for your {', '.join(held[:3])}"
+            elif not_held:
+                label = f"💡 Potential opportunity — {', '.join(not_held[:3])}"
+            else:
+                label = "🌐 Market-wide"
+            msg1.append(f"<b>{headline[:75]}</b>")
+            msg1.append(f"  {label}")
+            if portfolio_impact:
+                msg1.append(f"  {portfolio_impact[:150]}")
+            elif summary:
+                sentences = [s.strip() for s in summary.split(".") if len(s.strip()) > 15]
+                if sentences:
+                    msg1.append(f"  {sentences[0][:150]}.")
         msg1.append("")
 
     # Forward catalysts
@@ -105,11 +93,36 @@ def build_and_send_morning_telegram(
 
     msg1.append("→ Full briefing on dashboard")
 
-    # ─── MESSAGE 2: Positions + Alerts ──────────────────────────────────────
+    # ─── MESSAGE 2: Industries + Positions + Action Items ───────────────────
 
     msg2 = []
     msg2.append(f"<b>💼 Portfolio Update — {today}</b>")
     msg2.append("")
+
+    # Top industries with conviction
+    if top_industries:
+        msg2.append(f"<b>🏭 Top Industries ({len(high_conviction)} high conviction)</b>")
+        for ind in top_industries[:4]:
+            score = ind.get("conviction_score", 0)
+            name = ind["industry"]
+            etf = ind["etf"]
+            excess = ind.get("excess_63d", 0)
+            ripple = ind.get("ripple_benefits", [])
+            news_count = ind.get("news_count", 0)
+            rel_news = ind.get("relevant_news", [])
+            msg2.append(f"<b>{name} ({etf})</b> — Conviction {score}/100")
+            if excess > 0:
+                msg2.append(f"  • Outperforming S&P 500 by {excess:.1f}% over the last 3 months.")
+            if ripple:
+                ripple_clean = [r.replace("_", " ") for r in ripple[:2]]
+                msg2.append(f"  • Tailwinds from: {', '.join(ripple_clean)}.")
+            if news_count >= 2:
+                msg2.append(f"  • {news_count} news stories confirming this direction today.")
+            if rel_news:
+                headline = rel_news[0].get("headline", "")
+                if headline:
+                    msg2.append(f"  • {headline[:90]}")
+        msg2.append("")
 
     if positions:
         msg2.append("<b>Position Review</b>")
