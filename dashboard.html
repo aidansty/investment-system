@@ -750,11 +750,13 @@ TERM_ORDER.forEach(term => {
 document.querySelectorAll('.pos-toggle').forEach(btn => {
   btn.addEventListener('click', () => {
     const idx = btn.dataset.idx;
-    const detail = document.querySelector('.pos-detail[data-idx="' + idx + '"]');
-    const chev = document.querySelector('.pos-chevron[data-idx="' + idx + '"]');
+    const card = btn.closest('.pos-card');
+    if (!card) return;
+    const detail = card.querySelector('.pos-detail');
+    const chev = card.querySelector('.pos-chevron');
     const open = detail.style.display === 'block';
     detail.style.display = open ? 'none' : 'block';
-    chev.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+    if (chev) chev.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
 
     if (!open) {
       const p = POSITIONS_CONFIG[parseInt(idx)];
