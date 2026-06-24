@@ -74,24 +74,28 @@ def main():
         _raw = _config.get("positions", [])
         _stock_tickers = [p["ticker"] for p in _raw if p.get("type") != "Crypto"]
         _crypto_map = {"BTC": "BTC-USD", "ETH": "ETH-USD", "XRP": "XRP-USD", "ZEC": "ZEC-USD"}
-        _crypto_fetch = [_crypto_map[p["ticker"]] for p in _raw if p.get("type") == "Crypto" and p["ticker"] in _crypto_map]
-        _all_fetch = _stock_tickers + _crypto_fetch
         _price_cache = {}
+        # Fetch stock prices via yfinance
         try:
-            _data = _yf.download(_all_fetch, period="2d", auto_adjust=True, progress=False)
+            _data = _yf.download(_stock_tickers, period="2d", auto_adjust=True, progress=False)
             _close = _data["Close"] if "Close" in _data.columns else _data
             for _t in _stock_tickers:
                 if _t in _close.columns:
                     _s = _close[_t].dropna()
                     if not _s.empty:
                         _price_cache[_t] = round(float(_s.iloc[-1]), 2)
-            for _t, _yt in _crypto_map.items():
-                if _yt in _close.columns:
-                    _s = _close[_yt].dropna()
-                    if not _s.empty:
-                        _price_cache[_t] = round(float(_s.iloc[-1]), 2)
         except Exception as _e:
-            log(f"Price fetch error: {_e}")
+            log(f"Stock price fetch error: {_e}")
+        # Fetch crypto prices via Coinbase — yfinance crypto data is unreliable
+        import requests as _req
+        _coinbase_map = {"BTC": "BTC-USD", "ETH": "ETH-USD", "XRP": "XRP-USD", "ZEC": "ZEC-USD"}
+        for _t, _pair in _coinbase_map.items():
+            try:
+                _r = _req.get(f"https://api.coinbase.com/v2/prices/{_pair}/spot", timeout=5)
+                if _r.status_code == 200:
+                    _price_cache[_t] = round(float(_r.json()["data"]["amount"]), 2)
+            except Exception as _e:
+                log(f"Coinbase price error for {_t}: {_e}")
         for _p in _raw:
             _t = _p["ticker"]
             _qty = _p["qty"]

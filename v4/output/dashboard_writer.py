@@ -203,8 +203,15 @@ def write_dashboard_data(
         current = p.get("current_price", 0) or 0
         qty = p.get("qty", 0) or p.get("position_size", 0) or 0
         balance = round(current * qty, 2) if current and qty else 0
-        pct_change = round((current - entry) / entry * 100, 2) if entry > 0 and current > 0 else 0
-        dollar_change = round((current - entry) * qty, 2) if entry > 0 and qty else 0
+        # Use pre-calculated values from pipeline when entry is available
+        # Fall back to pipeline-calculated values if entry is missing (e.g. crypto via yfinance)
+        if entry > 0 and current > 0:
+            pct_change = round((current - entry) / entry * 100, 2)
+            dollar_change = round((current - entry) * qty, 2)
+        else:
+            # Trust pre-calculated values from pipeline
+            pct_change = p.get("pct_change", 0) or 0
+            dollar_change = p.get("dollar_change", 0) or 0
 
         portfolio_positions.append({
             "ticker": p.get("ticker", ""),

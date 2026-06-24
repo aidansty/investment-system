@@ -92,16 +92,29 @@ def main():
         if positions:
             tickers = [p["ticker"] for p in positions]
             price_cache = {}
+            # Stock prices via yfinance
+            stock_tickers = [t for t in tickers if t not in {"BTC","ETH","XRP","ZEC"}]
             try:
-                data = yf.download(tickers, period="2d", auto_adjust=True, progress=False)
+                data = yf.download(stock_tickers, period="2d", auto_adjust=True, progress=False)
                 close = data["Close"] if "Close" in data.columns else data
-                for ticker in tickers:
+                for ticker in stock_tickers:
                     if ticker in close.columns:
                         series = close[ticker].dropna()
                         if not series.empty:
                             price_cache[ticker] = round(float(series.iloc[-1]), 2)
             except Exception as e:
                 log(f"Position price error: {e}")
+            # Crypto prices via Coinbase — yfinance crypto is unreliable
+            import requests as _req
+            coinbase_map = {"BTC": "BTC-USD", "ETH": "ETH-USD", "XRP": "XRP-USD", "ZEC": "ZEC-USD"}
+            for ct, pair in coinbase_map.items():
+                if ct in tickers:
+                    try:
+                        r = _req.get(f"https://api.coinbase.com/v2/prices/{pair}/spot", timeout=5)
+                        if r.status_code == 200:
+                            price_cache[ct] = round(float(r.json()["data"]["amount"]), 2)
+                    except Exception as e:
+                        log(f"Coinbase price error for {ct}: {e}")
             update_position_prices(positions, price_cache)
     except Exception as e:
         log(f"Portfolio load error: {e}")
