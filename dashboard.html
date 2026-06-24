@@ -244,6 +244,25 @@ const ENTRY_PRICES = {
   'BTC': 59767.28, 'ZEC': 482.12, 'ETH': 2010.52, 'XRP': 1.18
 };
 
+// Position metadata — term and type from positions.json
+const POSITION_META = {
+  'SPY':  { term: 'Long-term',   type: 'Stock' },
+  'NVDA': { term: 'Long-term',   type: 'Stock' },
+  'SPCX': { term: 'Long-term',   type: 'Stock' },
+  'BTC':  { term: 'Long-term',   type: 'Crypto' },
+  'ETH':  { term: 'Long-term',   type: 'Crypto' },
+  'ZEC':  { term: 'Long-term',   type: 'Crypto' },
+  'XRP':  { term: 'Long-term',   type: 'Crypto' },
+  'AMD':  { term: 'Medium-term', type: 'Stock' },
+  'MU':   { term: 'Medium-term', type: 'Stock' },
+  'INTC': { term: 'Medium-term', type: 'Stock' },
+  'PLTR': { term: 'Medium-term', type: 'Stock' },
+  'CRWV': { term: 'Medium-term', type: 'Stock' },
+  'NOK':  { term: 'Medium-term', type: 'Stock' },
+  'SCO':  { term: 'Short-term',  type: 'ETF' },
+  'HUM':  { term: 'Short-term',  type: 'Stock' },
+};
+
 // Crypto tickers mapped to Coinbase pairs
 const CRYPTO_TICKERS = { 'BTC': 'BTC-USD', 'ETH': 'ETH-USD', 'XRP': 'XRP-USD', 'ZEC': 'ZEC-USD' };
 const STOCK_TICKERS_LIST = ['SPY','MU','AMD','SPCX','CRWV','NVDA','HUM','PLTR','UFO'];
@@ -627,7 +646,7 @@ POSITIONS_CONFIG.forEach((p, i) => {
   row.className = 'pos-row';
   row.innerHTML = `
     <button class="pos-toggle" data-idx="${i}">
-      <div><div class="pos-ticker">${p.ticker}</div><div class="pos-meta">${p.type || 'Stock'} &middot; ${p.term || '—'}</div></div>
+      <div><div class="pos-ticker">${p.ticker}</div><div class="pos-meta">${POSITION_META[p.ticker]?.type || p.type || 'Stock'} &middot; ${POSITION_META[p.ticker]?.term || p.term || '—'}</div></div>
       <div class="hide-mobile"><div class="pos-col-label">Qty</div><div class="pos-col-val">${p.qty || '—'}</div></div>
       <div class="hide-mobile"><div class="pos-col-label">Price</div><div class="pos-col-val" id="price-${i}">${p.current_price != null ? '$' + Number(p.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '—'}</div></div>
       <div><div class="pos-col-label">Balance</div><div class="pos-col-val" id="balance-${i}">${fmt(p.balance)}</div></div>
