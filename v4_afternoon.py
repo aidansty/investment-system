@@ -21,8 +21,28 @@ from v4.data.fetch_macro import fetch_macro_data
 from v4.intelligence.industry_scanner import run_industry_scan
 from v4.intelligence.event_engine import enrich_industries_with_events
 from v4.ai.afternoon_update import generate_afternoon_update
-from v4.output.notion_writer import get_open_positions, update_position_prices
 from v4.output.telegram_output import build_and_send_afternoon_telegram
+from v4.output.dashboard_writer import write_dashboard_data
+
+
+def get_open_positions():
+    import json, os
+    path = os.path.join(os.path.dirname(__file__), 'v4', 'config', 'positions.json')
+    with open(path) as f:
+        return json.load(f).get('positions', [])
+
+
+def update_position_prices(positions, price_cache):
+    for p in positions:
+        ticker = p.get('ticker')
+        if ticker in price_cache:
+            current = price_cache[ticker]
+            p['current_price'] = current
+            entry = p.get('entry', 0)
+            qty = p.get('qty', 0)
+            if entry and qty:
+                p['pnl'] = round((current - entry) * qty, 2)
+                p['pnl_pct'] = round((current - entry) / entry * 100, 2)
 from v4.config.settings import BENCHMARK_ETF
 
 
