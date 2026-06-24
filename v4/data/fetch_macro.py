@@ -137,3 +137,39 @@ def _fetch_economic_events() -> list:
     except Exception as e:
         log(f"Economic calendar error: {e}")
         return []
+
+
+def fetch_earnings_calendar(tickers: list) -> dict:
+    import requests, os, pytz
+    from datetime import datetime, timedelta
+    FINNHUB_KEY = os.environ.get("FINNHUB_KEY", "")
+    if not FINNHUB_KEY:
+        return {}
+    eastern = pytz.timezone("America/New_York")
+    today = datetime.now(eastern).date()
+    end = today + timedelta(days=90)
+    from_str = today.strftime("%Y-%m-%d")
+    to_str = end.strftime("%Y-%m-%d")
+    crypto = {"BTC", "ETH", "XRP", "ZEC", "BNB", "SOL", "DOGE"}
+    results = {}
+    for ticker in tickers:
+        if ticker in crypto:
+            continue
+        try:
+            url = f"https://finnhub.io/api/v1/calendar/earnings?symbol={ticker}&from={from_str}&to={to_str}&token={FINNHUB_KEY}"
+            r = requests.get(url, timeout=10)
+            if r.status_code != 200:
+                continue
+            data = r.json()
+            earnings_list = data.get("earningsCalendar", [])
+            if earnings_list:
+                next_e = earnings_list[0]
+                results[ticker] = {
+                    "date": next_e.get("date", ""),
+                    "hour": next_e.get("hour", ""),
+                    "eps_estimate": next_e.get("epsEstimate"),
+                    "revenue_estimate": next_e.get("revenueEstimate"),
+                }
+        except Exception:
+            continue
+    return results

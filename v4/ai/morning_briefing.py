@@ -14,6 +14,7 @@ def build_morning_context(
     forward_catalysts: list,
     positions: list,
     today: str,
+    earnings_calendar: dict = None,
 ) -> str:
     """
     Assembles the complete context block for the morning briefing.
@@ -110,7 +111,16 @@ Holding type: {p.get('holding_type', 'Not specified')}
 Thesis: {p.get('thesis', 'Not recorded')}
 """
 
+    earnings_block = chr(10).join(
+        f"  {t}: {i.get('date','')} {'(after close)' if i.get('hour')=='amc' else '(before open)' if i.get('hour')=='bmo' else ''}"
+        for t,i in (earnings_calendar or {}).items()
+    ) or "No confirmed earnings dates in next 90 days."
+
     return f"""DATE: {today}
+
+=== CONFIRMED EARNINGS DATES (Finnhub verified — use these, not estimates) ===
+{earnings_block}
+
 
 === INVESTOR ONE-PAGER (Your North Star) ===
 {one_pager}
@@ -217,6 +227,7 @@ def generate_morning_briefing(
     forward_catalysts: list,
     positions: list,
     today: str,
+    earnings_calendar: dict = None,
 ) -> dict:
     """
     Generate the complete morning briefing using Claude.
@@ -224,7 +235,7 @@ def generate_morning_briefing(
     """
     client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
 
-    context = build_morning_context(macro, industry_results, news, forward_catalysts, positions, today)
+    context = build_morning_context(macro, industry_results, news, forward_catalysts, positions, today, earnings_calendar=earnings_calendar or {})
     instructions = build_morning_output_instructions()
     full_prompt = context + instructions
 
