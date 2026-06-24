@@ -57,15 +57,22 @@ def build_and_send_morning_telegram(
             excess = ind.get("excess_63d", 0)
             ripple = ind.get("ripple_benefits", [])
             news_count = ind.get("news_count", 0)
-            msg1.append(f"<b>{name} ({etf})</b> — {score}/100")
-            msg1.append(f"  • +{excess:.1f}pp vs SPY over 63 days")
+            msg1.append(f"<b>{name} ({etf})</b> — Conviction {score}/100")
+            # Plain English bullets
+            if excess > 0:
+                msg1.append(f"  • Has been outperforming the S&P 500 by {excess:.1f}% over the last 3 months — sustained strength, not a one-day move.")
+            else:
+                msg1.append(f"  • Underperforming SPY recently but showing early reversal signals.")
             if ripple:
-                msg1.append(f"  • Macro tailwind: {', '.join(ripple[:2])}")
+                ripple_clean = [r.replace("_", " ") for r in ripple[:2]]
+                msg1.append(f"  • Getting a boost from spillover activity in: {', '.join(ripple_clean)}.")
             if news_count >= 2:
-                msg1.append(f"  • {news_count} confirming news catalysts today")
+                msg1.append(f"  • {news_count} separate news stories today are all pointing in the same direction for this industry.")
             rel_news = ind.get("relevant_news", [])
             if rel_news:
-                msg1.append(f"  • {rel_news[0].get('headline', '')[:80]}")
+                headline = rel_news[0].get("headline", "")
+                if headline:
+                    msg1.append(f"  • Latest catalyst: {headline[:90]}")
         msg1.append("")
 
     # Important news
@@ -108,7 +115,7 @@ def build_and_send_morning_telegram(
         msg2.append("<b>Position Review</b>")
         for p in positions:
             ticker = p.get("ticker", "")
-            entry = p.get("entry_price", 0) or 0
+            entry = p.get("entry", 0) or p.get("entry_price", 0) or 0
             current = p.get("current_price", 0) or 0
             stop = p.get("stop_price", 0) or 0
             pnl = round((current - entry) / entry * 100, 1) if entry > 0 else 0
@@ -116,8 +123,12 @@ def build_and_send_morning_telegram(
             pnl_str = f"{pnl:+.1f}%"
             pnl_emoji = "🟢" if pnl >= 0 else "🔴"
 
-            # Determine action and reason from briefing
-            pos_review = sections.get("Open Position Review", "")
+            # Determine action and reason from briefing — try multiple section name variants
+            pos_review = (
+                sections.get("Open Position Review") or
+                sections.get("Position Review") or
+                sections.get("Portfolio Review") or ""
+            )
             action = "HOLD"
             reason = "Thesis intact, no material changes today."
 
@@ -236,7 +247,11 @@ def build_and_send_afternoon_telegram(
     msg1.append("")
 
     # What changed
-    what_changed = sections.get("What Changed", "") or sections.get("Portfolio Review", "")
+    what_changed = (
+        sections.get("What Changed Since Morning") or
+        sections.get("What Changed") or
+        sections.get("Portfolio Review") or ""
+    )
     if what_changed:
         msg1.append("<b>What Changed Today</b>")
         sentences = [s.strip() for s in what_changed.replace("\n", " ").split(".") if len(s.strip()) > 15]
@@ -255,7 +270,12 @@ def build_and_send_afternoon_telegram(
         msg1.append("")
 
     # Position updates — only show positions where something changed or action needed
-    position_review = sections.get("Open Position Review", "") or sections.get("Portfolio Actions", "")
+    position_review = (
+        sections.get("Portfolio Actions Before Close") or
+        sections.get("Open Position Review") or
+        sections.get("Portfolio Actions") or
+        sections.get("Portfolio Review") or ""
+    )
     if positions and position_review:
         flagged = []
         for p in positions:
@@ -313,16 +333,35 @@ def build_and_send_afternoon_telegram(
     msg1.append("→ Full update on dashboard")
 
     msg2 = []
-    if new_opportunities:
-        msg2.append("<b>🏭 New Opportunities Since Morning</b>")
-        for opp in new_opportunities[:3]:
-            if isinstance(opp, dict):
-                msg2.append(f"• <b>{opp.get('industry', '')} ({opp.get('etf', '')})</b> — {opp.get('conviction', 0)}/100")
-                bullets = opp.get("bullets", [])
-                for b in bullets[:2]:
-                    msg2.append(f"  · {b[:100]}")
-            else:
-                msg2.append(f"• {str(opp)[:120]}")
+    # Flatten new_opportunities — it may arrive as a list-of-lists from the pipeline
+    opps_flat = []
+    for item in (new_opportunities or []):
+        if isinstance(item, list):
+            opps_flat.extend(item)
+        elif isinstance(item, dict):
+            opps_flat.append(item)
+
+    if opps_flat:
+        msg2.append("<b>🏭 New or Strengthened Opportunities</b>")
+        for opp in opps_flat[:3]:
+            if not isinstance(opp, dict):
+                continue
+            name = opp.get("industry", "")
+            etf = opp.get("etf", "")
+            score = opp.get("conviction_score", opp.get("conviction", 0))
+            excess = opp.get("excess_63d", 0)
+            ripple = opp.get("ripple_benefits", [])
+            rel_news = opp.get("relevant_news", [])
+            msg2.append(f"• <b>{name} ({etf})</b> — Conviction {score}/100")
+            if excess > 0:
+                msg2.append(f"  · Outperforming SPY by {excess:.1f}% over 3 months.")
+            if ripple:
+                ripple_clean = [r.replace("_", " ") for r in ripple[:2]]
+                msg2.append(f"  · Tailwinds from: {', '.join(ripple_clean)}.")
+            if rel_news:
+                headline = rel_news[0].get("headline", "")
+                if headline:
+                    msg2.append(f"  · {headline[:90]}")
         msg2.append("")
 
     close_watch = sections.get("Market Close Watch", "")
