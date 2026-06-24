@@ -964,19 +964,44 @@ async function fetchIntradayChart(ticker, canvasId) {
         console.warn('Coinbase historic failed:', e);
       }
     } else {
-      // Stock intraday data comes from pipeline — check briefing data first
+      // Stock intraday: try pipeline data first, then live Finnhub if market open
       const chartData = window.BRIEFING_DATA?.intraday?.[ticker];
       if (chartData && chartData.closes?.length) {
         closes = chartData.closes;
         labels = chartData.labels;
       } else {
-        // Show placeholder when market is closed or no pipeline data yet
-        const canvas = document.getElementById(canvasId);
-        if (canvas) {
-          const wrap = canvas.parentElement;
-          wrap.innerHTML = '<p style="font-size:12px;color:#5a5956;padding:20px 0;text-align:center;">Intraday chart available during market hours after morning briefing runs</p>';
+        const finnhubKey = window.BRIEFING_DATA?.finnhub_key;
+        const marketOpen = window.BRIEFING_DATA?.market_open;
+        if (finnhubKey && marketOpen) {
+          try {
+            const now = Math.floor(Date.now() / 1000);
+            const etOffset = -4 * 3600;
+            const nowEt = new Date((now + etOffset) * 1000);
+            const todayOpen = new Date(nowEt);
+            todayOpen.setHours(9, 30, 0, 0);
+            const fromTs = Math.floor(todayOpen.getTime() / 1000) - etOffset;
+            const url = `https://finnhub.io/api/v1/stock/candle?symbol=${ticker}&resolution=5&from=${fromTs}&to=${now}&token=${finnhubKey}`;
+            const resp = await fetch(url);
+            const d = await resp.json();
+            if (d.s === "ok" && d.c?.length) {
+              closes = d.c;
+              labels = d.t.map(ts => {
+                const dt = new Date((ts + etOffset) * 1000);
+                return dt.getHours() + ":" + String(dt.getMinutes()).padStart(2, "0");
+              });
+            }
+          } catch(e) {
+            console.warn("Finnhub live fetch failed:", e);
+          }
         }
-        return;
+        if (closes.length === 0) {
+          const canvas = document.getElementById(canvasId);
+          if (canvas) {
+            const wrap = canvas.parentElement;
+            wrap.innerHTML = '<p style="font-size:12px;color:#5a5956;padding:20px 0;text-align:center;">Intraday chart loads after 9:30 AM ET</p>';
+          }
+          return;
+        }
       }
     }
 
