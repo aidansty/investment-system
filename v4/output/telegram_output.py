@@ -207,7 +207,7 @@ def _build_action_items(positions: list, forward_catalysts: list) -> list:
         ]
         if upcoming_earnings:
             cat = upcoming_earnings[0]
-            items.append(f"⏰ {ticker}: earnings {cat.get('date', 'soon')} — decide hold/trim/exit before then")
+            items.append(f"⏰ {ticker}: earnings {cat.get('date', 'soon')} — review setup: check guidance, analyst expectations, and risk/reward before deciding hold/trim/exit")
 
         # Stop proximity warning
         if dist_stop is not None and dist_stop < 3:

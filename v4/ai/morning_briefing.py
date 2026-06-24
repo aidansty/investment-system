@@ -187,7 +187,8 @@ a position management decision, or both. Prioritize catalysts affecting current
 holdings or high-conviction industries. If a catalyst is an entry opportunity,
 say so explicitly — e.g. "Consider entering before this date to capture the move."
 If a catalyst requires managing an existing position, say so explicitly —
-e.g. "Decide hold/reduce/exit on TICKER before this date per pre-earnings rules."
+e.g. "TICKER earnings on [date] — based on [analyst expectations / guidance / sector momentum], the setup looks [strong/weak/mixed]. Recommend [hold through / trim before / exit before] because [specific reason]."
+Never apply a blanket exit rule before earnings. Analyze the actual setup: guidance, estimate revisions, sector tailwinds, and how much gain is at risk. Only recommend exiting if the risk/reward is unfavorable given the specific data. If the setup is strong, say so and recommend holding.
 
 ## Open Position Review
 For each held position:
