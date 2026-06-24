@@ -201,9 +201,16 @@ e.g. "TICKER earnings on [date] — based on [analyst expectations / guidance / 
 Never apply a blanket exit rule before earnings. Analyze the actual setup: guidance, estimate revisions, sector tailwinds, and how much gain is at risk. Only recommend exiting if the risk/reward is unfavorable given the specific data. If the setup is strong, say so and recommend holding.
 
 ## Market Overview
-Write 3-5 bullet points explaining what the VIX level, trend, and macro regime actually mean for the portfolio today. Do not just restate the numbers — explain what they mean. Example: if VIX is 18 and falling, explain why that is good for risk assets and what it signals about market confidence. Explain the regime (Bullish/Bearish/Neutral) in plain English and why it matters for today specifically.
+Write 3-5 bullet points explaining what the VIX level, trend, and macro regime actually mean for the portfolio today. Do not just restate the numbers — explain what they mean. Example: if VIX is 18 and falling, explain why that is good for risk assets and what it signals about market confidence. Explain the regime (Bullish/Bearish/Neutral) in plain English and why it matters for today specifically. Each bullet must start with a dash (-).
 
 ## Open Position Review
+For each position write exactly:
+TICKER — HOLD / WATCH / TRIM / EXIT
+Then 2-3 bullet points (starting with -) explaining:
+- What the data and news say about this position today
+- Whether the thesis is intact, strengthening, or at risk
+- Exact recommended action and why
+Use the confirmed earnings dates provided above. Never use generic phrases like "position stable" or "no material changes" — always cite specific data, news, or price action.
 For each held position:
 TICKER — HOLD / WATCH / REDUCE / EXIT
 One sentence explaining the recommendation based on current data.

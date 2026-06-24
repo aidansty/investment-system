@@ -566,15 +566,33 @@ def _classify_term(ind: dict) -> str:
 
 
 def _get_why_now(ind: dict) -> str:
-    reasons = []
-    if ind.get("excess_63d", 0) > 10:
-        reasons.append("sustained momentum outperformance")
+    parts = []
+    excess = ind.get("excess_63d", 0)
+    conviction = ind.get("conviction_score", 0)
+    event_score = int(ind.get("event_score", 0.5) * 100)
+    macro = ind.get("macro_alignment", "Neutral")
+
+    if excess > 20:
+        parts.append(f"This industry has outrun SPY by {excess:.1f}pp over 63 days — that is not noise, it is sustained institutional buying.")
+    elif excess > 10:
+        parts.append(f"Consistent {excess:.1f}pp outperformance vs SPY over 63 days signals real money rotating into this sector.")
+
+    if event_score >= 70:
+        parts.append(f"Event catalyst score of {event_score}/100 indicates multiple confirmed near-term catalysts that could drive further upside.")
+    elif event_score >= 50:
+        parts.append(f"Event score of {event_score}/100 — moderate near-term catalyst activity supporting the thesis.")
+
     if ind.get("ripple_benefits"):
-        reasons.append("macro ripple tailwinds")
-    if ind.get("news_count", 0) >= 2:
-        reasons.append("multiple confirming news catalysts")
-    if ind.get("event_score", 0) >= 0.7:
-        reasons.append("strong event catalyst score")
-    if not reasons:
-        return "Quantitative signals align with current macro conditions."
-    return "Momentum and " + " plus ".join(reasons) + " are pointing the same direction simultaneously."
+        parts.append(f"Positive spillover effects from: {', '.join(ind['ripple_benefits'][:3])} are amplifying sector momentum.")
+
+    if macro == "Green":
+        parts.append("Current macro regime (low VIX, risk-on) is directly favorable for this type of sector exposure.")
+    elif macro == "Yellow":
+        parts.append("Macro is neutral — sector strength here is coming from fundamentals and catalysts, not just a rising tide.")
+
+    if conviction >= 75:
+        parts.append(f"Conviction score of {conviction}/100 — this is a high-confidence setup where multiple independent signals are aligned.")
+    elif conviction >= 60:
+        parts.append(f"Conviction score of {conviction}/100 — solid setup with most signals pointing the same direction.")
+
+    return " ".join(parts) if parts else "Quantitative momentum and event signals are aligned for this industry."

@@ -24,6 +24,7 @@ from v4.ai.morning_briefing import generate_morning_briefing
 from v4.output.telegram_output import build_and_send_morning_telegram
 from v4.output.dashboard_writer import write_dashboard_data
 from v4.data.fetch_intraday import fetch_intraday_candles
+from v4.config.settings import BENCHMARK_ETF
 
 
 def get_open_positions():
@@ -44,8 +45,6 @@ def update_position_prices(positions, price_cache):
             if entry and qty:
                 p['pnl'] = round((current - entry) * qty, 2)
                 p['pnl_pct'] = round((current - entry) / entry * 100, 2)
-from v4.config.settings import BENCHMARK_ETF
-
 
 def save_morning_snapshot(top_industries: list, today) -> None:
     os.makedirs("data/cache", exist_ok=True)

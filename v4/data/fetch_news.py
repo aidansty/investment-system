@@ -96,7 +96,7 @@ def filter_relevant_news(news_items: list) -> list:
     prompt = f"""Here are {len(news_items)} recent financial news headlines.
 
 INDUSTRIES WE TRACK: {industries_list}
-CURRENT HOLDINGS: AMD, PLTR, HUM, NVDA, SPCX
+CURRENT HOLDINGS: SPY, NVDA, SPCX, AMD, MU, INTC, PLTR, CRWV, NOK, SCO, HUM, BTC, ETH, ZEC, XRP
 
 HEADLINES:
 {headlines_block}
@@ -280,7 +280,7 @@ def fetch_forward_catalysts(current_holdings: list = None) -> list:
     today_str = datetime.now(eastern).strftime("%B %d, %Y")
 
     industries_list = ", ".join(list(INDUSTRY_ETF_MAP.keys())[:15])
-    holdings = current_holdings or ["AMD", "PLTR", "HUM", "NVDA", "SPCX"]
+    holdings = current_holdings or ["SPY","NVDA","SPCX","AMD","MU","INTC","PLTR","CRWV","NOK","SCO","HUM","BTC","ETH","ZEC","XRP"]
     holdings_str = ", ".join(holdings)
 
     try:

@@ -23,7 +23,7 @@ def generate_afternoon_update(
     # Build positions context
     positions_block = ""
     for p in positions:
-        entry = p.get("entry_price", 0)
+        entry = p.get("entry_price", 0) or p.get("entry", 0)
         current = p.get("current_price", 0)
         stop = p.get("stop_price", 0)
         target = p.get("target_price", 0)

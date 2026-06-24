@@ -23,6 +23,7 @@ from v4.intelligence.event_engine import enrich_industries_with_events
 from v4.ai.afternoon_update import generate_afternoon_update
 from v4.output.telegram_output import build_and_send_afternoon_telegram
 from v4.output.dashboard_writer import write_dashboard_data
+from v4.config.settings import BENCHMARK_ETF
 
 
 def get_open_positions():
@@ -43,8 +44,6 @@ def update_position_prices(positions, price_cache):
             if entry and qty:
                 p['pnl'] = round((current - entry) * qty, 2)
                 p['pnl_pct'] = round((current - entry) / entry * 100, 2)
-from v4.config.settings import BENCHMARK_ETF
-
 
 def load_morning_snapshot(today) -> list:
     path = f"data/cache/v4_morning_snapshot_{today}.json"
