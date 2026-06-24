@@ -742,36 +742,32 @@ TERM_ORDER.forEach(term => {
         <div class="pos-what-to-do">${whatToDo || "See morning briefing for today's recommendation."}</div>
       </div>`;
 
+    // Attach click handler directly at creation with direct element references
+    const toggleBtn = card.querySelector('.pos-toggle');
+    const detailDiv = card.querySelector('.pos-detail');
+    const chevDiv = card.querySelector('.pos-chevron');
+
+    toggleBtn.addEventListener('click', () => {
+      const open = detailDiv.style.display === 'block';
+      detailDiv.style.display = open ? 'none' : 'block';
+      if (chevDiv) chevDiv.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+
+      if (!open) {
+        const canvasId = 'intraday-' + i;
+        if (!document.getElementById(canvasId)) {
+          const chartDiv = document.createElement('div');
+          chartDiv.className = 'intraday-wrap';
+          chartDiv.innerHTML = '<div class="intraday-label">Today\'s price movement</div><div class="intraday-canvas-wrap"><canvas id="' + canvasId + '"></canvas></div>';
+          detailDiv.appendChild(chartDiv);
+        }
+        setTimeout(() => fetchIntradayChart(p.ticker, canvasId), 50);
+      }
+    });
+
     grid.appendChild(card);
   });
 
   posList.appendChild(grid);
-});
-
-document.querySelectorAll('.pos-toggle').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const idx = btn.dataset.idx;
-    const card = btn.closest('.pos-card');
-    if (!card) return;
-    const detail = card.querySelector('.pos-detail');
-    const chev = card.querySelector('.pos-chevron');
-    const open = detail.style.display === 'block';
-    detail.style.display = open ? 'none' : 'block';
-    if (chev) chev.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
-
-    if (!open) {
-      const p = POSITIONS_CONFIG[parseInt(idx)];
-      if (!p) return;
-      const canvasId = 'intraday-' + idx;
-      if (!document.getElementById(canvasId)) {
-        const chartDiv = document.createElement('div');
-        chartDiv.className = 'intraday-wrap';
-        chartDiv.innerHTML = '<div class="intraday-label">Today\'s price movement</div><div class="intraday-canvas-wrap"><canvas id="' + canvasId + '"></canvas></div>';
-        detail.appendChild(chartDiv);
-      }
-      setTimeout(() => fetchIntradayChart(p.ticker, canvasId), 50);
-    }
-  });
 });
 
 // Fetch all prices on load
