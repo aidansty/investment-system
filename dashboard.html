@@ -87,9 +87,9 @@
     </div>
 
     <h2 class="section-title">Open positions</h2>
-    <p class="section-sub">Click any position for details &middot; prices refresh on page load</p>
-    <div class="pos-list" id="pos-list"></div>
-    <p class="hint">Prices pulled live from Yahoo Finance &middot; balances reflect quantity &times; current price</p>
+    <p class="section-sub">Click any card for details &middot; prices refresh every 10-60 seconds</p>
+    <div id="pos-list"></div>
+    <p class="hint">Stock prices via Finnhub &middot; crypto via Coinbase &middot; balances = qty × live price</p>
 
   </div>
 
@@ -637,33 +637,95 @@ rebuildAllocChart(POSITIONS_CONFIG, currentCash);
 // ============================================================
 // POSITION ROWS
 // ============================================================
+// ============================================================
+// ACTION BADGE HELPER
+// ============================================================
+function actionBadge(text) {
+  if (!text) return '';
+  const t = text.trim().toUpperCase();
+  let cls = 'badge-hold', label = 'HOLD';
+  if (t.includes('EXIT') || t.includes('SELL') || t.includes('CLOSE')) { cls = 'badge-sell'; label = t.includes('CLOSE') ? 'CLOSE' : 'SELL'; }
+  else if (t.includes('TRIM') || t.includes('REDUCE')) { cls = 'badge-trim'; label = 'TRIM'; }
+  else if (t.includes('BUY MORE') || t.includes('ADD')) { cls = 'badge-buy'; label = 'BUY MORE'; }
+  else if (t.includes('BUY')) { cls = 'badge-buy'; label = 'BUY'; }
+  else if (t.includes('WATCH') || t.includes('MONITOR')) { cls = 'badge-watch'; label = 'WATCH'; }
+  return `<span class="pos-action-badge ${cls}">${label}</span>`;
+}
+
+// ============================================================
+// POSITION CARD GRID — grouped by term
+// ============================================================
 const posList = document.getElementById('pos-list');
+const TERM_ORDER = ['Long-term', 'Medium-term', 'Short-term'];
+const termGroups = { 'Long-term': [], 'Medium-term': [], 'Short-term': [] };
+
 POSITIONS_CONFIG.forEach((p, i) => {
-  const pct = p.pct_change || 0;
-  const dol = p.dollar_change || 0;
-  const pctColor = pct >= 0 ? 'var(--green)' : 'var(--red)';
-  const row = document.createElement('div');
-  row.className = 'pos-row';
-  row.innerHTML = `
-    <button class="pos-toggle" data-idx="${i}">
-      <div><div class="pos-ticker">${p.ticker}</div><div class="pos-meta">${POSITION_META[p.ticker]?.type || p.type || 'Stock'} &middot; ${POSITION_META[p.ticker]?.term || p.term || '—'}</div></div>
-      <div class="hide-mobile"><div class="pos-col-label">Qty</div><div class="pos-col-val">${p.qty || '—'}</div></div>
-      <div class="hide-mobile"><div class="pos-col-label">Price</div><div class="pos-col-val" id="price-${i}">${p.current_price != null ? '$' + Number(p.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '—'}</div></div>
-      <div><div class="pos-col-label">Balance</div><div class="pos-col-val" id="balance-${i}">${fmt(p.balance)}</div></div>
-      <div><div class="pos-pct" id="pct-${i}" style="color:${pctColor}">${fmtPct(pct)}</div><div class="pos-dol" id="dol-${i}">${fmtDol(dol)}</div></div>
-      <div class="pos-chevron" data-idx="${i}">&#8964;</div>
-    </button>
-    <div class="pos-detail" data-idx="${i}">
-      <div class="pos-detail-label">What it is</div>
-      <div class="pos-detail-text">${p.summary || '—'}</div>
-      <div class="pos-detail-label">Catalyst</div>
-      <div class="pos-detail-text">${p.catalyst || '—'}</div>
-      <div class="pos-detail-label">Why ${(p.term || '').toLowerCase()}</div>
-      <div class="pos-detail-text">${p.why || '—'}</div>
-      <div class="pos-detail-label" style="margin-top:12px;color:#EF9F27;">What to do</div>
-      <div class="pos-detail-text" style="color:#c8c7c0;">${p.what_to_do || 'See morning briefing for today\'s recommendation.'}</div>
-    </div>`;
-  posList.appendChild(row);
+  const term = POSITION_META[p.ticker]?.term || p.term || 'Medium-term';
+  if (!termGroups[term]) termGroups[term] = [];
+  termGroups[term].push({ p, i });
+});
+
+TERM_ORDER.forEach(term => {
+  const group = termGroups[term];
+  if (!group || group.length === 0) return;
+
+  const label = document.createElement('div');
+  label.className = 'pos-section-label';
+  label.textContent = term + ' positions';
+  posList.appendChild(label);
+
+  const grid = document.createElement('div');
+  grid.className = 'pos-grid';
+
+  group.forEach(({ p, i }) => {
+    const pct = p.pct_change || 0;
+    const dol = p.dollar_change || 0;
+    const pctColor = pct >= 0 ? 'var(--green)' : 'var(--red)';
+    const meta = POSITION_META[p.ticker] || {};
+    const typeLabel = meta.type || p.type || 'Stock';
+    const termLabel = meta.term || p.term || '—';
+    const whatToDo = p.what_to_do || '';
+
+    const card = document.createElement('div');
+    card.className = 'pos-card';
+    card.innerHTML = `
+      <button class="pos-toggle" data-idx="${i}">
+        <div class="pos-toggle-top">
+          <div>
+            <div class="pos-ticker">${p.ticker}</div>
+            <div class="pos-meta">${typeLabel} &middot; ${termLabel}</div>
+          </div>
+          <div class="pos-chevron" data-idx="${i}">&#8964;</div>
+        </div>
+        <div class="pos-toggle-mid">
+          <div class="pos-price-block">
+            <div class="pos-col-label">Price</div>
+            <div class="pos-col-val" id="price-${i}">${p.current_price != null ? '$' + Number(p.current_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '—'}</div>
+            <div class="pos-col-label" style="margin-top:4px;">Balance</div>
+            <div class="pos-col-val" id="balance-${i}">${fmt(p.balance)}</div>
+          </div>
+          <div class="pos-pnl-block">
+            <div class="pos-pct" id="pct-${i}" style="color:${pctColor}">${fmtPct(pct)}</div>
+            <div class="pos-dol" id="dol-${i}">${fmtDol(dol)}</div>
+          </div>
+        </div>
+        ${actionBadge(whatToDo)}
+      </button>
+      <div class="pos-detail" data-idx="${i}">
+        <div class="pos-detail-label">What it is</div>
+        <div class="pos-detail-text">${p.summary || '—'}</div>
+        <div class="pos-detail-label">Catalyst</div>
+        <div class="pos-detail-text">${p.catalyst || '—'}</div>
+        <div class="pos-detail-label">Why ${termLabel.toLowerCase()}</div>
+        <div class="pos-detail-text">${p.why || '—'}</div>
+        <div class="pos-detail-label" style="margin-top:12px;">What to do</div>
+        <div class="pos-what-to-do">${whatToDo || "See morning briefing for today's recommendation."}</div>
+      </div>`;
+
+    grid.appendChild(card);
+  });
+
+  posList.appendChild(grid);
 });
 
 document.querySelectorAll('.pos-toggle').forEach(btn => {
@@ -675,19 +737,16 @@ document.querySelectorAll('.pos-toggle').forEach(btn => {
     detail.style.display = open ? 'none' : 'block';
     chev.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
 
-    // Load intraday chart when opening
     if (!open) {
       const p = POSITIONS_CONFIG[parseInt(idx)];
       if (!p) return;
       const canvasId = 'intraday-' + idx;
-      // Add chart section if not already there
       if (!document.getElementById(canvasId)) {
         const chartDiv = document.createElement('div');
         chartDiv.className = 'intraday-wrap';
         chartDiv.innerHTML = '<div class="intraday-label">Today\'s price movement</div><div class="intraday-canvas-wrap"><canvas id="' + canvasId + '"></canvas></div>';
         detail.appendChild(chartDiv);
       }
-      // Small delay lets the detail div become visible before Chart.js measures height
       setTimeout(() => fetchIntradayChart(p.ticker, canvasId), 50);
     }
   });

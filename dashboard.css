@@ -100,33 +100,49 @@
   .alloc-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
   .alloc-label { font-size: 13px; color: var(--text-body); display: flex; align-items: center; gap: 8px; }
   .alloc-val { font-size: 13px; font-weight: 500; color: var(--text-primary); white-space: nowrap; }
-  /* Position rows */
-  .pos-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
-  .pos-row {
+  /* Position card grid */
+  .pos-section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin: 20px 0 10px; }
+  .pos-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 6px; }
+  .pos-card {
     background: var(--bg-card); border: 0.5px solid var(--border);
     border-radius: var(--radius-lg); overflow: hidden;
   }
   .pos-toggle {
     width: 100%; background: none; border: none; cursor: pointer;
-    padding: 13px 18px;
-    display: grid; grid-template-columns: 1.3fr 0.8fr 0.9fr 1fr 1fr 22px;
-    gap: 10px; align-items: center; text-align: left;
+    padding: 13px 14px 11px;
+    display: flex; flex-direction: column; gap: 6px; text-align: left;
     transition: background 0.1s;
   }
   .pos-toggle:hover { background: var(--bg-card-hover); }
-  .pos-ticker { font-weight: 500; font-size: 14px; color: var(--text-primary); }
-  .pos-meta { font-size: 11.5px; color: var(--text-secondary); margin-top: 1px; }
-  .pos-col-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 2px; }
-  .pos-col-val { font-size: 13.5px; color: var(--text-primary); }
-  .pos-pct { font-size: 13.5px; font-weight: 500; text-align: right; }
-  .pos-dol { font-size: 11.5px; color: var(--text-secondary); text-align: right; margin-top: 1px; }
-  .pos-chevron { font-size: 18px; color: var(--text-secondary); text-align: center; transition: transform 0.15s; user-select: none; }
+  .pos-toggle-top { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; }
+  .pos-ticker { font-weight: 600; font-size: 15px; color: var(--text-primary); }
+  .pos-meta { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .pos-chevron { font-size: 16px; color: var(--text-secondary); transition: transform 0.15s; user-select: none; flex-shrink: 0; }
+  .pos-toggle-mid { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; }
+  .pos-price-block { display: flex; flex-direction: column; gap: 1px; }
+  .pos-col-label { font-size: 10.5px; color: var(--text-secondary); }
+  .pos-col-val { font-size: 13px; color: var(--text-primary); }
+  .pos-pnl-block { text-align: right; }
+  .pos-pct { font-size: 14px; font-weight: 600; }
+  .pos-dol { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+  .pos-action-badge {
+    display: inline-block; font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.06em; padding: 2px 8px; border-radius: 4px;
+    margin-top: 6px; text-transform: uppercase;
+  }
+  .badge-hold    { background: rgba(239,159,39,0.15);  color: #EF9F27; }
+  .badge-watch   { background: rgba(239,159,39,0.15);  color: #EF9F27; }
+  .badge-buy     { background: rgba(93,202,165,0.15);  color: #5DCAA5; }
+  .badge-sell    { background: rgba(226,80,79,0.15);   color: #e2504f; }
+  .badge-trim    { background: rgba(216,90,48,0.15);   color: #D85A30; }
+  .badge-close   { background: rgba(226,80,79,0.15);   color: #e2504f; }
   .pos-detail {
-    display: none; padding: 0 18px 14px;
+    display: none; padding: 0 14px 14px;
     border-top: 0.5px solid rgba(255,255,255,0.05);
   }
-  .pos-detail-label { font-size: 11.5px; color: var(--text-secondary); font-weight: 500; margin: 12px 0 4px; }
-  .pos-detail-text { font-size: 13px; line-height: 1.65; color: var(--text-body); }
+  .pos-detail-label { font-size: 11px; color: var(--text-secondary); font-weight: 600; margin: 12px 0 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .pos-detail-text { font-size: 12.5px; line-height: 1.6; color: var(--text-body); }
+  .pos-what-to-do { font-size: 12.5px; line-height: 1.6; color: #c8c7c0; }
   .hint { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; }
   /* Morning / afternoon sections */
   .info-card {
@@ -233,8 +249,7 @@
     .cards-5 { grid-template-columns: repeat(2, 1fr); }
     .cards-4 { grid-template-columns: repeat(2, 1fr); }
     .alloc-grid { grid-template-columns: 1fr; }
-    .pos-toggle { grid-template-columns: 1.2fr 1fr 1fr 26px; }
-    .pos-toggle .hide-mobile { display: none; }
+    .pos-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
 /* Price flash animations */
