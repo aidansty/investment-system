@@ -149,16 +149,14 @@ def build_and_send_morning_telegram(
             msg2.append(f"{action_emoji} <b>{ticker}</b> {pnl_str} — {action}")
             ticker_block = ""
             in_block = False
-            for line in pos_review.split("
-"):
+            for line in pos_review.split(chr(10)):
                 if ticker in line:
                     in_block = True
                 if in_block and line.strip():
                     ticker_block += " " + line.strip()
                 if in_block and len(ticker_block) > 20 and line.strip() == "":
                     break
-            sentences = [s.strip() for s in ticker_block.replace("
-", " ").split(".") if len(s.strip()) > 20]
+            sentences = [s.strip() for s in ticker_block.replace(chr(10), " ").split(".") if len(s.strip()) > 20]
             bullets = sentences[:3] if sentences else [reason]
             for b in bullets:
                 msg2.append(f"   • {b}.")
@@ -270,8 +268,7 @@ def build_and_send_afternoon_telegram(
             # Determine if Claude flagged this position with an action
             action = None
             reason = None
-            for line in position_review.split("
-"):
+            for line in position_review.split(chr(10)):
                 if ticker in line:
                     upper = line.upper()
                     if "EXIT" in upper or "SELL" in upper or "CLOSE" in upper:
@@ -294,16 +291,14 @@ def build_and_send_afternoon_telegram(
                 # Extract 2-3 sentences from the review block as bullets
                 ticker_block = ""
                 in_block = False
-                for line in position_review.split("
-"):
+                for line in position_review.split(chr(10)):
                     if ticker in line:
                         in_block = True
                     if in_block and line.strip():
                         ticker_block += " " + line.strip()
                     if in_block and len(ticker_block) > 20 and line.strip() == "":
                         break
-                sentences = [s.strip() for s in ticker_block.replace("
-"," ").split(".") if len(s.strip()) > 20]
+                sentences = [s.strip() for s in ticker_block.replace(chr(10)," ").split(".") if len(s.strip()) > 20]
                 for s in sentences[:3]:
                     flagged.append(f"   • {s}.")
 
