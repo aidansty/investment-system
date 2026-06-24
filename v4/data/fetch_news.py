@@ -157,17 +157,33 @@ def deduplicate_and_summarize(news_items: list) -> list:
         for i, item in enumerate(news_items)
     ])
 
+    # Build positions context for impact analysis
+    positions_str = "SPY, NVDA, SPCX, AMD, MU, INTC, PLTR, CRWV, NOK, SCO, HUM, BTC, ZEC, ETH, XRP"
+
     prompt = f"""Here are {len(news_items)} financial news headlines that may cover overlapping stories.
+
+CURRENT HOLDINGS: {positions_str}
 
 {headlines_block}
 
 Group headlines that cover the SAME underlying story or event together.
-For each group, write a 2-3 sentence summary covering all key points across the grouped articles.
-For standalone stories with no overlap, keep them as their own entry with their original summary.
+For each group:
+1. Write a 2-3 sentence summary of what the news actually is
+2. Identify which current holdings or industries this affects (use exact tickers)
+3. Write 1-2 sentences on how this affects the portfolio — is it bullish, bearish, or neutral for those holdings? Can we capitalize on this?
+4. Assign a sentiment: bullish, bearish, or neutral
 
 Return ONLY a JSON array in this exact format, nothing else:
 [
-  {{"headline": "Short descriptive title for the story/group", "summary": "2-3 sentence summary covering all key points", "source_count": 3, "category": "fed/economic/industry/company/geopolitical/ipo"}}
+  {{
+    "headline": "Short descriptive title for the story/group",
+    "summary": "2-3 sentence summary of what the news actually is",
+    "portfolio_impact": "1-2 sentences on how this affects the portfolio and whether to act",
+    "affected_tickers": ["NVDA", "AMD"],
+    "sentiment": "bullish",
+    "source_count": 3,
+    "category": "fed/economic/industry/company/geopolitical/ipo"
+  }}
 ]"""
 
     try:
