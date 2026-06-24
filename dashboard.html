@@ -555,7 +555,7 @@ function rebuildAllocChart(positions, cash) {
 
 // ============================================================
 // ALLOCATION CHART — initial render
-const ALLOC_COLORS = ['#7F77DD','#5DCAA5','#D85A30','#378ADD','#D4537E','#EF9F27','#3a9e7a','#6b4fa8','#3a3938'];
+const ALLOC_COLORS = ['#7F77DD','#5DCAA5','#D85A30','#378ADD','#D4537E','#EF9F27','#3a9e7a','#6b4fa8','#c4a832','#e05c8a','#4db8a0','#7b5ea7'];
 
 function buildAllocData(positions, cash) {
   // Group positions by industry — same industry = same slice and color
@@ -578,6 +578,22 @@ function buildAllocData(positions, cash) {
     color: ALLOC_COLORS[i % ALLOC_COLORS.length],
   }));
 
+  // Assign specific colors to known industry groups
+  const INDUSTRY_COLORS = {
+    'Cryptocurrency': '#F7931A',
+    'AI Infrastructure': '#7F77DD',
+    'Semiconductors': '#5DCAA5',
+    'Broad Market ETF': '#378ADD',
+    'Aerospace & Space': '#D4537E',
+    'Data Analytics': '#EF9F27',
+    'Managed Care': '#3a9e7a',
+    'Oil & Gas': '#8B4513',
+    'Networking': '#4db8a0',
+  };
+  rows.forEach((r, i) => {
+    const industryKey = Object.keys(industryMap)[i];
+    if (INDUSTRY_COLORS[industryKey]) r.color = INDUSTRY_COLORS[industryKey];
+  });
   rows.push({ label: 'Cash', value: cash, color: '#3a3938' });
   return rows;
 }
