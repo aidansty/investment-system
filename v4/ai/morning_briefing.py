@@ -200,6 +200,9 @@ If a catalyst requires managing an existing position, say so explicitly —
 e.g. "TICKER earnings on [date] — based on [analyst expectations / guidance / sector momentum], the setup looks [strong/weak/mixed]. Recommend [hold through / trim before / exit before] because [specific reason]."
 Never apply a blanket exit rule before earnings. Analyze the actual setup: guidance, estimate revisions, sector tailwinds, and how much gain is at risk. Only recommend exiting if the risk/reward is unfavorable given the specific data. If the setup is strong, say so and recommend holding.
 
+## Market Overview
+Write 3-5 bullet points explaining what the VIX level, trend, and macro regime actually mean for the portfolio today. Do not just restate the numbers — explain what they mean. Example: if VIX is 18 and falling, explain why that is good for risk assets and what it signals about market confidence. Explain the regime (Bullish/Bearish/Neutral) in plain English and why it matters for today specifically.
+
 ## Open Position Review
 For each held position:
 TICKER — HOLD / WATCH / REDUCE / EXIT

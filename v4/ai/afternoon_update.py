@@ -76,26 +76,36 @@ Today's news for this ticker:
 
 === OUTPUT INSTRUCTIONS ===
 
-Generate a concise afternoon portfolio update.
+Generate a detailed afternoon portfolio update with the following sections. Be specific — every bullet must reference real news, data, or price action from today. Never use generic filler.
 
-## Portfolio Review
-For each position that requires attention (WATCH, REDUCE, or EXIT only — skip clean HOLDs):
-TICKER — WATCH / REDUCE / EXIT
-Then write 2-3 bullet points explaining:
-- What specifically happened today that affects this position (news, price action, data)
-- How this changes or confirms the thesis
-- What the investor should do and why
-Base reasoning on: news, price vs stop/target, thesis integrity, upcoming catalysts.
-If all positions are clean holds with nothing new, write: "No position changes warranted — hold into close."
+## What Changed Since Morning
+3-5 bullet points covering the most important things that shifted since the morning briefing. Include: notable macro moves, sector developments, news that broke during the session, any price action that matters. If truly nothing changed, say so in one sentence.
 
-## New Opportunities
-If new high-conviction industries emerged since morning:
-List them with one sentence explanation of what changed.
-If nothing new: write "No new opportunities since morning briefing."
+## Notable Price Moves
+List 3-5 notable price moves from today — these do NOT have to be holdings. Include broad ETFs, sector leaders, or any ticker with a move that matters to this portfolio. For each: ticker, move percentage, and one sentence on why it matters.
+
+## Portfolio Actions Before Close
+For EVERY open position, write:
+TICKER — HOLD / WATCH / REDUCE / EXIT
+Entry:  | Current:  | P&L: X%
+Then 2-3 bullet points explaining:
+- What happened today specifically that affects this position (cite actual news or price action — not just the P&L number)
+- Whether the thesis is intact, strengthening, or breaking
+- Exact action: hold into tomorrow, reduce X% before close, exit fully, or buy more
+Do NOT skip any position. Do NOT use generic phrases like "position stable" or "no material changes" unless you can confirm nothing whatsoever occurred in this sector today.
+
+## New or Strengthened Candidates
+For each high-conviction industry (whether new or same as morning but with updated reasoning):
+INDUSTRY — conviction X/100 — NEW or STRENGTHENED
+Then 3-4 bullet points explaining:
+- What specific catalyst, news, or data point TODAY makes this compelling
+- Why the conviction score is what it is (cite the actual factors: momentum data, news catalysts, macro alignment, event scores)
+- ETF or specific stock ticker — and the exact reasoning why that vehicle over the alternative
+- Why act now vs waiting
+If nothing changed from morning and conviction is unchanged, say so clearly and re-explain the original thesis with the specific stock/ETF recommendation.
 
 ## Market Close Watch
-One sentence: the single most important thing to monitor before close.
-If nothing urgent: write "No urgent action required before close."
+The single most important thing to monitor or act on before market close today.
 """
 
     log("Calling Claude for afternoon update...")

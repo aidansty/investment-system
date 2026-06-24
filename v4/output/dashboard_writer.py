@@ -160,15 +160,37 @@ def write_dashboard_data(
     afternoon_candidates = []
 
     if run_type == "afternoon":
-        aft_text = briefing.get("sections", {}).get("What Changed", "") if briefing else ""
+        aft_sections = briefing.get("sections", {}) if briefing else {}
+
+        # What Changed
+        aft_text = (
+            aft_sections.get("What Changed Since Morning") or
+            aft_sections.get("What Changed") or ""
+        )
         what_changed = _extract_bullets(aft_text)
 
-        close_watch = briefing.get("sections", {}).get("Market Close Watch", "") if briefing else ""
-        if close_watch:
-            what_changed.append(f"<b>Close watch:</b> {close_watch.strip()}")
+        # Notable Price Moves
+        notable_text = aft_sections.get("Notable Price Moves", "")
+        notable_moves = _extract_bullets(notable_text)
 
-        afternoon_positions = position_review
-        afternoon_candidates = industry_opportunities
+        # Portfolio Actions Before Close — use Claude output, not hardcoded logic
+        portfolio_actions_text = (
+            aft_sections.get("Portfolio Actions Before Close") or
+            aft_sections.get("Portfolio Review") or ""
+        )
+        afternoon_positions = _parse_afternoon_positions(portfolio_actions_text, positions)
+
+        # New or Strengthened Candidates
+        candidates_text = (
+            aft_sections.get("New or Strengthened Candidates") or
+            aft_sections.get("New Opportunities") or ""
+        )
+        afternoon_candidates = _parse_afternoon_candidates(candidates_text, industry_opportunities)
+
+        # Close watch appended to what_changed
+        close_watch = aft_sections.get("Market Close Watch", "")
+        if close_watch and close_watch.strip():
+            what_changed.append(f"<b>Close watch:</b> {close_watch.strip()}")
 
         position_review = []
         industry_opportunities = []
@@ -267,6 +289,162 @@ def _is_market_open() -> bool:
     market_open = now.replace(hour=9, minute=30, second=0)
     market_close = now.replace(hour=16, minute=0, second=0)
     return market_open <= now <= market_close
+
+
+def _parse_afternoon_positions(text: str, positions: list) -> list:
+    """Parse Claude afternoon position review into structured list."""
+    if not text:
+        return []
+    results = []
+    pos_lookup = {p.get("ticker"): p for p in positions}
+    current_ticker = None
+    current_action = "Hold"
+    current_bullets = []
+
+    for line in text.split(chr(10)):
+        line = line.strip()
+        if not line:
+            if current_ticker:
+                raw = pos_lookup.get(current_ticker, {})
+                entry = raw.get("entry", 0) or raw.get("entry_price", 0) or 0
+                current = raw.get("current_price", 0) or 0
+                qty = raw.get("qty", 0) or 0
+                pct = round((current - entry) / entry * 100, 2) if entry > 0 else 0
+                results.append({
+                    "ticker": current_ticker,
+                    "action": current_action,
+                    "entry_price": entry,
+                    "current_price": current,
+                    "qty": qty,
+                    "pct_change": pct,
+                    "bullets": current_bullets[:4],
+                })
+                current_ticker = None
+                current_bullets = []
+            continue
+
+        # Detect ticker line: "TICKER — ACTION"
+        upper = line.upper()
+        for action in ["EXIT", "REDUCE", "TRIM", "WATCH", "HOLD", "BUY MORE"]:
+            if action in upper and chr(8212) in line or " — " in line or " - " in line:
+                parts = line.replace(chr(8212), "—").split("—")
+                if parts:
+                    candidate = parts[0].strip().split()[0].upper()
+                    if candidate in pos_lookup or len(candidate) <= 5:
+                        if current_ticker:
+                            raw = pos_lookup.get(current_ticker, {})
+                            entry = raw.get("entry", 0) or raw.get("entry_price", 0) or 0
+                            current_p = raw.get("current_price", 0) or 0
+                            qty = raw.get("qty", 0) or 0
+                            pct = round((current_p - entry) / entry * 100, 2) if entry > 0 else 0
+                            results.append({
+                                "ticker": current_ticker,
+                                "action": current_action,
+                                "entry_price": entry,
+                                "current_price": current_p,
+                                "qty": qty,
+                                "pct_change": pct,
+                                "bullets": current_bullets[:4],
+                            })
+                        current_ticker = candidate
+                        current_action = action.title()
+                        current_bullets = []
+                        break
+        else:
+            # Bullet line
+            if current_ticker and len(line) > 10:
+                cleaned = line.lstrip("•-* ").strip()
+                if cleaned:
+                    current_bullets.append(cleaned)
+
+    # Flush last ticker
+    if current_ticker:
+        raw = pos_lookup.get(current_ticker, {})
+        entry = raw.get("entry", 0) or raw.get("entry_price", 0) or 0
+        current_p = raw.get("current_price", 0) or 0
+        qty = raw.get("qty", 0) or 0
+        pct = round((current_p - entry) / entry * 100, 2) if entry > 0 else 0
+        results.append({
+            "ticker": current_ticker,
+            "action": current_action,
+            "entry_price": entry,
+            "current_price": current_p,
+            "qty": qty,
+            "pct_change": pct,
+            "bullets": current_bullets[:4],
+        })
+
+    # Fill in any positions Claude didn't mention as clean holds
+    mentioned = {r["ticker"] for r in results}
+    for p in positions:
+        ticker = p.get("ticker", "")
+        if ticker and ticker not in mentioned:
+            entry = p.get("entry", 0) or p.get("entry_price", 0) or 0
+            current_p = p.get("current_price", 0) or 0
+            qty = p.get("qty", 0) or 0
+            pct = round((current_p - entry) / entry * 100, 2) if entry > 0 else 0
+            results.append({
+                "ticker": ticker,
+                "action": "Hold",
+                "entry_price": entry,
+                "current_price": current_p,
+                "qty": qty,
+                "pct_change": pct,
+                "bullets": ["No new developments today — thesis intact, hold into tomorrow."],
+            })
+
+    return results
+
+
+def _parse_afternoon_candidates(text: str, fallback_opportunities: list) -> list:
+    """Parse Claude afternoon candidates section. Falls back to morning opportunities if empty."""
+    if not text or len(text.strip()) < 30:
+        return fallback_opportunities
+
+    candidates = []
+    current = None
+
+    for line in text.split(chr(10)):
+        line = line.strip()
+        if not line:
+            if current:
+                candidates.append(current)
+                current = None
+            continue
+
+        # Detect industry header line
+        if " — " in line or chr(8212) in line:
+            parts = line.replace(chr(8212), "—").split("—")
+            if len(parts) >= 2 and "conviction" in line.lower() or any(w in line for w in ["NEW", "STRENGTHENED", "/100"]):
+                if current:
+                    candidates.append(current)
+                conviction = 0
+                import re
+                m = re.search(r"(\d+)/100", line)
+                if m:
+                    conviction = int(m.group(1))
+                status = "NEW" if "NEW" in line.upper() else "STRENGTHENED" if "STRENGTHENED" in line.upper() else "CONFIRMED"
+                current = {
+                    "industry": parts[0].strip(),
+                    "conviction": conviction,
+                    "status": status,
+                    "bullets": [],
+                    "vehicle": "",
+                    "stocks": [],
+                    "etf": "",
+                    "term": "Medium-term",
+                }
+                continue
+
+        if current:
+            cleaned = line.lstrip("•-* ").strip()
+            if cleaned and len(cleaned) > 10:
+                current["bullets"].append(cleaned)
+
+    if current:
+        candidates.append(current)
+
+    return candidates if candidates else fallback_opportunities
 
 
 def _extract_bullets(text: str) -> list:
