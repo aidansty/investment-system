@@ -202,23 +202,8 @@ def main():
             run_type="afternoon",
             today=today,
             cash=0,
-            cost_basis=0,
-        )
-    except Exception as e:
-        log(f"Dashboard write error (non-fatal): {e}")
-
-    # Write dashboard data
-    try:
-        write_dashboard_data(
-            macro=macro,
-            industry_results=industry_results,
-            news_package=news_package,
-            positions=positions,
-            briefing=update,
-            run_type="afternoon",
-            today=today,
-            cash=0,
             cost_basis=sum(p.get("cost_basis", 0) for p in positions),
+            intraday={},
         )
         log("Dashboard data written successfully")
     except Exception as e:

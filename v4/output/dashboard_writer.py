@@ -461,39 +461,98 @@ def _extract_bullets(text: str) -> list:
 
 
 def _parse_position_review(text: str, positions: list) -> list:
+    """Parse Claude morning position review — reads actual Claude output, enriched with price data."""
+    pos_lookup = {p.get("ticker", ""): p for p in positions}
     reviews = []
+
+    if text:
+        # Parse Claude output: each position block starts with TICKER — ACTION
+        current_ticker = None
+        current_action = "Hold"
+        current_bullets = []
+
+        for line in text.split(chr(10)):
+            stripped = line.strip()
+            if not stripped:
+                if current_ticker:
+                    _flush_morning_position(current_ticker, current_action, current_bullets, pos_lookup, reviews)
+                    current_ticker = None
+                    current_bullets = []
+                continue
+
+            # Detect ticker header: TICKER — ACTION or **TICKER** — ACTION
+            clean = stripped.lstrip("*#").strip()
+            parts = clean.replace(chr(8212), "—").split("—")
+            if len(parts) >= 2:
+                candidate = parts[0].strip().lstrip("*").rstrip("*").strip().split()[0].upper()
+                action_part = parts[1].strip().upper()
+                if candidate in pos_lookup and any(a in action_part for a in ["HOLD","WATCH","TRIM","REDUCE","EXIT","BUY"]):
+                    if current_ticker:
+                        _flush_morning_position(current_ticker, current_action, current_bullets, pos_lookup, reviews)
+                    current_ticker = candidate
+                    current_action = next((a for a in ["EXIT","REDUCE","TRIM","WATCH","BUY MORE","HOLD"] if a in action_part), "Hold").title()
+                    current_bullets = []
+                    continue
+
+            if current_ticker:
+                cleaned = stripped.lstrip("•-* ").strip()
+                if cleaned and len(cleaned) > 10:
+                    current_bullets.append(cleaned)
+
+        if current_ticker:
+            _flush_morning_position(current_ticker, current_action, current_bullets, pos_lookup, reviews)
+
+    # Fill any positions Claude did not mention
+    mentioned = {r["ticker"] for r in reviews}
     for p in positions:
         ticker = p.get("ticker", "")
-        if not ticker:
-            continue
-        entry = p.get("entry_price", 0) or 0
-        current = p.get("current_price", 0) or 0
-        stop = p.get("stop_price", 0) or 0
-        pct = round((current - entry) / entry * 100, 2) if entry > 0 else 0
-        dist_stop = round((current - stop) / current * 100, 2) if current > 0 and stop > 0 else None
+        if ticker and ticker not in mentioned:
+            entry = p.get("entry", 0) or p.get("entry_price", 0) or 0
+            current = p.get("current_price", 0) or 0
+            qty = p.get("qty", 0) or 0
+            pct = round((current - entry) / entry * 100, 2) if entry > 0 else 0
+            reviews.append({
+                "ticker": ticker,
+                "action": "Hold",
+                "entry_price": entry,
+                "current_price": current,
+                "pct_change": pct,
+                "bullets": [f"Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pct:+.1f}%"],
+                "reasoning": p.get("what_to_do", "Hold — thesis intact."),
+                "summary": p.get("summary", ""),
+                "catalyst": p.get("catalyst", ""),
+                "why": p.get("why", ""),
+                "what_to_do": p.get("what_to_do", ""),
+                "industry": p.get("industry", ""),
+                "term": p.get("term", ""),
+            })
 
-        bullets = [
-            f"Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pct:+.1f}%",
-        ]
-        if dist_stop is not None:
-            bullets.append(f"Stop at ${stop:.2f} ({dist_stop:.1f}% away from current price)")
-        if pct <= -10:
-            action = "Watch"
-            reasoning = f"Down {pct:.1f}% — approaching mandatory review threshold. Thesis should be reassessed."
-        elif pct <= -5:
-            action = "Watch"
-            reasoning = f"Down {pct:.1f}% from entry. Monitor closely but no action required yet."
-        else:
-            action = "Hold"
-            reasoning = f"Position stable. No material changes to thesis today."
-
-        reviews.append({
-            "ticker": ticker,
-            "action": action,
-            "bullets": bullets,
-            "reasoning": reasoning,
-        })
     return reviews
+
+
+def _flush_morning_position(ticker, action, bullets, pos_lookup, reviews):
+    p = pos_lookup.get(ticker, {})
+    entry = p.get("entry", 0) or p.get("entry_price", 0) or 0
+    current = p.get("current_price", 0) or 0
+    qty = p.get("qty", 0) or 0
+    pct = round((current - entry) / entry * 100, 2) if entry > 0 else 0
+    header = f"Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pct:+.1f}%"
+    all_bullets = [header] + bullets if bullets else [header, p.get("what_to_do", "")]
+    reviews.append({
+        "ticker": ticker,
+        "action": action,
+        "entry_price": entry,
+        "current_price": current,
+        "pct_change": pct,
+        "bullets": all_bullets[:5],
+        "reasoning": bullets[0] if bullets else p.get("what_to_do", ""),
+        "summary": p.get("summary", ""),
+        "catalyst": p.get("catalyst", ""),
+        "why": p.get("why", ""),
+        "what_to_do": p.get("what_to_do", ""),
+        "industry": p.get("industry", ""),
+        "term": p.get("term", ""),
+    })
 
 
 def _classify_term(ind: dict) -> str:
