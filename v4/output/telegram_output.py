@@ -141,6 +141,10 @@ def build_and_send_morning_telegram(
                 action = "REVIEW"
                 reason = f"Down {pnl_str} — mandatory thesis review triggered. Has anything changed?"
 
+            # Only surface positions requiring attention — skip clean HOLDs
+            if action == "HOLD":
+                continue
+
             action_emoji = {"EXIT": "🔴", "TRIM": "🟠", "WATCH": "🟡", "REVIEW": "🟡"}.get(action, "🟢")
             msg2.append(f"{action_emoji} <b>{ticker}</b> {pnl_str} — {action}")
             msg2.append(f"   {reason}")
@@ -238,16 +242,50 @@ def build_and_send_afternoon_telegram(
             msg1.append(f"• <b>{ticker} {move}</b> — {reason[:100]}")
         msg1.append("")
 
-    # Position updates
-    if positions:
-        msg1.append("<b>Your Positions</b>")
+    # Position updates — only show positions where something changed or action needed
+    position_review = sections.get("Open Position Review", "") or sections.get("Portfolio Actions", "")
+    if positions and position_review:
+        flagged = []
         for p in positions:
             ticker = p.get("ticker", "")
-            entry = p.get("entry_price", 0) or 0
+            entry = p.get("entry", 0) or p.get("entry_price", 0) or 0
             current = p.get("current_price", 0) or 0
             pnl = round((current - entry) / entry * 100, 1) if entry > 0 else 0
-            pnl_emoji = "🟢" if pnl >= 0 else "🔴"
-            msg1.append(f"{pnl_emoji} {ticker}: {pnl:+.1f}%")
+            pnl_str = f"{pnl:+.1f}%"
+
+            # Determine if Claude flagged this position with an action
+            action = None
+            reason = None
+            for line in position_review.split("
+"):
+                if ticker in line:
+                    upper = line.upper()
+                    if "EXIT" in upper or "SELL" in upper or "CLOSE" in upper:
+                        action = "CLOSE"
+                        reason = line.strip()[:120]
+                    elif "BUY" in upper or "ADD" in upper:
+                        action = "BUY MORE"
+                        reason = line.strip()[:120]
+                    elif "TRIM" in upper or "REDUCE" in upper:
+                        action = "TRIM"
+                        reason = line.strip()[:120]
+                    elif "WATCH" in upper or "MONITOR" in upper:
+                        action = "WATCH"
+                        reason = line.strip()[:120]
+                    break
+
+            if action:
+                emoji = {"CLOSE": "🔴", "TRIM": "🟠", "BUY MORE": "🟢", "WATCH": "🟡"}.get(action, "⚪")
+                flagged.append(f"{emoji} <b>{ticker}</b> {pnl_str} — {action}")
+                if reason:
+                    flagged.append(f"   {reason}")
+
+        if flagged:
+            msg1.append("<b>Positions Needing Attention</b>")
+            msg1.extend(flagged)
+        else:
+            msg1.append("<b>Positions</b>")
+            msg1.append("• No position changes warranted — hold everything into close.")
 
     msg1.append("")
     msg1.append("→ Full update on dashboard")
