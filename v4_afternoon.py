@@ -45,12 +45,60 @@ def main():
         log("Market closed. Exiting.")
         sys.exit(0)
 
-    # Load positions
+    # Load positions from positions.json
     positions = []
     try:
-        positions = get_open_positions()
+        import json as _json
+        import yfinance as _yf
+        with open("v4/config/positions.json", "r") as _f:
+            _config = _json.load(_f)
+        _raw = _config.get("positions", [])
+        _stock_tickers = [p["ticker"] for p in _raw if p.get("type") != "Crypto"]
+        _crypto_map = {"BTC": "BTC-USD", "ETH": "ETH-USD", "XRP": "XRP-USD", "ZEC": "ZEC-USD"}
+        _crypto_fetch = [_crypto_map[p["ticker"]] for p in _raw if p.get("type") == "Crypto" and p["ticker"] in _crypto_map]
+        _all_fetch = _stock_tickers + _crypto_fetch
+        _price_cache = {}
+        try:
+            _data = _yf.download(_all_fetch, period="2d", auto_adjust=True, progress=False)
+            _close = _data["Close"] if "Close" in _data.columns else _data
+            for _t in _stock_tickers:
+                if _t in _close.columns:
+                    _s = _close[_t].dropna()
+                    if not _s.empty:
+                        _price_cache[_t] = round(float(_s.iloc[-1]), 2)
+            for _t, _yt in _crypto_map.items():
+                if _yt in _close.columns:
+                    _s = _close[_yt].dropna()
+                    if not _s.empty:
+                        _price_cache[_t] = round(float(_s.iloc[-1]), 2)
+        except Exception as _e:
+            log(f"Price fetch error: {_e}")
+        for _p in _raw:
+            _t = _p["ticker"]
+            _qty = _p["qty"]
+            _entry = _p["entry"]
+            _current = _price_cache.get(_t, 0)
+            _balance = round(_current * _qty, 2) if _current else 0
+            _pct = round((_current - _entry) / _entry * 100, 2) if _entry > 0 and _current > 0 else 0
+            positions.append({
+                "ticker": _t, "type": _p.get("type", "Stock"),
+                "term": _p.get("term", "Medium-term"),
+                "qty": _qty, "entry_price": _entry,
+                "current_price": _current, "balance": _balance,
+                "cost_basis": _p.get("cost_basis", 0),
+                "pct_change": _pct,
+                "dollar_change": round((_current - _entry) * _qty, 2) if _entry > 0 else 0,
+                "industry": _p.get("industry", ""),
+                "summary": _p.get("summary", ""),
+                "catalyst": _p.get("catalyst", ""),
+                "why": _p.get("why", ""),
+                "what_to_do": _p.get("what_to_do", ""),
+                "stop_price": _p.get("stop_price", 0),
+                "thesis": _p.get("summary", ""),
+            })
+        log(f"Loaded {len(positions)} positions from positions.json")
     except Exception as e:
-        log(f"Portfolio load error: {e}")
+        log(f"Position load error: {e}")
 
     # Load morning snapshot
     morning_top = load_morning_snapshot(today)
@@ -136,6 +184,23 @@ def main():
             cash=0,
             cost_basis=0,
         )
+    except Exception as e:
+        log(f"Dashboard write error (non-fatal): {e}")
+
+    # Write dashboard data
+    try:
+        write_dashboard_data(
+            macro=macro,
+            industry_results=industry_results,
+            news_package=news_package,
+            positions=positions,
+            briefing=update,
+            run_type="afternoon",
+            today=today,
+            cash=0,
+            cost_basis=sum(p.get("cost_basis", 0) for p in positions),
+        )
+        log("Dashboard data written successfully")
     except Exception as e:
         log(f"Dashboard write error (non-fatal): {e}")
 
