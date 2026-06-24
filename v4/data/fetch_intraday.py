@@ -32,13 +32,15 @@ def fetch_intraday_candles(positions: list) -> dict:
     t_to = int(min(now_utc, market_close_utc).timestamp())
 
     if now_utc < market_open_utc:
-        yesterday_open = market_open_utc - timedelta(days=1)
-        while yesterday_open.weekday() >= 5:
-            yesterday_open -= timedelta(days=1)
-        yesterday_close = yesterday_open.replace(hour=20, minute=0, second=0)
-        t_from = int(yesterday_open.timestamp())
-        t_to = int(yesterday_close.timestamp())
-        log("Pre-market: fetching previous session candles")
+        # Before market open — fetch yesterday's full session
+        prev = now_utc - timedelta(days=1)
+        while prev.weekday() >= 5:
+            prev -= timedelta(days=1)
+        prev_open = prev.replace(hour=13, minute=30, second=0, microsecond=0)
+        prev_close = prev.replace(hour=20, minute=0, second=0, microsecond=0)
+        t_from = int(prev_open.timestamp())
+        t_to = int(prev_close.timestamp())
+        log(f"Pre-market: fetching {prev.strftime('%Y-%m-%d')} session candles")
 
     crypto_tickers = {"BTC", "ETH", "XRP", "ZEC", "BNB", "SOL", "DOGE"}
     stock_positions = [

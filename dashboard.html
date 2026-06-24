@@ -298,7 +298,10 @@ async function fetchLivePrices(tickers) {
 
 // Cash — persisted in localStorage, never resets on reload
 const CASH_KEY = 'investment_desk_cash';
+// Cash only comes from localStorage — never from pipeline (pipeline cash is always 0)
 let currentCash = parseFloat(localStorage.getItem(CASH_KEY) || '0');
+// Ensure pipeline cash field never overwrites user-set value
+if (BRIEFING_DATA && BRIEFING_DATA.cash !== undefined) delete BRIEFING_DATA.cash;
 document.getElementById('s-cash').textContent = fmt(currentCash);
 
 // Cash edit modal

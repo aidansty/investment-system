@@ -53,39 +53,104 @@ def write_dashboard_data(
                 s = sentence.strip()
                 if s and len(s) > 20:
                     bullets.append(s)
+        # Add portfolio impact as a bullet if present
+        impact = n.get("portfolio_impact", "") or n.get("impact", "")
+        if impact and impact not in bullets:
+            bullets.append(impact)
+        # Add affected tickers
+        affected = n.get("affected_tickers", []) or n.get("tickers", [])
+        if affected:
+            bullets.append(f"Affects: {', '.join(affected)}")
         news_cards.append({
             "headline": n.get("headline", ""),
             "url": n.get("url", ""),
             "source": n.get("source", ""),
-            "bullets": bullets[:3],
+            "bullets": bullets[:5],
+            "affected_tickers": affected,
+            "sentiment": n.get("sentiment", ""),
         })
 
-    # Position review from briefing
-    pos_review_text = briefing.get("sections", {}).get("Open Position Review", "") if briefing else ""
+    # Position review from briefing — try multiple section name variants Claude might use
+    sections = briefing.get("sections", {}) if briefing else {}
+    pos_review_text = (
+        sections.get("Open Position Review") or
+        sections.get("Position Review") or
+        sections.get("Portfolio Review") or
+        sections.get("Holdings Review") or
+        ""
+    )
     position_review = _parse_position_review(pos_review_text, positions)
+
+    # Enrich each position with quant data and entry price from positions.json
+    pos_lookup = {p.get("ticker"): p for p in positions}
+    for pr in position_review:
+        ticker = pr.get("ticker", "")
+        raw = pos_lookup.get(ticker, {})
+        pr["entry_price"] = raw.get("entry", 0) or raw.get("entry_price", 0)
+        pr["term"] = raw.get("term", "")
+        pr["industry"] = raw.get("industry", "")
+        pr["what_to_do"] = raw.get("what_to_do", "")
+        # Pull quant data if available
+        quant = raw.get("quant", {})
+        if quant:
+            pr["revenue_growth"] = quant.get("revenue_growth_yoy")
+            pr["fcf"] = quant.get("fcf")
+            pr["avg_surprise"] = quant.get("avg_earnings_surprise_pct")
+            pr["analyst_target"] = quant.get("analyst_price_target")
 
     # Industry opportunities
     top_industries = industry_results.get("top_industries", []) if industry_results else []
     industry_opportunities = []
+    # Get industry section from Claude briefing for richer reasoning
+    sections = briefing.get("sections", {}) if briefing else {}
+    ind_briefing_text = (
+        sections.get("Industry Opportunities") or
+        sections.get("Top Industry Opportunities") or
+        sections.get("Industry Candidates") or ""
+    )
+
     for ind in top_industries[:3]:
         ind_news = ind.get("relevant_news", [])
+        industry_name = ind["industry"]
+
+        # Build rich bullets from actual data + news
         bullets = []
-        bullets.append(f"{ind['etf']} outperforming SPY by {ind.get('excess_63d', 0):+.1f}pp over 63 trading days")
-        if ind.get("ripple_benefits"):
-            bullets.append(f"Ripple tailwinds from: {', '.join(ind['ripple_benefits'])}")
+        excess = ind.get("excess_63d", 0)
+        bullets.append(f"{ind['etf']} is outperforming SPY by {excess:+.1f} percentage points over the last 63 trading days — sustained momentum that goes beyond a one-day move.")
+
         if ind_news:
-            bullets.append(ind_news[0].get("headline", ""))
-        bullets.append(f"Macro alignment: {ind.get('macro_alignment', 'Neutral')} | Event score: {int(ind.get('event_score', 0.5) * 100)}/100")
+            for n in ind_news[:2]:
+                headline = n.get("headline", "")
+                summary = n.get("summary", "")
+                if headline:
+                    bullets.append(f"{headline}" + (f" — {summary[:120]}" if summary else ""))
+
+        if ind.get("ripple_benefits"):
+            bullets.append(f"Ripple tailwinds flowing in from related sectors: {', '.join(ind['ripple_benefits'][:3])}.")
+
+        macro = ind.get("macro_alignment", "Neutral")
+        event_score = int(ind.get("event_score", 0.5) * 100)
+        bullets.append(f"Macro environment is {macro} for this industry. Event catalyst score: {event_score}/100 — {'multiple confirmed catalysts' if event_score >= 60 else 'moderate catalyst activity'}.")
+
+        # Vehicle: ETF vs stocks with specific reasoning
+        conviction = ind.get("conviction_score", 0)
+        top_stocks = ind.get("top_stocks", []) or ind.get("validated_stocks", []) or []
+        if conviction >= 70 and top_stocks:
+            vehicle = f"Individual stocks — at this conviction level, concentrated positions in sector leaders outperform the ETF. Focus on: {', '.join(top_stocks[:3])}."
+        elif conviction >= 55:
+            vehicle = f"{ind['etf']} ETF — conviction is building but not yet high enough to concentrate in individual names. The ETF captures the sector move with less single-stock risk."
+        else:
+            vehicle = f"{ind['etf']} ETF — early-stage opportunity. Use the ETF for broad exposure until a clear sector leader emerges."
 
         industry_opportunities.append({
-            "industry": ind["industry"],
+            "industry": industry_name,
             "etf": ind["etf"],
-            "conviction": ind.get("conviction_score", 0),
+            "conviction": conviction,
             "term": _classify_term(ind),
             "bullets": bullets,
-            "vehicle": "Individual stocks preferred — sector leadership is concentrated" if ind.get("conviction_score", 0) >= 70 else "ETF provides diversified exposure at this conviction level",
+            "vehicle": vehicle,
+            "stocks": top_stocks[:4],
             "why_now": _get_why_now(ind),
-            "stocks": [],
         })
 
     # Afternoon-specific sections
@@ -108,29 +173,31 @@ def write_dashboard_data(
         position_review = []
         industry_opportunities = []
 
-    # Positions for portfolio tab
+    # Positions for portfolio tab — field names match positions.json exactly
     portfolio_positions = []
     for p in positions:
-        entry = p.get("entry_price", 0) or 0
+        entry = p.get("entry", 0) or p.get("entry_price", 0) or 0
         current = p.get("current_price", 0) or 0
-        qty = p.get("position_size") or p.get("qty", 0) or 0
-        balance = round(current * qty, 2) if current and qty else (p.get("balance", 0) or 0)
+        qty = p.get("qty", 0) or p.get("position_size", 0) or 0
+        balance = round(current * qty, 2) if current and qty else 0
         pct_change = round((current - entry) / entry * 100, 2) if entry > 0 and current > 0 else 0
-        dollar_change = round((current - entry) * (qty or 1), 2) if entry > 0 else 0
+        dollar_change = round((current - entry) * qty, 2) if entry > 0 and qty else 0
 
         portfolio_positions.append({
             "ticker": p.get("ticker", ""),
-            "type": "Stock",
-            "term": p.get("holding_type", "Medium-term"),
+            "type": p.get("type", "Stock"),
+            "term": p.get("term", p.get("holding_type", "Medium-term")),
             "qty": qty,
+            "entry_price": entry,
             "current_price": current,
             "balance": balance,
             "pct_change": pct_change,
             "dollar_change": dollar_change,
-            "summary": p.get("thesis", ""),
-            "catalyst": "",
-            "why": "",
-            "industry": p.get("ticker", ""),
+            "summary": p.get("summary", p.get("thesis", "")),
+            "catalyst": p.get("catalyst", ""),
+            "why": p.get("why", ""),
+            "what_to_do": p.get("what_to_do", ""),
+            "industry": p.get("industry", p.get("ticker", "")),
         })
 
     # Performance history — placeholder until real history is tracked
