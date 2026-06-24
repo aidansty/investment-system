@@ -147,7 +147,21 @@ def build_and_send_morning_telegram(
 
             action_emoji = {"EXIT": "🔴", "TRIM": "🟠", "WATCH": "🟡", "REVIEW": "🟡"}.get(action, "🟢")
             msg2.append(f"{action_emoji} <b>{ticker}</b> {pnl_str} — {action}")
-            msg2.append(f"   {reason}")
+            ticker_block = ""
+            in_block = False
+            for line in pos_review.split("
+"):
+                if ticker in line:
+                    in_block = True
+                if in_block and line.strip():
+                    ticker_block += " " + line.strip()
+                if in_block and len(ticker_block) > 20 and line.strip() == "":
+                    break
+            sentences = [s.strip() for s in ticker_block.replace("
+", " ").split(".") if len(s.strip()) > 20]
+            bullets = sentences[:3] if sentences else [reason]
+            for b in bullets:
+                msg2.append(f"   • {b}.")
 
         msg2.append("")
 
@@ -277,8 +291,21 @@ def build_and_send_afternoon_telegram(
             if action:
                 emoji = {"CLOSE": "🔴", "TRIM": "🟠", "BUY MORE": "🟢", "WATCH": "🟡"}.get(action, "⚪")
                 flagged.append(f"{emoji} <b>{ticker}</b> {pnl_str} — {action}")
-                if reason:
-                    flagged.append(f"   {reason}")
+                # Extract 2-3 sentences from the review block as bullets
+                ticker_block = ""
+                in_block = False
+                for line in position_review.split("
+"):
+                    if ticker in line:
+                        in_block = True
+                    if in_block and line.strip():
+                        ticker_block += " " + line.strip()
+                    if in_block and len(ticker_block) > 20 and line.strip() == "":
+                        break
+                sentences = [s.strip() for s in ticker_block.replace("
+"," ").split(".") if len(s.strip()) > 20]
+                for s in sentences[:3]:
+                    flagged.append(f"   • {s}.")
 
         if flagged:
             msg1.append("<b>Positions Needing Attention</b>")
