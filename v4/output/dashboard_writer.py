@@ -173,7 +173,7 @@ def write_dashboard_data(
         notable_text = aft_sections.get("Notable Price Moves", "")
         notable_moves = _extract_bullets(notable_text)
 
-        # Portfolio Actions Before Close — use Claude output, not hardcoded logic
+        # Portfolio Actions Before Close
         portfolio_actions_text = (
             aft_sections.get("Portfolio Actions Before Close") or
             aft_sections.get("Portfolio Review") or ""
@@ -192,8 +192,9 @@ def write_dashboard_data(
         if close_watch and close_watch.strip():
             what_changed.append(f"<b>Close watch:</b> {close_watch.strip()}")
 
-        position_review = []
-        industry_opportunities = []
+        # IMPORTANT: preserve morning briefing data — do not clear it
+        # Morning position_review and industry_opportunities stay in their keys
+        # so the morning briefing tab remains populated after afternoon run
 
     # Positions for portfolio tab — field names match positions.json exactly
     portfolio_positions = []
@@ -220,6 +221,7 @@ def write_dashboard_data(
             "why": p.get("why", ""),
             "what_to_do": p.get("what_to_do", ""),
             "industry": p.get("industry", p.get("ticker", "")),
+            "cost_basis": p.get("cost_basis", 0),
         })
 
     # Performance history — placeholder until real history is tracked

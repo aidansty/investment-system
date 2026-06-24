@@ -365,8 +365,8 @@ async function fetchAndUpdatePrices() {
       const livePrice = prices[p.ticker];
       if (livePrice == null) return p;
       const balance = round2(livePrice * p.qty);
-      const pctChange = p.entry_price > 0 ? round2((livePrice - p.entry_price) / p.entry_price * 100) : 0;
-      const dollarChange = round2((livePrice - p.entry_price) * p.qty);
+      const pctChange = p.entry_price > 0 ? round2((livePrice - p.entry_price) / p.entry_price * 100) : (p.pct_change || 0);
+      const dollarChange = p.entry_price > 0 ? round2((livePrice - p.entry_price) * p.qty) : (p.dollar_change || 0);
       return { ...p, current_price: livePrice, balance, pct_change: pctChange, dollar_change: dollarChange };
     });
 
@@ -687,8 +687,8 @@ async function fetchCryptoOnly() {
         ...p,
         current_price: livePrice,
         balance: round2(livePrice * p.qty),
-        pct_change: p.entry_price > 0 ? round2((livePrice - p.entry_price) / p.entry_price * 100) : 0,
-        dollar_change: round2((livePrice - p.entry_price) * p.qty),
+        pct_change: p.entry_price > 0 ? round2((livePrice - p.entry_price) / p.entry_price * 100) : (p.pct_change || 0),
+        dollar_change: p.entry_price > 0 ? round2((livePrice - p.entry_price) * p.qty) : (p.dollar_change || 0),
       };
     });
 
