@@ -710,6 +710,11 @@ TERM_ORDER.forEach(term => {
     const card = document.createElement('div');
     card.className = 'pos-card';
 
+    // Get action from position_review (Claude's actual recommendation) not what_to_do text
+    const reviewData = (BRIEFING_DATA.position_review || []).find(r => r.ticker === p.ticker);
+    const reviewAction = reviewData?.action || '';
+    const badgeSource = reviewAction || whatToDo;
+
     // Button (toggle header)
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'pos-toggle';
@@ -734,7 +739,7 @@ TERM_ORDER.forEach(term => {
           <div class="pos-dol" id="dol-${i}">${fmtDol(dol)}</div>
         </div>
       </div>
-      ${actionBadge(whatToDo)}`;
+      ${actionBadge(badgeSource)}`;
 
     // Detail panel (sibling of button, inside card)
     const detailDiv = document.createElement('div');

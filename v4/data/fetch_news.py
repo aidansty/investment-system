@@ -160,29 +160,31 @@ def deduplicate_and_summarize(news_items: list) -> list:
     # Build positions context for impact analysis
     positions_str = "SPY, NVDA, SPCX, AMD, MU, INTC, PLTR, CRWV, NOK, SCO, HUM, BTC, ZEC, ETH, XRP"
 
-    prompt = f"""Here are {len(news_items)} financial news headlines that may cover overlapping stories.
+    prompt = f"""You are analyzing financial news for an investor with these holdings: {positions_str}
 
-CURRENT HOLDINGS: {positions_str}
+Here are {len(news_items)} headlines to analyze:
 
 {headlines_block}
 
-Group headlines that cover the SAME underlying story or event together.
-For each group:
-1. Write a 2-3 sentence summary of what the news actually is
-2. Identify which current holdings or industries this affects (use exact tickers)
-3. Write 1-2 sentences on how this affects the portfolio — is it bullish, bearish, or neutral for those holdings? Can we capitalize on this?
-4. Assign a sentiment: bullish, bearish, or neutral
+Group headlines covering the SAME story together. For each unique story, return a JSON object.
 
-Return ONLY a JSON array in this exact format, nothing else:
+IMPORTANT: Only include news that is relevant to the investor — either it affects their holdings, or it represents a potential new investment opportunity, or it affects the overall market significantly. Skip irrelevant news entirely.
+
+Return ONLY a valid JSON array. No markdown, no explanation, just the JSON:
 [
   {{
-    "headline": "Short descriptive title for the story/group",
-    "summary": "2-3 sentence summary of what the news actually is",
-    "portfolio_impact": "1-2 sentences on how this affects the portfolio and whether to act",
-    "affected_tickers": ["NVDA", "AMD"],
-    "sentiment": "bullish",
-    "source_count": 3,
-    "category": "fed/economic/industry/company/geopolitical/ipo"
+    "headline": "Clear descriptive title (max 80 chars)",
+    "summary": "2-3 sentences explaining exactly what happened and why it matters",
+    "portfolio_impact": "1-2 sentences on how this specifically affects the investor — is it bullish or bearish for their holdings, or is this a new opportunity they should consider?",
+    "bullets": [
+      "What happened: one clear sentence",
+      "Why it matters: one clear sentence on market or sector impact",
+      "Portfolio relevance: how this affects the investor specifically"
+    ],
+    "affected_tickers": ["list of tickers from holdings affected, or new tickers representing opportunities"],
+    "sentiment": "bullish or bearish or neutral",
+    "source_count": 1,
+    "category": "fed/economic/industry/company/geopolitical/crypto"
   }}
 ]"""
 

@@ -204,13 +204,23 @@ Never apply a blanket exit rule before earnings. Analyze the actual setup: guida
 Write 3-5 bullet points explaining what the VIX level, trend, and macro regime actually mean for the portfolio today. Do not just restate the numbers — explain what they mean. Example: if VIX is 18 and falling, explain why that is good for risk assets and what it signals about market confidence. Explain the regime (Bullish/Bearish/Neutral) in plain English and why it matters for today specifically. Each bullet must start with a dash (-).
 
 ## Open Position Review
-For each position write exactly:
-TICKER — HOLD / WATCH / TRIM / EXIT
-Then 2-3 bullet points (starting with -) explaining:
-- What the data and news say about this position today
-- Whether the thesis is intact, strengthening, or at risk
-- Exact recommended action and why
-Use the confirmed earnings dates provided above. Never use generic phrases like "position stable" or "no material changes" — always cite specific data, news, or price action.
+For EVERY position write exactly this format:
+
+TICKER — HOLD / WATCH / TRIM / EXIT / CLOSE
+- Bullet 1: Current P&L context and what drove it today (cite specific news or data)
+- Bullet 2: Thesis status — is it intact, strengthening, or breaking? Why?
+- Bullet 3: Specific action and exact reasoning (not generic — cite the actual catalyst, stop level, or event)
+- Bullet 4 (optional): What to watch for next / upcoming catalyst or risk event
+
+Rules:
+- Use WATCH if the position needs monitoring due to approaching stop, upcoming earnings, or negative news
+- Use CLOSE or EXIT if a hard stop has been breached or thesis has broken
+- Use TRIM if position is oversized or risk/reward has shifted
+- Use HOLD only if thesis is fully intact and no action is needed
+- NEVER say "hold and monitor" — that is WATCH not HOLD
+- PLTR hard stop is  — if price is below , action must be CLOSE
+- MU earnings have already occurred — do not say "exit before earnings"
+- Always use the CONFIRMED EARNINGS DATES provided above, never estimate
 For each held position:
 TICKER — HOLD / WATCH / REDUCE / EXIT
 One sentence explaining the recommendation based on current data.

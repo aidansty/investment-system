@@ -38,7 +38,16 @@ def write_dashboard_data(
 
     # Market bullets from briefing
     market_overview = briefing.get("sections", {}).get("Market Overview", "") if briefing else ""
-    market_bullets = _extract_bullets(market_overview)
+    # Extract bullets from Market Overview — handle both dash bullets and prose sentences
+    market_bullets = []
+    if market_overview:
+        for line in market_overview.split(chr(10)):
+            stripped = line.strip().lstrip("- •*").strip()
+            if len(stripped) > 20:
+                market_bullets.append(stripped)
+        if not market_bullets:
+            # Fall back to sentence splitting
+            market_bullets = [s.strip() + "." for s in market_overview.replace(chr(10), " ").split(".") if len(s.strip()) > 20][:5]
 
     # News
     recent_news = news_package.get("recent_news", [])
@@ -79,6 +88,15 @@ def write_dashboard_data(
         sections.get("Holdings Review") or
         ""
     )
+    # If section parsing failed, try extracting from raw briefing text
+    if not pos_review_text and briefing:
+        raw = briefing.get("raw_text", "")
+        if raw:
+            # Find the position review section in raw text
+            import re
+            match = re.search(r"##\s*(?:Open )?Position Review.*?(?=##|$)", raw, re.DOTALL | re.IGNORECASE)
+            if match:
+                pos_review_text = match.group(0)
     position_review = _parse_position_review(pos_review_text, positions)
 
     # Enrich each position with quant data and entry price from positions.json
@@ -123,7 +141,7 @@ def write_dashboard_data(
                 headline = n.get("headline", "")
                 summary = n.get("summary", "")
                 if headline:
-                    bullets.append(f"{headline}" + (f" — {summary[:120]}" if summary else ""))
+                    bullets.append(f"{headline}" + (f" — {summary[:300]}" if summary else ""))
 
         if ind.get("ripple_benefits"):
             bullets.append(f"Ripple tailwinds flowing in from related sectors: {', '.join(ind['ripple_benefits'][:3])}.")

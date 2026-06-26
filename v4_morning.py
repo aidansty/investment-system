@@ -113,6 +113,7 @@ def main():
                         r = _req.get(f"https://api.coinbase.com/v2/prices/{pair}/spot", timeout=5)
                         if r.status_code == 200:
                             price_cache[ct] = round(float(r.json()["data"]["amount"]), 2)
+                            log(f"Coinbase {ct}: ${price_cache[ct]:,.2f}")
                     except Exception as e:
                         log(f"Coinbase price error for {ct}: {e}")
             update_position_prices(positions, price_cache)
