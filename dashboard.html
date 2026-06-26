@@ -753,7 +753,7 @@ TERM_ORDER.forEach(term => {
       <div class="pos-detail-label">Why ${termLabel.toLowerCase()}</div>
       <div class="pos-detail-text">${p.why || '—'}</div>
       <div class="pos-detail-label" style="margin-top:12px;">What to do</div>
-      <div class="pos-what-to-do">${whatToDo || "See morning briefing for today's recommendation."}</div>`;
+      <div class="pos-what-to-do">${reviewData?.bullets?.slice(1).join('<br><br>') || reviewData?.reasoning || whatToDo || "See morning briefing for today's recommendation."}</div>`;
 
     card.appendChild(toggleBtn);
     card.appendChild(detailDiv);
