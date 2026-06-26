@@ -260,8 +260,7 @@ def build_and_send_afternoon_telegram(
     if not what_changed:
         import re
         raw = briefing.get("raw_text", "") if briefing else ""
-        match = re.search(r"What Changed.*?
-(.*?)(?=##|$)", raw, re.DOTALL | re.IGNORECASE)
+        match = re.search(r"What Changed.*?\n(.*?)(?=##|$)", raw, re.DOTALL | re.IGNORECASE)
         if match:
             what_changed = match.group(1).strip()
     if what_changed:
