@@ -206,8 +206,7 @@ def write_dashboard_data(
         what_changed = _extract_bullets(aft_text)
         if not what_changed and raw_text:
             # Last resort: look for any lines after "What Changed" in raw text
-            match = re.search(r"What Changed.*?
-(.*?)(?=##|$)", raw_text, re.DOTALL | re.IGNORECASE)
+            match = re.search(r"What Changed.*?\n(.*?)(?=##|$)", raw_text, re.DOTALL | re.IGNORECASE)
             if match:
                 what_changed = _extract_bullets(match.group(1))
 
