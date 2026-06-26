@@ -226,9 +226,7 @@ def _build_action_items(positions: list, forward_catalysts: list) -> list:
         # Stop proximity warning
         # No hardcoded stop alerts — Claude's analysis drives all action recommendations
 
-        # Large loss with no stop buffer
-        if pnl <= -15:
-            items.append(f"🔴 {ticker}: down {pnl:+.1f}% — mandatory review, has the thesis changed?")
+        # No hardcoded loss thresholds — Claude drives all recommendations
 
     return items
 
@@ -270,14 +268,20 @@ def build_and_send_afternoon_telegram(
             msg1.append(f"• {s}.")
         msg1.append("")
 
-    # Notable moves
+    # Notable moves — handle both dict objects and plain strings
     if notable_moves:
         msg1.append("<b>Notable Price Moves</b>")
         for m in notable_moves[:4]:
-            ticker = m.get("ticker", "")
-            move = m.get("move", "")
-            reason = m.get("reason", "")
-            msg1.append(f"• <b>{ticker} {move}</b> — {reason[:100]}")
+            if isinstance(m, dict):
+                ticker = m.get("ticker", "")
+                move = m.get("move", "")
+                reason = m.get("reason", "")
+                if ticker:
+                    msg1.append(f"• <b>{ticker} {move}</b> — {reason[:100]}")
+                elif reason:
+                    msg1.append(f"• {reason[:120]}")
+            elif isinstance(m, str) and len(m) > 5:
+                msg1.append(f"• {m[:120]}")
         msg1.append("")
 
     # Position updates — only show positions where something changed or action needed

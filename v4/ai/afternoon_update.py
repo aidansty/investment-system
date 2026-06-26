@@ -23,24 +23,20 @@ def generate_afternoon_update(
     # Build positions context
     positions_block = ""
     for p in positions:
-        entry = p.get("entry_price", 0) or p.get("entry", 0)
-        current = p.get("current_price", 0)
-        stop = p.get("stop_price", 0)
-        target = p.get("target_price", 0)
+        entry = p.get("entry", 0) or p.get("entry_price", 0) or 0
+        current = p.get("current_price", 0) or 0
         pnl = ((current - entry) / entry * 100) if entry > 0 else 0
-        dist_stop = ((current - stop) / current * 100) if current > 0 and stop > 0 else 0
-        dist_target = ((target - current) / current * 100) if current > 0 and target > 0 else 0
-
-        ticker_news = p.get("ticker_news", [])
-        news_lines = "\n".join([f"  - {n['headline']}" for n in ticker_news[:3]]) or "  No ticker-specific news today"
+        term = p.get("term", p.get("holding_type", "Not specified"))
+        thesis = p.get("summary", p.get("thesis", "Not recorded"))
+        what_to_do = p.get("what_to_do", "")
+        catalyst = p.get("catalyst", "")
 
         positions_block += f"""
-TICKER: {p['ticker']} | Holding Type: {p.get('holding_type', 'Not specified')}
+TICKER: {p['ticker']} | Term: {term} | Industry: {p.get('industry', '')}
 Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pnl:+.1f}%
-Stop: ${stop:.2f} ({dist_stop:.1f}% away) | Target: ${target:.2f} ({dist_target:.1f}% to target)
-Original thesis: {p.get('thesis', 'Not recorded')}
-Today's news for this ticker:
-{news_lines}
+Thesis: {thesis}
+Catalyst: {catalyst}
+Current guidance: {what_to_do}
 """
 
     # New opportunities vs morning

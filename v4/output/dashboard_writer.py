@@ -221,7 +221,7 @@ def write_dashboard_data(
         )
         notable_moves = _extract_bullets(notable_text)
         if not notable_moves:
-            notable_moves = ["No notable price moves identified this session."]
+            notable_moves = ["No notable price moves identified this session — markets closed or no significant moves detected."]
 
         # Portfolio Actions Before Close
         portfolio_actions_text = (

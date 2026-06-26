@@ -214,11 +214,21 @@ def main():
 
     # Send Telegram (2 messages)
     try:
+        # Get notable moves from Claude's output sections
+        aft_sections = update.get("sections", {}) if update else {}
+        notable_text = aft_sections.get("Notable Price Moves", "") or aft_sections.get("Notable Moves", "")
+        notable_moves_parsed = []
+        if notable_text:
+            for line in notable_text.split("\n"):
+                stripped = line.strip().lstrip("- •*").strip()
+                if len(stripped) > 10:
+                    notable_moves_parsed.append({"ticker": "", "move": "", "reason": stripped})
+
         build_and_send_afternoon_telegram(
             positions=positions,
             update=update,
-            new_opportunities=[industry_results.get("top_industries", [])],
-            notable_moves=[],
+            new_opportunities=industry_results.get("top_industries", []),
+            notable_moves=notable_moves_parsed,
             today=str(today),
         )
     except Exception as e:

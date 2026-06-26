@@ -957,14 +957,18 @@ const moveRow = document.getElementById('notable-moves');
 (BRIEFING_DATA.notable_moves || []).forEach(m => {
   const div = document.createElement('div');
   div.className = 'move-item';
-  div.innerHTML = '<span class="move-ticker">' + m.ticker + ' ' + (m.move || '') + '</span> &mdash; ' + (m.reason || '');
+  if (typeof m === 'string') {
+    div.innerHTML = '<span style="color:var(--text-body);font-size:13px;">' + m + '</span>';
+  } else {
+    div.innerHTML = '<span class="move-ticker">' + (m.ticker || '') + ' ' + (m.move || '') + '</span> &mdash; ' + (m.reason || '');
+  }
   moveRow.appendChild(div);
 });
 
 const aftPos = document.getElementById('afternoon-positions');
 (BRIEFING_DATA.afternoon_positions || []).forEach(p => {
-  const badgeClass = { 'Hold': 'badge-gray', 'Watch': 'badge-gray', 'Buy More': 'badge-green', 'Trim': 'badge-amber', 'Sell': 'badge-red' }[p.action] || 'badge-gray';
-  const reasonColor = { 'Hold': '#aeada5', 'Watch': '#aeada5', 'Buy More': 'var(--green)', 'Trim': 'var(--amber)', 'Sell': 'var(--red)' }[p.action] || '#aeada5';
+  const badgeClass = { 'Hold': 'badge-gray', 'Watch': 'badge-amber', 'Buy More': 'badge-green', 'Buy more': 'badge-green', 'Trim': 'badge-amber', 'Sell': 'badge-red', 'Close': 'badge-red', 'Exit': 'badge-red', 'Reduce': 'badge-amber' }[p.action] || 'badge-gray';
+  const reasonColor = { 'Hold': '#aeada5', 'Watch': 'var(--amber)', 'Buy More': 'var(--green)', 'Trim': 'var(--amber)', 'Sell': 'var(--red)', 'Close': 'var(--red)', 'Exit': 'var(--red)' }[p.action] || '#aeada5';
   const card = document.createElement('div');
   card.className = 'info-card';
   card.style.marginBottom = '12px';
