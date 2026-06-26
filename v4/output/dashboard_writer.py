@@ -46,8 +46,7 @@ def write_dashboard_data(
         raw = briefing.get("raw_text", "")
         if raw:
             import re
-            m = re.search(r"## Market Snapshot.*?
-(.*?)(?=##|$)", raw, re.DOTALL | re.IGNORECASE)
+            m = re.search(r"## Market Snapshot.*?\n(.*?)(?=##|$)", raw, re.DOTALL | re.IGNORECASE)
             if m:
                 market_overview = m.group(1).strip()
     # Extract bullets from Market Overview — handle both dash bullets and prose sentences
