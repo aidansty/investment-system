@@ -216,6 +216,8 @@ def write_dashboard_data(
             aft_sections.get("Notable Moves") or ""
         )
         notable_moves = _extract_bullets(notable_text)
+        if not notable_moves:
+            notable_moves = ["No notable price moves identified this session."]
 
         # Portfolio Actions Before Close
         portfolio_actions_text = (
@@ -225,7 +227,7 @@ def write_dashboard_data(
         )
         afternoon_positions = _parse_afternoon_positions(portfolio_actions_text, positions)
 
-        # If no positions parsed, show all as hold with current P&L
+        # If no positions parsed, show P&L data only — no fabricated reasoning
         if not afternoon_positions:
             afternoon_positions = []
             for p in positions:
@@ -240,7 +242,7 @@ def write_dashboard_data(
                     "current_price": current,
                     "qty": qty,
                     "pct_change": pct,
-                    "bullets": [f"Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pct:+.1f}%", "No new developments this afternoon — thesis intact, hold into tomorrow."],
+                    "bullets": [f"Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pct:+.1f}%", "Afternoon analysis unavailable — see morning briefing for full position review."],
                 })
 
         # New or Strengthened Candidates

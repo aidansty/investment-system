@@ -82,7 +82,7 @@ Generate a detailed afternoon portfolio update with the following sections. Be s
 3-5 bullet points covering the most important things that shifted since the morning briefing. Include: notable macro moves, sector developments, news that broke during the session, any price action that matters. If truly nothing changed, say so in one sentence.
 
 ## Notable Price Moves
-List 3-5 notable price moves from today — these do NOT have to be holdings. Include broad ETFs, sector leaders, or any ticker with a move that matters to this portfolio. For each: ticker, move percentage, and one sentence on why it matters.
+REQUIRED — always include this section. List 3-5 notable price moves from today. These do NOT have to be your holdings — include broad market ETFs (SPY, QQQ, IWM), sector ETFs, or any individual stock with a significant move today. For each: ticker, approximate move percentage, and one sentence on why it matters to this portfolio. There are always notable movers every session — find them.
 
 ## Portfolio Actions Before Close
 For EVERY open position, write:
