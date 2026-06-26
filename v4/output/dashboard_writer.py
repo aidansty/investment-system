@@ -221,7 +221,7 @@ def write_dashboard_data(
         )
         notable_moves = _extract_bullets(notable_text)
         if not notable_moves:
-            notable_moves = ["No notable price moves identified this session — markets closed or no significant moves detected."]
+            notable_moves = ["⚠️ Notable price moves unavailable — Claude output could not be parsed. Check GitHub Actions logs for this run."]
 
         # Portfolio Actions Before Close
         portfolio_actions_text = (
@@ -231,7 +231,7 @@ def write_dashboard_data(
         )
         afternoon_positions = _parse_afternoon_positions(portfolio_actions_text, positions)
 
-        # If no positions parsed, show P&L data only — no fabricated reasoning
+        # If no positions parsed, show error message
         if not afternoon_positions:
             afternoon_positions = []
             for p in positions:
@@ -246,7 +246,7 @@ def write_dashboard_data(
                     "current_price": current,
                     "qty": qty,
                     "pct_change": pct,
-                    "bullets": [f"Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pct:+.1f}%", "Afternoon analysis unavailable — see morning briefing for full position review."],
+                    "bullets": [f"Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pct:+.1f}%", "⚠️ Portfolio actions could not be parsed — check GitHub Actions logs for this run."],
                 })
 
         # New or Strengthened Candidates
@@ -263,7 +263,7 @@ def write_dashboard_data(
 
         # If still nothing in what_changed, show a default
         if not what_changed:
-            what_changed = ["Afternoon update processed — no major developments since the morning briefing."]
+            what_changed = ["⚠️ What Changed section unavailable — Claude output could not be parsed. Check GitHub Actions logs for this run."]
 
         # IMPORTANT: preserve morning briefing data — do not clear it
         # Morning position_review and industry_opportunities stay in their keys

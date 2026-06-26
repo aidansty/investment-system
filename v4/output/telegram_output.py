@@ -268,21 +268,7 @@ def build_and_send_afternoon_telegram(
             msg1.append(f"• {s}.")
         msg1.append("")
 
-    # Notable moves — handle both dict objects and plain strings
-    if notable_moves:
-        msg1.append("<b>Notable Price Moves</b>")
-        for m in notable_moves[:4]:
-            if isinstance(m, dict):
-                ticker = m.get("ticker", "")
-                move = m.get("move", "")
-                reason = m.get("reason", "")
-                if ticker:
-                    msg1.append(f"• <b>{ticker} {move}</b> — {reason[:100]}")
-                elif reason:
-                    msg1.append(f"• {reason[:120]}")
-            elif isinstance(m, str) and len(m) > 5:
-                msg1.append(f"• {m[:120]}")
-        msg1.append("")
+    # Notable moves intentionally excluded from Telegram — dashboard only
 
     # Position updates — only show positions where something changed or action needed
     position_review = (
