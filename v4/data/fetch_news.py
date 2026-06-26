@@ -168,7 +168,19 @@ Here are {len(news_items)} headlines to analyze:
 
 Group headlines covering the SAME story together. For each unique story, return a JSON object.
 
-IMPORTANT: Only include news that is relevant to the investor — either it affects their holdings, or it represents a potential new investment opportunity, or it affects the overall market significantly. Skip irrelevant news entirely.
+STRICT RELEVANCE RULES — only include news that meets AT LEAST ONE of these criteria:
+1. Directly affects one or more of the investor's holdings (listed above)
+2. Affects an entire sector/industry that the investor is exposed to (semiconductors, AI infrastructure, crypto, managed care, oil, aerospace, networking)
+3. Is a major macro event that moves the whole market (Fed decisions, CPI/jobs data, geopolitical events affecting oil or supply chains)
+4. Represents a specific new investment opportunity in an industry the investor watches
+
+REJECT these types of stories entirely — do not include them:
+- Analyst reports about companies NOT in the holdings list (e.g. DuPont, Becton Dickinson, random S&P 500 stocks)
+- Earnings from unrelated companies
+- General market recaps with no specific portfolio relevance
+- News about industries with zero connection to the portfolio
+
+If after filtering fewer than 3 stories are relevant, include the 3 most market-relevant macro stories.
 
 Return ONLY a valid JSON array. No markdown, no explanation, just the JSON:
 [

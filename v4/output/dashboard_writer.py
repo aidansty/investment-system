@@ -37,7 +37,11 @@ def write_dashboard_data(
     regime_label = "Bullish" if vix_regime == "Green" else ("Bearish" if vix_regime == "Red" else "Neutral")
 
     # Market bullets from briefing
-    market_overview = briefing.get("sections", {}).get("Market Overview", "") if briefing else ""
+    sections_dict = briefing.get("sections", {}) if briefing else {}
+    market_overview = (
+        sections_dict.get("Market Snapshot Explanation") or
+        sections_dict.get("Market Overview") or ""
+    )
     # Extract bullets from Market Overview — handle both dash bullets and prose sentences
     market_bullets = []
     if market_overview:
@@ -587,18 +591,43 @@ def _parse_position_review(text: str, positions: list) -> list:
             current = p.get("current_price", 0) or 0
             qty = p.get("qty", 0) or 0
             pct = round((current - entry) / entry * 100, 2) if entry > 0 else 0
+            what_to_do = p.get("what_to_do", "")
+
+            # Resolve action from what_to_do text
+            resolved_action = "Hold"
+            if what_to_do:
+                wtd_upper = what_to_do.upper()
+                if wtd_upper.startswith("CLOSE") or "CLOSE —" in wtd_upper:
+                    resolved_action = "Close"
+                elif wtd_upper.startswith("WATCH") or "WATCH —" in wtd_upper:
+                    resolved_action = "Watch"
+                elif wtd_upper.startswith("TRIM") or "TRIM —" in wtd_upper:
+                    resolved_action = "Trim"
+                elif wtd_upper.startswith("EXIT"):
+                    resolved_action = "Exit"
+                elif "HOLD AND MONITOR" in wtd_upper or "MONITOR" in wtd_upper:
+                    resolved_action = "Watch"
+
+            # Build bullets from what_to_do
+            real_bullets = [f"Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pct:+.1f}%"]
+            if what_to_do:
+                for sentence in what_to_do.replace("\n", " ").split("."):
+                    s = sentence.strip().lstrip("- •*").strip()
+                    if len(s) > 20:
+                        real_bullets.append(s + ".")
+
             reviews.append({
                 "ticker": ticker,
-                "action": "Hold",
+                "action": resolved_action,
                 "entry_price": entry,
                 "current_price": current,
                 "pct_change": pct,
-                "bullets": [f"Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pct:+.1f}%"],
-                "reasoning": p.get("what_to_do", "Hold — thesis intact."),
+                "bullets": real_bullets[:5],
+                "reasoning": what_to_do or "Hold — thesis intact.",
                 "summary": p.get("summary", ""),
                 "catalyst": p.get("catalyst", ""),
                 "why": p.get("why", ""),
-                "what_to_do": p.get("what_to_do", ""),
+                "what_to_do": what_to_do,
                 "industry": p.get("industry", ""),
                 "term": p.get("term", ""),
             })
@@ -613,19 +642,47 @@ def _flush_morning_position(ticker, action, bullets, pos_lookup, reviews):
     qty = p.get("qty", 0) or 0
     pct = round((current - entry) / entry * 100, 2) if entry > 0 else 0
     header = f"Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pct:+.1f}%"
-    all_bullets = [header] + bullets if bullets else [header, p.get("what_to_do", "")]
+
+    # Get the stored what_to_do from positions.json as the authoritative reasoning
+    what_to_do = p.get("what_to_do", "")
+
+    # Extract real action from what_to_do text if parser didn't find it
+    resolved_action = action
+    if what_to_do:
+        wtd_upper = what_to_do.upper()
+        if wtd_upper.startswith("CLOSE") or "CLOSE —" in wtd_upper or "EXIT —" in wtd_upper:
+            resolved_action = "Close"
+        elif wtd_upper.startswith("WATCH") or "WATCH —" in wtd_upper:
+            resolved_action = "Watch"
+        elif wtd_upper.startswith("TRIM") or "TRIM —" in wtd_upper:
+            resolved_action = "Trim"
+        elif wtd_upper.startswith("EXIT"):
+            resolved_action = "Exit"
+        elif "HOLD AND MONITOR" in wtd_upper or "HOLD AND WATCH" in wtd_upper or "MONITOR" in wtd_upper:
+            resolved_action = "Watch"
+
+    # Build real bullets from what_to_do text
+    real_bullets = [header]
+    if what_to_do:
+        for sentence in what_to_do.replace("\n", " ").split("."):
+            s = sentence.strip().lstrip("- •*").strip()
+            if len(s) > 20:
+                real_bullets.append(s + ".")
+    if not real_bullets[1:] and bullets:
+        real_bullets.extend(bullets)
+
     reviews.append({
         "ticker": ticker,
-        "action": action,
+        "action": resolved_action,
         "entry_price": entry,
         "current_price": current,
         "pct_change": pct,
-        "bullets": all_bullets[:5],
-        "reasoning": bullets[0] if bullets else p.get("what_to_do", ""),
+        "bullets": real_bullets[:5],
+        "reasoning": what_to_do or (bullets[0] if bullets else ""),
         "summary": p.get("summary", ""),
         "catalyst": p.get("catalyst", ""),
         "why": p.get("why", ""),
-        "what_to_do": p.get("what_to_do", ""),
+        "what_to_do": what_to_do,
         "industry": p.get("industry", ""),
         "term": p.get("term", ""),
     })

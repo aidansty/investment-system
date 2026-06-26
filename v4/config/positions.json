@@ -63,7 +63,7 @@
       "catalyst": "CoreWeave recently IPO'd and the near-term catalyst is proving commercial traction \u2014 winning and renewing large contracts from AI labs and enterprises who need dedicated GPU compute. Any announcement of a major new customer or contract extension would be a positive signal.",
       "why": "This is a medium-term position in the AI infrastructure layer, specifically the compute supply side. As AI model training and inference demand grows, CoreWeave is positioned to capture that spend from companies that need dedicated GPU access beyond what general cloud providers offer.",
       "cost_basis": 58.3,
-      "what_to_do": "Hold and monitor. Down 4.5% from entry which is within normal volatility for a recently IPO'd stock. No negative catalyst has emerged. The AI infrastructure thesis remains intact. Watch for any contract announcements or customer news as confirmation signals."
+      "what_to_do": "WATCH \u2014 Down 18% from entry. AI infrastructure thesis remains intact but no positive catalyst has emerged yet. Watch for any contract announcements or customer news as confirmation. If no catalyst emerges in the next 2-3 weeks, reassess allocation."
     },
     {
       "ticker": "NVDA",
@@ -90,19 +90,6 @@
       "why": "This is a short-term catalyst position entered specifically around the July 29 earnings event. The thesis is that managed care cost trends are normalizing after a difficult period, and Humana's earnings will confirm this. It is not intended to be held long-term beyond the earnings catalyst.",
       "cost_basis": 50.0,
       "what_to_do": "Hold and plan your exit before July 29 earnings. Per your pre-earnings exit rule, decide before that date whether to hold through the report or exit. Given this is a short-term catalyst play, the default should be to exit before earnings unless you have specific conviction in the outcome."
-    },
-    {
-      "ticker": "PLTR",
-      "qty": 1.0,
-      "entry": 133.41,
-      "type": "Stock",
-      "term": "Medium-term",
-      "industry": "Data Analytics",
-      "summary": "Palantir builds AI-driven data analytics software for government intelligence agencies and large enterprises. Its AIP platform allows organizations to deploy AI on their proprietary data in a secure environment \u2014 a capability that is increasingly valuable as enterprises try to use AI without exposing sensitive information to public AI models.",
-      "catalyst": "Q2 FY2026 earnings on August 10th. Before then, watch for any AIP contract announcements or enterprise customer news that could confirm or deny the commercial growth thesis.",
-      "why": "This is a medium-term conviction position built around AIP commercial platform adoption scaling over several quarters. The thesis requires that enterprise customers continue adopting AIP at an accelerating rate. The valuation is high, making the stock sensitive to any sign that growth is slowing.",
-      "cost_basis": 133.41,
-      "what_to_do": "CLOSE \u2014 The position is down 19% and the original thesis is under pressure. High-multiple growth stocks have been hit by the Fed hawkish signal. Evaluate whether the AIP commercial growth story is still on track or whether capital is better deployed elsewhere. If no new positive catalyst has emerged, close and reallocate."
     },
     {
       "ticker": "BTC",
