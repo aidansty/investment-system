@@ -108,6 +108,9 @@ def write_dashboard_data(
         pr["term"] = raw.get("term", "")
         pr["industry"] = raw.get("industry", "")
         pr["what_to_do"] = raw.get("what_to_do", "")
+        pr["summary"] = raw.get("summary", "")
+        pr["catalyst"] = raw.get("catalyst", "")
+        pr["why"] = raw.get("why", "")
         # Pull quant data if available
         quant = raw.get("quant", {})
         if quant:

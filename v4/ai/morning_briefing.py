@@ -213,13 +213,13 @@ TICKER — HOLD / WATCH / TRIM / EXIT / CLOSE
 - Bullet 4 (optional): What to watch for next / upcoming catalyst or risk event
 
 Rules:
-- Use WATCH if the position needs monitoring due to approaching stop, upcoming earnings, or negative news
-- Use CLOSE or EXIT if a hard stop has been breached or thesis has broken
-- Use TRIM if position is oversized or risk/reward has shifted
-- Use HOLD only if thesis is fully intact and no action is needed
-- NEVER say "hold and monitor" — that is WATCH not HOLD
-- PLTR hard stop is  — if price is below , action must be CLOSE
-- MU earnings have already occurred — do not say "exit before earnings"
+- Use WATCH if something specific warrants monitoring — an upcoming earnings, a news development, a price level being tested — explain exactly what to watch for
+- Use CLOSE or EXIT only if the investment thesis has fundamentally broken — not because of a price level alone. Ask: has the business changed? Has the macro environment shifted against this position? Is there a better place for this capital?
+- Use TRIM if the position is oversized relative to conviction or risk/reward has shifted unfavorably
+- Use HOLD only if thesis is fully intact and no action is needed today
+- NEVER base any action on a percentage loss or price level alone — always cite the actual thesis, news, data, or event driving the recommendation
+- NEVER say "hold and monitor" — that is WATCH not HOLD. Say WATCH and explain what specifically to watch for
+- MU earnings have already occurred — assess based on actual results and forward guidance, not pre-earnings rules
 - Always use the CONFIRMED EARNINGS DATES provided above, never estimate
 For each held position:
 TICKER — HOLD / WATCH / REDUCE / EXIT

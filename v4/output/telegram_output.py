@@ -157,14 +157,6 @@ def build_and_send_morning_telegram(
                             action = "WATCH"
                         break
 
-            # Override with specific known situations
-            if pnl <= -10 and dist_stop and dist_stop < 5:
-                action = "WATCH"
-                reason = f"Down {pnl_str} and within {dist_stop:.1f}% of stop ${stop:.2f}. Monitor closely."
-            elif pnl <= -15:
-                action = "REVIEW"
-                reason = f"Down {pnl_str} — mandatory thesis review triggered. Has anything changed?"
-
             # Only surface positions requiring attention — skip clean HOLDs
             if action == "HOLD":
                 continue
@@ -232,8 +224,7 @@ def _build_action_items(positions: list, forward_catalysts: list) -> list:
             items.append(f"⏰ {ticker}: earnings {cat.get('date', 'soon')} — review setup: check guidance, analyst expectations, and risk/reward before deciding hold/trim/exit")
 
         # Stop proximity warning
-        if dist_stop is not None and dist_stop < 3:
-            items.append(f"⚠️ {ticker}: only {dist_stop:.1f}% above stop ${stop:.2f} — watch closely at open")
+        # No hardcoded stop alerts — Claude's analysis drives all action recommendations
 
         # Large loss with no stop buffer
         if pnl <= -15:
