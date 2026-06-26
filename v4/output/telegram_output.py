@@ -256,6 +256,14 @@ def build_and_send_afternoon_telegram(
         sections.get("What Changed") or
         sections.get("Portfolio Review") or ""
     )
+    # Fallback: re-parse from raw text if sections are empty
+    if not what_changed:
+        import re
+        raw = briefing.get("raw_text", "") if briefing else ""
+        match = re.search(r"What Changed.*?
+(.*?)(?=##|$)", raw, re.DOTALL | re.IGNORECASE)
+        if match:
+            what_changed = match.group(1).strip()
     if what_changed:
         msg1.append("<b>What Changed Today</b>")
         sentences = [s.strip() for s in what_changed.replace("\n", " ").split(".") if len(s.strip()) > 15]

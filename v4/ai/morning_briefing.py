@@ -263,7 +263,7 @@ def generate_morning_briefing(
 
     message = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=3000,
+        max_tokens=4000,
         system="""You are a no-fluff, data-driven investment strategist generating a daily
 morning briefing. You think like an institutional research desk.
 You prioritize industries before stocks. You think in second and third-order effects.

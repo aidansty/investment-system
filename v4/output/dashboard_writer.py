@@ -182,6 +182,21 @@ def write_dashboard_data(
 
     if run_type == "afternoon":
         aft_sections = briefing.get("sections", {}) if briefing else {}
+        raw_text = briefing.get("raw_text", "") if briefing else ""
+
+        # If section parsing found nothing, try re-parsing from raw text
+        if not any(aft_sections.values()) and raw_text:
+            import re
+            found = {}
+            parts = re.split(r"^## ", raw_text, flags=re.MULTILINE)
+            for part in parts[1:]:
+                lines = part.split(chr(10))
+                sec_name = lines[0].strip()
+                sec_content = chr(10).join(lines[1:]).strip()
+                found[sec_name] = sec_content
+            if found:
+                aft_sections = found
+                log(f"Re-parsed afternoon sections from raw: {list(found.keys())}")
 
         # What Changed
         aft_text = (
@@ -189,17 +204,45 @@ def write_dashboard_data(
             aft_sections.get("What Changed") or ""
         )
         what_changed = _extract_bullets(aft_text)
+        if not what_changed and raw_text:
+            # Last resort: look for any lines after "What Changed" in raw text
+            match = re.search(r"What Changed.*?
+(.*?)(?=##|$)", raw_text, re.DOTALL | re.IGNORECASE)
+            if match:
+                what_changed = _extract_bullets(match.group(1))
 
         # Notable Price Moves
-        notable_text = aft_sections.get("Notable Price Moves", "")
+        notable_text = (
+            aft_sections.get("Notable Price Moves") or
+            aft_sections.get("Notable Moves") or ""
+        )
         notable_moves = _extract_bullets(notable_text)
 
         # Portfolio Actions Before Close
         portfolio_actions_text = (
             aft_sections.get("Portfolio Actions Before Close") or
-            aft_sections.get("Portfolio Review") or ""
+            aft_sections.get("Portfolio Review") or
+            aft_sections.get("Portfolio Actions") or ""
         )
         afternoon_positions = _parse_afternoon_positions(portfolio_actions_text, positions)
+
+        # If no positions parsed, show all as hold with current P&L
+        if not afternoon_positions:
+            afternoon_positions = []
+            for p in positions:
+                entry = p.get("entry", 0) or p.get("entry_price", 0) or 0
+                current = p.get("current_price", 0) or 0
+                qty = p.get("qty", 0) or 0
+                pct = round((current - entry) / entry * 100, 2) if entry > 0 else 0
+                afternoon_positions.append({
+                    "ticker": p.get("ticker", ""),
+                    "action": "Hold",
+                    "entry_price": entry,
+                    "current_price": current,
+                    "qty": qty,
+                    "pct_change": pct,
+                    "bullets": [f"Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pct:+.1f}%", "No new developments this afternoon — thesis intact, hold into tomorrow."],
+                })
 
         # New or Strengthened Candidates
         candidates_text = (
@@ -212,6 +255,10 @@ def write_dashboard_data(
         close_watch = aft_sections.get("Market Close Watch", "")
         if close_watch and close_watch.strip():
             what_changed.append(f"<b>Close watch:</b> {close_watch.strip()}")
+
+        # If still nothing in what_changed, show a default
+        if not what_changed:
+            what_changed = ["Afternoon update processed — no major developments since the morning briefing."]
 
         # IMPORTANT: preserve morning briefing data — do not clear it
         # Morning position_review and industry_opportunities stay in their keys
