@@ -1585,6 +1585,31 @@ async function fetchIntradayChart(ticker, canvasId) {
 // TABS
 // ============================================================
 
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+document.querySelectorAll('.tab-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    // Deactivate all tabs
+    document.querySelectorAll('.tab-btn').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-panel').forEach(function(p) {
+      p.classList.remove('active');
+    });
+    // Activate clicked tab
+    btn.classList.add('active');
+    var tabId = 'tab-' + btn.dataset.tab;
+    var panel = document.getElementById(tabId);
+    if (panel) panel.classList.add('active');
+    // Render manage positions when that tab is opened
+    if (btn.dataset.tab === 'positions-mgmt') {
+      setTimeout(renderMgmtPositions, 100);
+    }
+  });
+});
+
 </script>
 </body>
 </html>
