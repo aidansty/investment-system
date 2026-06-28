@@ -8,11 +8,12 @@ import json
 from datetime import datetime, timedelta
 from v4.utils.logger import log
 
-MIN_CONVICTION_FULL_ENTRY = 70
-MIN_CONVICTION_REDUCED_ENTRY = 80
-MIN_CONVICTION_HOLD = 45
+MIN_CONVICTION_FULL_ENTRY = 75
+MIN_CONVICTION_REDUCED_ENTRY = 85
+MIN_CONVICTION_HOLD = 40
 MIN_REGIME_SCORE = 40
-MAX_ACTIVE_POSITIONS = 10
+MAX_ACTIVE_POSITIONS = 4
+THESIS_BREAK_DAYS = 10
 MIN_CASH_RESERVE_PCT = 0.12
 MAX_CASH_RESERVE_PCT = 0.18
 MAX_CRYPTO_PCT_GREEN = 0.20
@@ -98,8 +99,14 @@ def evaluate_entry(opportunity, positions, macro, regime_score, portfolio_value,
         return {"action": "no_entry", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": f"At maximum {MAX_ACTIVE_POSITIONS} active positions.", "size_pct": 0}
 
     if conviction >= MIN_CONVICTION_FULL_ENTRY:
+        # Conviction-based sizing proven by backtest
+        if conviction >= 88: size_pct = 0.25
+        elif conviction >= 80: size_pct = 0.20
+        elif conviction >= 75: size_pct = 0.15
+        else: size_pct = 0.10
+
         if has_catalyst:
-            size_pct = 0.10 if conviction >= 80 else 0.06 if conviction >= 65 else 0.04
+            pass  # use size_pct as calculated above
             return {"action": "enter_full", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": f"All entry conditions met. Conviction {conviction}/100, Layer 1 qualified, regime {regime_score}/100 ({regime_label(regime_score)}), catalyst confirmed.", "size_pct": size_pct, "entry_type": "full"}
         elif conviction >= MIN_CONVICTION_REDUCED_ENTRY:
             return {"action": "enter_reduced", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": f"Conviction {conviction}/100 — all signals green but no confirmed catalyst. Reduced 3-5% entry. Full size when catalyst confirms.", "size_pct": 0.04, "entry_type": "reduced"}
@@ -142,10 +149,10 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
             except Exception:
                 pass
 
-    if conviction < MIN_CONVICTION_HOLD and consecutive_low_conviction_days >= 5:
+    if conviction < MIN_CONVICTION_HOLD and consecutive_low_conviction_days >= THESIS_BREAK_DAYS:
         return {"action": "exit", "ticker": ticker, "exit_type": "slow", "urgency": "next_open", "reason": f"Conviction {conviction}/100 below {MIN_CONVICTION_HOLD} for {consecutive_low_conviction_days} consecutive days.", "pct_change": pct_change}
     elif conviction < MIN_CONVICTION_HOLD:
-        days_remaining = 5 - consecutive_low_conviction_days
+        days_remaining = THESIS_BREAK_DAYS - consecutive_low_conviction_days
         return {"action": "watch", "ticker": ticker, "exit_type": "slow", "urgency": "monitor", "reason": f"Conviction {conviction}/100 below {MIN_CONVICTION_HOLD}. Day {consecutive_low_conviction_days}/5 of exit window. {days_remaining} more days to exit if no recovery.", "pct_change": pct_change}
 
     if consecutive_layer1_miss_days >= 5:
