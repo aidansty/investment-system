@@ -38,6 +38,39 @@ INDUSTRY_ETF_MAP = {
 # ETF tickers list for price fetching
 ALL_INDUSTRY_ETFS = [v["etf"] for v in INDUSTRY_ETF_MAP.values()]
 
+# Stock leaders per industry — Layer 2 security selection
+# These are the individual stocks the system evaluates within each winning industry
+INDUSTRY_STOCK_LEADERS = {
+    "Semiconductors":        ["NVDA", "AMD", "MU", "AVGO", "TSM", "INTC"],
+    "Software":              ["MSFT", "CRM", "NOW", "ADBE", "ORCL", "AAPL"],
+    "Cybersecurity":         ["CRWD", "PANW", "ZS", "FTNT", "S"],
+    "AI Infrastructure":     ["NVDA", "MSFT", "GOOGL", "AMZN", "META", "AMD"],
+    "Cloud Computing":       ["AMZN", "MSFT", "GOOGL", "NET", "SNOW"],
+    "Networking":            ["CSCO", "ANET", "NOK", "JNPR"],
+    "Biotech":               ["AMGN", "GILD", "REGN", "VRTX", "MRNA"],
+    "Medical Devices":       ["ABT", "MDT", "ISRG", "SYK", "BSX"],
+    "Managed Care":          ["UNH", "CVS", "HUM", "CI", "MOH"],
+    "Pharmaceuticals":       ["LLY", "JNJ", "PFE", "MRK", "ABBV"],
+    "Defense & Aerospace":   ["LMT", "RTX", "NOC", "GD", "HII"],
+    "Energy Transition":     ["ENPH", "FSLR", "SEDG", "NEE", "PLUG"],
+    "Oil & Gas":             ["XOM", "CVX", "COP", "SLB", "EOG"],
+    "Financials":            ["JPM", "BAC", "GS", "MS", "V", "MA"],
+    "Regional Banks":        ["JPM", "WFC", "USB", "PNC", "TFC"],
+    "Investment Banking":    ["GS", "MS", "BX", "KKR", "APO"],
+    "Consumer Discretionary":["AMZN", "TSLA", "HD", "NKE", "SBUX", "MCD"],
+    "Industrial Automation": ["ROK", "HON", "EMR", "PH", "AME"],
+    "Logistics & Transport": ["UPS", "FDX", "UBER", "LYFT", "XPO"],
+    "Homebuilders":          ["DHI", "LEN", "NVR", "PHM", "TOL"],
+    "REITs":                 ["AMT", "PLD", "EQIX", "SPG", "O"],
+    "Commodities":           ["GLD", "SLV", "FCX", "NEM", "CLF"],
+    "Clean Energy":          ["ENPH", "FSLR", "NEE", "CEG", "VST"],
+    "Nuclear Energy":        ["CEG", "VST", "CCJ", "LEU", "NNE"],
+    "Emerging Markets":      ["BABA", "TSM", "SE", "MELI", "PDD"],
+}
+
+# All individual stocks to fetch prices for
+ALL_STOCKS = list(set(s for stocks in INDUSTRY_STOCK_LEADERS.values() for s in stocks))
+
 # Benchmark
 BENCHMARK_ETF = "SPY"
 
@@ -54,8 +87,8 @@ CONVICTION_WEIGHTS = {
 }
 
 # Thresholds
-CONVICTION_HIGH =    70   # High conviction — recommend entry
-CONVICTION_MEDIUM =  45   # Medium conviction — monitor closely
+CONVICTION_HIGH =    75   # High conviction — recommend entry (raised from 70)
+CONVICTION_MEDIUM =  40   # Medium conviction — monitor closely (lowered from 45)
 CONVICTION_LOW =      0   # Below this — no recommendation, hold cash
 
 # Maximum industries to surface in daily briefing

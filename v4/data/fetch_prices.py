@@ -3,7 +3,7 @@ import yfinance as yf
 import pandas as pd
 from datetime import date, timedelta
 from v4.utils.logger import log
-from v4.config.settings import INDUSTRY_ETF_MAP, BENCHMARK_ETF, ALL_INDUSTRY_ETFS, MOMENTUM_LOOKBACK_DAYS
+from v4.config.settings import INDUSTRY_ETF_MAP, BENCHMARK_ETF, ALL_INDUSTRY_ETFS, MOMENTUM_LOOKBACK_DAYS, ALL_STOCKS
 
 
 def fetch_etf_prices(lookback_days: int = 90) -> dict:
@@ -67,6 +67,33 @@ def fetch_etf_prices(lookback_days: int = 90) -> dict:
     if failed:
         log(f"Failed ETFs: {failed}")
 
+    return results
+
+
+def fetch_stock_prices(lookback_days: int = 90) -> dict:
+    """
+    Fetch price history for all stock leaders across industries.
+    Returns dict: {ticker: [prices]}
+    """
+    import yfinance as yf
+    from v4.utils.logger import log
+    results = {}
+    try:
+        tickers = ALL_STOCKS + [BENCHMARK_ETF]
+        unique_tickers = list(set(tickers))
+        data = yf.download(unique_tickers, period=f"{lookback_days}d", auto_adjust=True, progress=False)
+        if hasattr(data.columns, 'levels'):
+            closes = data['Close']
+        else:
+            closes = data
+        for ticker in unique_tickers:
+            if ticker in closes.columns:
+                prices = closes[ticker].dropna().tolist()
+                if prices:
+                    results[ticker] = prices
+        log(f"Stock prices fetched: {len(results)} tickers")
+    except Exception as e:
+        log(f"Stock price fetch error: {e}")
     return results
 
 

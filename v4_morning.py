@@ -15,7 +15,7 @@ import yfinance as yf
 from v4.utils.logger import log
 from v4.utils.market_calendar import is_trading_day, get_trading_date
 from v4.utils.telegram import send_telegram
-from v4.data.fetch_prices import fetch_etf_prices
+from v4.data.fetch_prices import fetch_etf_prices, fetch_stock_prices
 from v4.data.fetch_news import fetch_complete_news_package
 from v4.data.fetch_macro import fetch_macro_data, fetch_earnings_calendar
 from v4.intelligence.industry_scanner import run_industry_scan
@@ -71,6 +71,8 @@ def main():
     # Step 1 — ETF prices
     log("Fetching ETF prices...")
     prices = fetch_etf_prices(lookback_days=90)
+    stock_prices = fetch_stock_prices(lookback_days=90)
+    prices = {**prices, **stock_prices}
     if not prices or BENCHMARK_ETF not in prices:
         send_telegram("⚠️ V4 Morning Run FAILED — ETF price fetch error.")
         sys.exit(1)

@@ -3,7 +3,8 @@ from v4.utils.logger import log
 from v4.config.settings import (
     INDUSTRY_ETF_MAP, BENCHMARK_ETF, MOMENTUM_LOOKBACK_DAYS,
     MOMENTUM_SHORT_LOOKBACK, LAYER1_TOP_N, MIN_OUTPERFORMANCE_PCT,
-    CONVICTION_WEIGHTS, CONVICTION_HIGH, CONVICTION_MEDIUM
+    CONVICTION_WEIGHTS, CONVICTION_HIGH, CONVICTION_MEDIUM,
+    INDUSTRY_STOCK_LEADERS,
 )
 
 
@@ -74,6 +75,64 @@ def calculate_industry_momentum(prices: dict) -> dict:
     outperforming = sum(1 for v in results.values() if v["outperforming"])
     log(f"Outperforming SPY: {outperforming}/25 industries")
     return results
+
+
+def score_stock_leaders(prices: dict, industry: str, spy_prices: list) -> list:
+    """
+    Layer 2: Score individual stock leaders within a qualifying industry.
+    Returns ranked list of stocks with momentum scores vs SPY.
+    Uses multi-timeframe: 63-day sustained + 21-day breakout detection.
+    """
+    stocks = INDUSTRY_STOCK_LEADERS.get(industry, [])
+    if not stocks or not spy_prices:
+        return []
+
+    spy_63d = (spy_prices[-1] / spy_prices[-63] - 1) * 100 if len(spy_prices) >= 63 else 0
+    spy_21d = (spy_prices[-1] / spy_prices[-21] - 1) * 100 if len(spy_prices) >= 21 else 0
+
+    scored = []
+    for ticker in stocks:
+        stk_prices = prices.get(ticker, [])
+        if not stk_prices or len(stk_prices) < 63:
+            continue
+        try:
+            stk_63d = (stk_prices[-1] / stk_prices[-63] - 1) * 100
+            stk_21d = (stk_prices[-1] / stk_prices[-21] - 1) * 100 if len(stk_prices) >= 21 else 0
+            exc_63d = stk_63d - spy_63d
+            exc_21d = stk_21d - spy_21d
+
+            # Multi-timeframe conviction score
+            if exc_63d > 0 and exc_21d > 0:
+                # Both timeframes confirm — strong signal
+                combined = (exc_63d * 0.6) + (exc_21d * 0.4)
+            elif exc_21d > 15 and exc_63d > -5:
+                # Strong 21-day breakout even if 63-day not yet confirmed
+                combined = exc_21d * 0.85
+            else:
+                combined = exc_63d
+
+            # Convert to conviction score
+            if combined >= 25: conv = 95
+            elif combined >= 18: conv = 88
+            elif combined >= 12: conv = 82
+            elif combined >= 8: conv = 77
+            elif combined >= 5: conv = 72
+            elif combined >= 2: conv = 65
+            elif combined >= 0: conv = 55
+            else: conv = max(0, int(40 + combined * 2))
+
+            scored.append({
+                "ticker": ticker,
+                "conviction": conv,
+                "excess_63d": round(exc_63d, 2),
+                "excess_21d": round(exc_21d, 2),
+                "current_price": round(stk_prices[-1], 2),
+                "is_breakout": exc_21d > 15 and exc_63d > -5,
+            })
+        except Exception as e:
+            continue
+
+    return sorted(scored, key=lambda x: x["conviction"], reverse=True)
 
 
 def layer1_filter(momentum_data: dict) -> list:
@@ -237,11 +296,28 @@ def run_industry_scan(prices: dict, news: list, macro: dict) -> dict:
     log(f"High conviction (70+): {len(high_conviction)} industries")
     log(f"Medium conviction (45-69): {len(medium_conviction)} industries")
 
+    # Layer 2: Score stock leaders within each qualifying industry
+    spy_prices = prices.get("SPY", [])
+    top_industries = layer2_results[:4]
+    for ind in top_industries:
+        industry_name = ind.get("industry", "")
+        stock_scores = score_stock_leaders(prices, industry_name, spy_prices)
+        ind["stock_leaders"] = stock_scores[:3]
+        etf_conv = ind.get("conviction_score", 0)
+        if stock_scores and stock_scores[0]["conviction"] > etf_conv + 5:
+            ind["recommended_security"] = stock_scores[0]["ticker"]
+            ind["recommended_type"] = "stock"
+            ind["recommended_conviction"] = stock_scores[0]["conviction"]
+        else:
+            ind["recommended_security"] = ind.get("etf", "")
+            ind["recommended_type"] = "etf"
+            ind["recommended_conviction"] = etf_conv
+
     return {
         "layer1": layer1_industries,
         "layer2": layer2_results,
         "all_industries": all_industries,
         "high_conviction": high_conviction,
         "medium_conviction": medium_conviction,
-        "top_industries": layer2_results[:4],
+        "top_industries": top_industries,
     }
