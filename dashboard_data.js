@@ -131,23 +131,6 @@ window.BRIEFING_DATA = {
       "cost_basis": 50.0
     },
     {
-      "ticker": "PLTR",
-      "type": "Stock",
-      "term": "Medium-term",
-      "qty": 1.0,
-      "entry_price": 133.41,
-      "current_price": 112.59,
-      "balance": 112.59,
-      "pct_change": -15.61,
-      "dollar_change": -20.82,
-      "summary": "Palantir builds AI-driven data analytics software for government intelligence agencies and large enterprises. Its AIP platform allows organizations to deploy AI on their proprietary data in a secure environment \u2014 a capability that is increasingly valuable as enterprises try to use AI without exposing sensitive information to public AI models.",
-      "catalyst": "Q2 FY2026 earnings on August 10th. Before then, watch for any AIP contract announcements or enterprise customer news that could confirm or deny the commercial growth thesis.",
-      "why": "This is a medium-term conviction position built around AIP commercial platform adoption scaling over several quarters. The thesis requires that enterprise customers continue adopting AIP at an accelerating rate. The valuation is high, making the stock sensitive to any sign that growth is slowing.",
-      "what_to_do": "CLOSE \u2014 The position is down 19% and the original thesis is under pressure. High-multiple growth stocks have been hit by the Fed hawkish signal. Evaluate whether the AIP commercial growth story is still on track or whether capital is better deployed elsewhere. If no new positive catalyst has emerged, close and reallocate.",
-      "industry": "Data Analytics",
-      "cost_basis": 133.41
-    },
-    {
       "ticker": "BTC",
       "type": "Crypto",
       "term": "Long-term",
@@ -470,23 +453,6 @@ window.BRIEFING_DATA = {
       "what_to_do": "Hold and plan your exit before July 29 earnings. Per your pre-earnings exit rule, decide before that date whether to hold through the report or exit. Given this is a short-term catalyst play, the default should be to exit before earnings unless you have specific conviction in the outcome.",
       "industry": "Managed Care",
       "term": "Short-term"
-    },
-    {
-      "ticker": "PLTR",
-      "action": "Hold",
-      "entry_price": 133.41,
-      "current_price": 112.59,
-      "pct_change": -15.61,
-      "bullets": [
-        "Entry: $133.41 | Current: $112.59 | P&L: -15.6%"
-      ],
-      "reasoning": "CLOSE \u2014 The position is down 19% and the original thesis is under pressure. High-multiple growth stocks have been hit by the Fed hawkish signal. Evaluate whether the AIP commercial growth story is still on track or whether capital is better deployed elsewhere. If no new positive catalyst has emerged, close and reallocate.",
-      "summary": "Palantir builds AI-driven data analytics software for government intelligence agencies and large enterprises. Its AIP platform allows organizations to deploy AI on their proprietary data in a secure environment \u2014 a capability that is increasingly valuable as enterprises try to use AI without exposing sensitive information to public AI models.",
-      "catalyst": "Q2 FY2026 earnings on August 10th. Before then, watch for any AIP contract announcements or enterprise customer news that could confirm or deny the commercial growth thesis.",
-      "why": "This is a medium-term conviction position built around AIP commercial platform adoption scaling over several quarters. The thesis requires that enterprise customers continue adopting AIP at an accelerating rate. The valuation is high, making the stock sensitive to any sign that growth is slowing.",
-      "what_to_do": "CLOSE \u2014 The position is down 19% and the original thesis is under pressure. High-multiple growth stocks have been hit by the Fed hawkish signal. Evaluate whether the AIP commercial growth story is still on track or whether capital is better deployed elsewhere. If no new positive catalyst has emerged, close and reallocate.",
-      "industry": "Data Analytics",
-      "term": "Medium-term"
     },
     {
       "ticker": "BTC",
