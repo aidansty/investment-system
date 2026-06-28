@@ -100,16 +100,16 @@
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
       <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px 16px;">
-        <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Active Equity vs SPY</div>
+        <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">My Stocks vs SPY</div>
         <div id="dual-equity-return" style="font-size:22px;font-weight:600;">—</div>
-        <div id="dual-equity-vs-spy" style="font-size:12px;color:var(--text-secondary);margin-top:2px;">— vs benchmark</div>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Stocks & ETFs only (excl. crypto & SPY)</div>
+        <div id="dual-equity-vs-spy" style="font-size:13px;font-weight:600;margin-top:4px;">—</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Active stock holdings only (excl. crypto & SPY)</div>
       </div>
       <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:10px;padding:14px 16px;">
-        <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Total Wealth vs Blended</div>
+        <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Total Portfolio vs SPY</div>
         <div id="dual-total-return" style="font-size:22px;font-weight:600;">—</div>
-        <div id="dual-total-vs-blend" style="font-size:12px;color:var(--text-secondary);margin-top:2px;">— vs 85% SPY + 15% risk-free</div>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Full portfolio including crypto</div>
+        <div id="dual-total-vs-blend" style="font-size:13px;font-weight:600;margin-top:4px;">—</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Everything including crypto & SPY</div>
       </div>
     </div>
     <div class="chart-legend">
@@ -596,6 +596,7 @@ async function fetchAndUpdatePrices() {
 
     rebuildAllocChart(updatedPositions, currentCash);
     updateDualScoreboard(updatedPositions, currentCash);
+    window._livePositions = updatedPositions;
     document.getElementById('last-run').textContent = 'Prices updated live · ' + new Date().toLocaleTimeString();
 
     // Fetch SPY comparison only on first load
@@ -843,7 +844,11 @@ function updateDualScoreboard(positions, cashBalance) {
   const eqRet = document.getElementById('dual-equity-return');
   const eqVs = document.getElementById('dual-equity-vs-spy');
   if (eqRet) { eqRet.textContent = (activeReturn >= 0 ? '+' : '') + activeReturn.toFixed(1) + '%'; eqRet.style.color = activeReturn >= 0 ? 'var(--green)' : 'var(--red)'; }
-  if (eqVs) { eqVs.textContent = (equityVsSpy >= 0 ? '+' : '') + equityVsSpy.toFixed(1) + 'pp vs SPY'; eqVs.style.color = equityVsSpy >= 0 ? 'var(--green)' : 'var(--red)'; }
+  if (eqVs) {
+    const absEq = Math.abs(equityVsSpy).toFixed(1);
+    eqVs.textContent = equityVsSpy >= 0 ? 'Beating SPY by ' + absEq + '%' : 'Trailing SPY by ' + absEq + '%';
+    eqVs.style.color = equityVsSpy >= 0 ? 'var(--green)' : 'var(--red)';
+  }
   let totalInvested = 0, totalValue = 0;
   for (const p of positions) {
     const entry = ENTRY_PRICES[p.ticker] || p.entry_price || 0;
@@ -858,7 +863,11 @@ function updateDualScoreboard(positions, cashBalance) {
   const totRet = document.getElementById('dual-total-return');
   const totVs = document.getElementById('dual-total-vs-blend');
   if (totRet) { totRet.textContent = (totalReturn >= 0 ? '+' : '') + totalReturn.toFixed(1) + '%'; totRet.style.color = totalReturn >= 0 ? 'var(--green)' : 'var(--red)'; }
-  if (totVs) { totVs.textContent = (totalVsBlend >= 0 ? '+' : '') + totalVsBlend.toFixed(1) + 'pp vs blended'; totVs.style.color = totalVsBlend >= 0 ? 'var(--green)' : 'var(--red)'; }
+  if (totVs) {
+    const absTot = Math.abs(totalVsBlend).toFixed(1);
+    totVs.textContent = totalVsBlend >= 0 ? 'Beating SPY by ' + absTot + '%' : 'Trailing SPY by ' + absTot + '%';
+    totVs.style.color = totalVsBlend >= 0 ? 'var(--green)' : 'var(--red)';
+  }
 }
 updateRegimeScore();
 updateKillCriteria();
@@ -873,14 +882,37 @@ function renderMgmtPositions() {
   const positions = POSITIONS_CONFIG || [];
   positions.forEach((p) => {
     const entry = ENTRY_PRICES[p.ticker] || p.entry_price || 0;
-    const current = p.current_price || 0;
-    const pct = entry > 0 ? ((current - entry) / entry * 100) : 0;
+    // Use live price from position data — crypto prices come from Coinbase refresh
+    const livePos = (window._livePositions || []).find(lp => lp.ticker === p.ticker);
+    const current = livePos ? (livePos.current_price || p.current_price || 0) : (p.current_price || 0);
+    const pct = entry > 0 && current > 0 ? ((current - entry) / entry * 100) : 0;
     const pctColor = pct >= 0 ? '#5DCAA5' : '#e2504f';
+    const currentDisplay = current > 0 ? '$' + current.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) : '—';
     const div = document.createElement('div');
     div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg-card);border:0.5px solid var(--border);border-radius:8px;';
-    div.innerHTML = `<div><div style="font-weight:600;font-size:13px;">${p.ticker}</div><div style="font-size:11px;color:var(--text-secondary);">${POSITION_META[p.ticker]?.term || p.term || ''} · ${POSITION_META[p.ticker]?.type || p.type || ''}</div><div style="font-size:11px;color:var(--text-secondary);">Entry: $${entry.toFixed(2)} · Qty: ${p.qty}</div></div><div style="text-align:right;"><div style="font-weight:600;color:${pctColor};">${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%</div></div>`;
+    div.innerHTML = '<div><div style="font-weight:600;font-size:13px;">' + p.ticker + '</div><div style="font-size:11px;color:var(--text-secondary);">' + (POSITION_META[p.ticker]?.term || p.term || '') + ' · ' + (POSITION_META[p.ticker]?.type || p.type || '') + '</div><div style="font-size:11px;color:var(--text-secondary);">Entry: $' + entry.toFixed(2) + ' · Now: ' + currentDisplay + ' · Qty: ' + p.qty + '</div></div><div style="text-align:right;"><div style="font-weight:600;color:' + pctColor + ';">' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%</div><button onclick="removePosition('' + p.ticker + '')" style="margin-top:4px;background:rgba(226,80,79,0.12);color:#e2504f;border:0.5px solid rgba(226,80,79,0.2);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:inherit;">Close</button> <button onclick="trimPosition(\'' + p.ticker + '\')" style="margin-top:4px;background:rgba(239,159,39,0.1);color:#EF9F27;border:0.5px solid rgba(239,159,39,0.2);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:inherit;">Trim</button></div>';
     list.appendChild(div);
   });
+}
+
+function removePosition(ticker) {
+  const result = document.getElementById('add-position-result');
+  if (result) {
+    result.style.display = 'block';
+    result.style.background = 'rgba(226,80,79,0.1)';
+    result.style.color = '#e2504f';
+    result.innerHTML = '<b>' + ticker + ' staged for removal.</b> To make permanent: export positions.json below, remove the ' + ticker + ' entry, then push to GitHub.';
+  }
+}
+
+function trimPosition(ticker) {
+  const result = document.getElementById('add-position-result');
+  if (result) {
+    result.style.display = 'block';
+    result.style.background = 'rgba(239,159,39,0.1)';
+    result.style.color = '#EF9F27';
+    result.innerHTML = '<b>' + ticker + ' trim noted.</b> Update the qty field in your positions.json after selling shares in Webull, then export and push.';
+  }
 }
 
 document.getElementById('add-position-btn')?.addEventListener('click', () => {
