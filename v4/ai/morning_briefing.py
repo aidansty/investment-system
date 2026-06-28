@@ -163,32 +163,34 @@ Be specific — no generic commentary.
 Only include developments that directly affect investable industries.
 List 2-4 bullet points maximum. If nothing material: state that clearly.
 
-## Industry Opportunities
-For each of the top 2-4 high-conviction industries, write exactly this format:
+## Rules Engine Signals
+The rules engine has already evaluated all entry and exit decisions quantitatively.
+Your job is to explain the reasoning behind each signal in plain English.
+
+For each ENTRY signal the rules engine generated:
+ENTRY: [TICKER] — [CONVICTION]/100 — [POSITION SIZE]% of active sleeve
+- Why this ticker: what specific momentum, fundamental, or catalyst data supports it
+- Why now specifically: what changed recently that makes this the right entry point
+- What to watch: the specific data point or event that would invalidate this entry
+- Tax note: new position will be short-term gain until held 12+ months
+
+For each EXIT or WATCH signal:
+EXIT/WATCH: [TICKER]
+- What specifically broke or is weakening in the thesis
+- The measurable data supporting this decision
+- What would reverse this signal
+
+If no entry signals: state clearly "Rules engine found no qualifying entry opportunities today. Hold cash and wait for conviction score above 75 with confirmed catalyst."
+
+## Industry Analysis (Layer 1 — Context Only)
+This section provides context for the rules engine signals above.
+For each top 2-3 qualifying industry (conviction 75+):
 
 ### [INDUSTRY NAME] — Conviction: [SCORE]/100
-
-**Why Now**
-2-3 sentences. Why does this industry deserve attention today?
-Reference specific data from the scan results above.
-
-**What Changed**
-1-2 sentences. What event or data point is driving this opportunity?
-Must come directly from the news or scan data provided.
-
-**Quantitative Support**
-- ETF: [ticker] | 63-day return: [X]% | Outperformance vs SPY: [X]pp
-- [One additional relevant data point]
-
-**Investment Vehicle**
-Recommend ETF or individual stocks. Explain why one is better than the other right now.
-If recommending stocks, name 2-3 specific tickers from within the industry.
-Keep this to 2-3 sentences maximum.
-
-**Key Risks**
-2 bullet points. What could invalidate this opportunity?
-
----
+- What is driving momentum in this industry right now
+- Which individual stocks within this industry are leading vs lagging
+- Specific catalyst or data point that could strengthen or break this thesis
+- Key risk: one specific thing that could end this industry's outperformance
 
 ## Catalysts Ahead
 List 3-5 of the most important upcoming catalysts from the data above.
@@ -225,20 +227,25 @@ THESIS BREAK — flag as EXIT immediately if ANY confirmed:
 RULES:
 - NEVER use percentage loss alone to recommend action
 - NEVER say "hold and monitor" — say WATCH and name exactly what to monitor
-- EXIT only when thesis has fundamentally broken in measurable terms
+- EXIT only when thesis has fundamentally broken in measurable terms — 10 consecutive days below conviction 40
+- Short-term dips in conviction (1-9 days below 40) are WATCH not EXIT — the thesis may recover
 - Use CONFIRMED EARNINGS DATES above — never estimate
+- Conviction-based sizing: 88+=25% of active sleeve, 80+=20%, 75+=15%
+- Maximum 4 active positions at any time — if recommending a new entry, identify which current position it displaces if at max
 
-## Risk Assessment & Cash Guidance
-One paragraph. Should capital be deployed today or is caution warranted?
-If no high-conviction opportunities exist, explicitly recommend holding cash.
-Reference specific reasons from the data above.
+## Capital Deployment Guidance
+One paragraph covering two things:
+1. Active sleeve (non-SPY, non-crypto stock holdings): should new capital be deployed today or held in cash? Reference the rules engine signals and regime score.
+2. SPY anchor: no action needed unless trimming is warranted by a specific overweight condition.
 
 IMPORTANT RULES:
 - Never recommend options, short selling, or margin
-- Never exceed 15% in a single position
-- Never recommend a position simply because it is moving up
-- If conviction score is below 45 for all industries, recommend holding cash
-- Always explain WHY, not just WHAT
+- Maximum 4 active positions — if at max, a new entry requires identifying which position to exit first
+- Never recommend a position below conviction 75 — wait for the right setup
+- If no industry scores above 75 conviction, cash is the correct allocation — state this clearly
+- Conviction-based sizing only: 88+=25%, 80+=20%, 75+=15% of active sleeve
+- Always explain WHY with specific data, not generic market commentary
+- SPY is a permanent anchor — never recommend closing it
 """
 
 
