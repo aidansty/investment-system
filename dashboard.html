@@ -915,6 +915,26 @@ function trimPosition(ticker) {
   }
 }
 
+function removePosition(ticker) {
+  const result = document.getElementById('add-position-result');
+  if (result) {
+    result.style.display = 'block';
+    result.style.background = 'rgba(226,80,79,0.1)';
+    result.style.color = '#e2504f';
+    result.innerHTML = '<b>' + ticker + ' staged for removal.</b> Export positions.json below, remove the ' + ticker + ' entry, then push to GitHub to make permanent.';
+  }
+}
+
+function trimPosition(ticker) {
+  const result = document.getElementById('add-position-result');
+  if (result) {
+    result.style.display = 'block';
+    result.style.background = 'rgba(239,159,39,0.1)';
+    result.style.color = '#EF9F27';
+    result.innerHTML = '<b>' + ticker + ' trim noted.</b> After selling shares in Webull, update the qty in positions.json and push to GitHub.';
+  }
+}
+
 document.getElementById('add-position-btn')?.addEventListener('click', () => {
   const ticker = document.getElementById('new-ticker')?.value?.trim()?.toUpperCase();
   const entry = parseFloat(document.getElementById('new-entry')?.value);
