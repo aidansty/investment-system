@@ -880,17 +880,40 @@ function renderMgmtPositions() {
   if (!list) return;
   list.innerHTML = '';
   const positions = POSITIONS_CONFIG || [];
-  positions.forEach((p) => {
+  positions.forEach(function(p) {
     const entry = ENTRY_PRICES[p.ticker] || p.entry_price || 0;
-    // Use live price from position data — crypto prices come from Coinbase refresh
-    const livePos = (window._livePositions || []).find(lp => lp.ticker === p.ticker);
+    const livePos = (window._livePositions || []).find(function(lp) { return lp.ticker === p.ticker; });
     const current = livePos ? (livePos.current_price || p.current_price || 0) : (p.current_price || 0);
     const pct = entry > 0 && current > 0 ? ((current - entry) / entry * 100) : 0;
     const pctColor = pct >= 0 ? '#5DCAA5' : '#e2504f';
-    const currentDisplay = current > 0 ? '$' + current.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) : '—';
+    const pctStr = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
+    const term = (POSITION_META[p.ticker] && POSITION_META[p.ticker].term) || p.term || '';
+    const type = (POSITION_META[p.ticker] && POSITION_META[p.ticker].type) || p.type || '';
     const div = document.createElement('div');
     div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg-card);border:0.5px solid var(--border);border-radius:8px;';
-    div.innerHTML = '<div><div style="font-weight:600;font-size:13px;">' + p.ticker + '</div><div style="font-size:11px;color:var(--text-secondary);">' + (POSITION_META[p.ticker]?.term || p.term || '') + ' · ' + (POSITION_META[p.ticker]?.type || p.type || '') + '</div><div style="font-size:11px;color:var(--text-secondary);">Entry: $' + entry.toFixed(2) + ' · Now: ' + currentDisplay + ' · Qty: ' + p.qty + '</div></div><div style="text-align:right;"><div style="font-weight:600;color:' + pctColor + ';">' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%</div><button onclick="removePosition(\'' + p.ticker + '\')" style="margin-top:4px;background:rgba(226,80,79,0.12);color:#e2504f;border:0.5px solid rgba(226,80,79,0.2);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:inherit;">Close</button> <button onclick="trimPosition(\'' + p.ticker + '\')" style="margin-top:4px;background:rgba(239,159,39,0.1);color:#EF9F27;border:0.5px solid rgba(239,159,39,0.2);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:inherit;">Trim</button></div>';
+    const left = document.createElement('div');
+    left.innerHTML = '<div style="font-weight:600;font-size:13px;">' + p.ticker + '</div>' +
+      '<div style="font-size:11px;color:var(--text-secondary);">' + term + ' &middot; ' + type + '</div>' +
+      '<div style="font-size:11px;color:var(--text-secondary);">Entry: $' + entry.toFixed(2) + ' &middot; Qty: ' + p.qty + '</div>';
+    const right = document.createElement('div');
+    right.style.textAlign = 'right';
+    const pctEl = document.createElement('div');
+    pctEl.style.fontWeight = '600';
+    pctEl.style.color = pctColor;
+    pctEl.textContent = pctStr;
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close';
+    closeBtn.style.cssText = 'margin-top:4px;margin-right:4px;background:rgba(226,80,79,0.12);color:#e2504f;border:0.5px solid rgba(226,80,79,0.2);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:inherit;';
+    closeBtn.onclick = function() { removePosition(p.ticker); };
+    const trimBtn = document.createElement('button');
+    trimBtn.textContent = 'Trim';
+    trimBtn.style.cssText = 'margin-top:4px;background:rgba(239,159,39,0.1);color:#EF9F27;border:0.5px solid rgba(239,159,39,0.2);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:inherit;';
+    trimBtn.onclick = function() { trimPosition(p.ticker); };
+    right.appendChild(pctEl);
+    right.appendChild(closeBtn);
+    right.appendChild(trimBtn);
+    div.appendChild(left);
+    div.appendChild(right);
     list.appendChild(div);
   });
 }
