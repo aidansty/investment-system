@@ -44,7 +44,7 @@ INDUSTRY_STOCK_LEADERS = {
     "Semiconductors":        ["NVDA", "AMD", "MU", "AVGO", "TSM", "INTC", "QCOM", "MRVL", "KLAC", "AMAT", "LRCX", "TXN", "ASML", "NXPI", "STM"],
     "Software":              ["MSFT", "CRM", "NOW", "ADBE", "ORCL", "AAPL", "SAP", "WDAY", "TEAM", "ZM", "DDOG", "MDB", "GTLB", "HUBS", "BILL"],
     "Cybersecurity":         ["CRWD", "PANW", "ZS", "FTNT", "S", "CYBR", "OKTA", "RPD", "TENB", "QLYS", "VRNT", "SAIL", "CHKP", "AKAM", "FEYE"],
-    "AI Infrastructure":     ["NVDA", "MSFT", "GOOGL", "AMZN", "META", "AMD", "ORCL", "IBM", "SMCI", "ARM", "CRWV", "PLTR", "AI", "SOUN", "BBAI"],
+    "AI Infrastructure":     ["NVDA", "MSFT", "GOOGL", "AMZN", "META", "AMD", "ORCL", "IBM", "SMCI", "ARM", "CRWV", "PLTR", "AI", "IONQ", "RGTI"],
     "Cloud Computing":       ["AMZN", "MSFT", "GOOGL", "NET", "SNOW", "DDOG", "ESTC", "FSLY", "FIVN", "TWLO", "ZI", "BOX", "DOCN", "WK", "APPN"],
     "Networking":            ["CSCO", "ANET", "JNPR", "CIEN", "INFN", "VIAV", "NTGR", "CALX", "COMM", "RBBN", "AAOI", "LITE", "IIVI", "COHR", "FNSR"],
     "Biotech":               ["AMGN", "GILD", "REGN", "VRTX", "MRNA", "BIIB", "ILMN", "EXAS", "SGEN", "ALNY", "BMRN", "IONS", "FOLD", "RARE", "ACAD"],
