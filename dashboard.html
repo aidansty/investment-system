@@ -52,6 +52,7 @@
     <button class="tab-btn active" data-tab="portfolio">Portfolio</button>
     <button class="tab-btn" data-tab="morning">Morning briefing</button>
     <button class="tab-btn" data-tab="afternoon">Afternoon update</button>
+    <button class="tab-btn" data-tab="backtest">Backtest</button>
     <button class="tab-btn" data-tab="positions-mgmt">Manage positions</button>
     <button class="tab-btn" data-tab="assistant">Ask the desk</button>
   </nav>
@@ -190,6 +191,78 @@
   </div>
 
   <!-- ASK THE DESK TAB -->
+  <div class="tab-panel" id="tab-backtest">
+    <h2 class="section-title">Backtest &amp; validation</h2>
+    <p class="section-sub">Validate the rules engine against historical data before trusting live results with full capital.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:20px;">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px;">Run backtest locally</div>
+        <div style="font-size:12px;color:var(--text-body);line-height:1.7;">
+          <div style="margin-bottom:8px;">1. Open your terminal in the investment-system folder</div>
+          <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:10px;font-family:monospace;font-size:11px;margin-bottom:8px;color:#5DCAA5;">python3 -m v4.intelligence.backtest --start 2020-01-01 --end 2025-01-01</div>
+          <div style="margin-bottom:8px;">2. Test different periods:</div>
+          <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:10px;font-family:monospace;font-size:11px;margin-bottom:8px;color:#5DCAA5;">python3 -m v4.intelligence.backtest --start 2022-01-01 --end 2023-01-01</div>
+          <div style="color:var(--text-secondary);font-size:11px;">Tests industry ETF momentum rotation vs SPY buy-and-hold with 0.1% transaction costs. Results saved to data/backtest/</div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:20px;">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px;">Portfolio Visualizer (no-code)</div>
+        <div style="font-size:12px;color:var(--text-body);line-height:1.7;">
+          <div style="margin-bottom:6px;">1. Go to <a href="https://www.portfoliovisualizer.com/backtest-portfolio" target="_blank" style="color:#5DCAA5;">portfoliovisualizer.com</a></div>
+          <div style="margin-bottom:6px;">2. Select <b>Backtest Portfolio</b></div>
+          <div style="margin-bottom:6px;">3. Set dates: Jan 2019 → Dec 2024</div>
+          <div style="margin-bottom:6px;">4. Portfolio A (Your strategy): SOXX 34%, IGV 33%, CIBR 33%</div>
+          <div style="margin-bottom:6px;">5. Portfolio B (Benchmark): SPY 100%</div>
+          <div style="margin-bottom:6px;">6. Set rebalancing: Quarterly</div>
+          <div style="margin-bottom:6px;">7. Compare results — look for positive alpha and acceptable drawdown</div>
+          <div style="margin-top:10px;color:var(--text-secondary);font-size:11px;">This tests whether top-performing industry ETFs historically beat SPY — the core assumption of your strategy.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:20px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;">What to look for in results</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div style="padding:12px;background:rgba(93,202,165,0.08);border:0.5px solid rgba(93,202,165,0.2);border-radius:8px;">
+          <div style="font-size:11px;font-weight:600;color:#5DCAA5;margin-bottom:4px;">✅ Green flags</div>
+          <div style="font-size:11px;color:var(--text-body);line-height:1.6;">• Alpha &gt; 0% vs SPY<br>• CAGR beats SPY in 3+ of 5 tested periods<br>• Max drawdown &lt; 35%<br>• Works in both bull and bear markets</div>
+        </div>
+        <div style="padding:12px;background:rgba(239,159,39,0.08);border:0.5px solid rgba(239,159,39,0.2);border-radius:8px;">
+          <div style="font-size:11px;font-weight:600;color:#EF9F27;margin-bottom:4px;">⚠️ Yellow flags</div>
+          <div style="font-size:11px;color:var(--text-body);line-height:1.6;">• Only beats SPY in bull markets<br>• Alpha &lt; 2% (fees may erase it)<br>• Works in 2 of 5 periods<br>• High drawdown (&gt; 40%)</div>
+        </div>
+        <div style="padding:12px;background:rgba(226,80,79,0.08);border:0.5px solid rgba(226,80,79,0.2);border-radius:8px;">
+          <div style="font-size:11px;font-weight:600;color:#e2504f;margin-bottom:4px;">🔴 Red flags</div>
+          <div style="font-size:11px;color:var(--text-body);line-height:1.6;">• Consistently underperforms SPY<br>• Only works in 1 period<br>• Max drawdown &gt; 50%<br>• Returns disappear after costs</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:20px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;">Validation timeline</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;background:rgba(93,202,165,0.06);border-radius:8px;">
+          <div style="width:80px;font-size:11px;font-weight:600;color:#5DCAA5;flex-shrink:0;">Now</div>
+          <div style="font-size:12px;color:var(--text-body);">Run Portfolio Visualizer backtest across 2019-2024. If positive alpha, proceed with small capital deployment.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;">
+          <div style="width:80px;font-size:11px;font-weight:600;color:var(--text-secondary);flex-shrink:0;">6-8 weeks</div>
+          <div style="font-size:12px;color:var(--text-body);">Log every signal with full conviction breakdown. Track vs SPY daily. Win rate tracker starts accumulating data.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;">
+          <div style="width:80px;font-size:11px;font-weight:600;color:var(--text-secondary);flex-shrink:0;">3-4 months</div>
+          <div style="font-size:12px;color:var(--text-body);">First kill criteria review. Is active equity outperforming SPY? If yes, increase allocation. If not, pause new entries.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;">
+          <div style="width:80px;font-size:11px;font-weight:600;color:var(--text-secondary);flex-shrink:0;">100+ trades</div>
+          <div style="font-size:12px;color:var(--text-body);">First conviction weight update. Component attribution analysis tells you which of the 7 signals actually predicted winners.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="tab-panel" id="tab-positions-mgmt">
     <h2 class="section-title">Manage positions</h2>
     <p class="section-sub">Add or remove positions. Export positions.json and push to GitHub to make permanent.</p>
