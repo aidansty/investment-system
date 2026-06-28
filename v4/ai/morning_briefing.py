@@ -204,27 +204,29 @@ Never apply a blanket exit rule before earnings. Analyze the actual setup: guida
 Write 3-5 bullet points explaining what the VIX level, trend, and macro regime actually mean for the portfolio today. Do not just restate the numbers — explain what they mean in plain English. Example: if VIX is 18 and falling, explain why that is good for risk assets and what it signals about market confidence. Explain the regime (Bullish/Bearish/Neutral) and why it matters for today specifically. Each bullet must start with a dash (-).
 
 ## Open Position Review
-For EVERY position write exactly this format:
+You are the explanation layer. The rules engine decides. You explain WHY using real data, news, and events.
+
+For EVERY position write exactly:
 
 TICKER — HOLD / WATCH / TRIM / EXIT / CLOSE
-- Bullet 1: Current P&L context and what drove it today (cite specific news or data)
-- Bullet 2: Thesis status — is it intact, strengthening, or breaking? Why?
-- Bullet 3: Specific action and exact reasoning (not generic — cite the actual catalyst, stop level, or event)
-- Bullet 4 (optional): What to watch for next / upcoming catalyst or risk event
+- Bullet 1: What specific data, news, or event is most relevant TODAY (cite actual numbers)
+- Bullet 2: Thesis status in measurable terms — revenue growth %, earnings revision direction, relative strength
+- Bullet 3: Exact reasoning for the recommended action — cite the specific factor
+- Bullet 4: What to monitor next — specific data point, date, or event
 
-Rules:
-- Use WATCH if something specific warrants monitoring — an upcoming earnings, a news development, a price level being tested — explain exactly what to watch for
-- Use CLOSE or EXIT only if the investment thesis has fundamentally broken — not because of a price level alone. Ask: has the business changed? Has the macro environment shifted against this position? Is there a better place for this capital?
-- Use TRIM if the position is oversized relative to conviction or risk/reward has shifted unfavorably
-- Use HOLD only if thesis is fully intact and no action is needed today
-- NEVER base any action on a percentage loss or price level alone — always cite the actual thesis, news, data, or event driving the recommendation
-- NEVER say "hold and monitor" — that is WATCH not HOLD. Say WATCH and explain what specifically to watch for
-- MU earnings have already occurred — assess based on actual results and forward guidance, not pre-earnings rules
-- Always use the CONFIRMED EARNINGS DATES provided above, never estimate
-For each held position:
-TICKER — HOLD / WATCH / REDUCE / EXIT
-One sentence explaining the recommendation based on current data.
-If no positions: state "No open positions."
+THESIS BREAK — flag as EXIT immediately if ANY confirmed:
+- Revenue growth reversal two consecutive negative quarters
+- Earnings estimates cut more than 10% from consensus
+- FCF turned negative when previously positive
+- Regulatory rejection directly affecting core business
+- Major contract loss with material revenue impact
+- Management guidance cut significantly below expectations
+
+RULES:
+- NEVER use percentage loss alone to recommend action
+- NEVER say "hold and monitor" — say WATCH and name exactly what to monitor
+- EXIT only when thesis has fundamentally broken in measurable terms
+- Use CONFIRMED EARNINGS DATES above — never estimate
 
 ## Risk Assessment & Cash Guidance
 One paragraph. Should capital be deployed today or is caution warranted?

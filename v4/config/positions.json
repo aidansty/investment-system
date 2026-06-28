@@ -11,7 +11,8 @@
       "catalyst": "SPY has no single catalyst \u2014 it moves with the overall market. Key drivers right now include Fed rate decisions, inflation data (next CPI report July 14), and corporate earnings season beginning in mid-July. A dovish shift from the Fed or strong earnings results would push SPY higher.",
       "why": "This is a long-term core holding designed to anchor the portfolio with stable, compounding returns over many years. When no higher-conviction opportunity exists for your cash, SPY is where uninvested capital belongs rather than sitting idle.",
       "cost_basis": 4169.65,
-      "what_to_do": "Hold. No action needed. This position is up 12.9% and serves its purpose as the portfolio foundation. Only reassess if the investment thesis for a specific higher-conviction opportunity justifies reallocating this capital."
+      "what_to_do": "Hold. No action needed. This position is up 12.9% and serves its purpose as the portfolio foundation. Only reassess if the investment thesis for a specific higher-conviction opportunity justifies reallocating this capital.",
+      "entry_date": "2026-04-14"
     },
     {
       "ticker": "MU",
@@ -24,7 +25,8 @@
       "catalyst": "Earnings just reported June 25. Review results and forward guidance carefully.",
       "why": "This was entered as a medium-term position around the AI memory demand supercycle. It has returned over 100% from entry, which is exceptional. The pre-earnings exit rule in your framework exists precisely for situations like this \u2014 massive gains before a binary event.",
       "cost_basis": 148.59,
-      "what_to_do": "WATCH \u2014 Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cut, exit and reallocate."
+      "what_to_do": "WATCH \u2014 Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cut, exit and reallocate.",
+      "entry_date": "2026-04-14"
     },
     {
       "ticker": "AMD",
@@ -37,7 +39,8 @@
       "catalyst": "Q2 FY2026 earnings on August 4th, where AMD guided approximately $11.2 billion in revenue \u2014 up 46% year over year. The key question is whether AI GPU demand is as strong as expected and whether AMD is successfully converting design wins into shipped revenue against NVIDIA.",
       "why": "This is a medium-term conviction position built around a multi-quarter thesis that AMD gains meaningful GPU market share in the AI data center market. It is not a trade around a single quarter but a thesis that plays out over 6-18 months as AI infrastructure investment accelerates.",
       "cost_basis": 263.68,
-      "what_to_do": "Hold. AMD is up 18.4% but the thesis is intact and nothing negative has emerged. The only reason to trim or exit would be a negative AMD-specific event, sector weakness, or a deteriorating macro environment for growth stocks. Without that, let the position continue to develop toward the August 4 earnings catalyst."
+      "what_to_do": "Hold. AMD is up 18.4% but the thesis is intact and nothing negative has emerged. The only reason to trim or exit would be a negative AMD-specific event, sector weakness, or a deteriorating macro environment for growth stocks. Without that, let the position continue to develop toward the August 4 earnings catalyst.",
+      "entry_date": "2026-04-14"
     },
     {
       "ticker": "SPCX",
@@ -50,7 +53,8 @@
       "catalyst": "Index inclusion is the immediate near-term catalyst \u2014 SpaceX is being added to the Russell 1000, MSCI Global, and Nasdaq-100 indices through late June and early July 2026. This forces index funds tracking those benchmarks to buy shares regardless of price, which can drive significant price appreciation in the short term.",
       "why": "This is a long-term core holding in the commercial space infrastructure buildout. SpaceX has a dominant and defensible position in launch and satellite internet that is likely to compound for decades. It is held for the long-term thesis, not for short-term price action.",
       "cost_basis": 236.98,
-      "what_to_do": "Hold through the index inclusion dates. The Russell 1000 and Nasdaq-100 inclusion through early July is the immediate catalyst. After index inclusion is complete, reassess the position size and whether to add more or hold at current allocation."
+      "what_to_do": "Hold through the index inclusion dates. The Russell 1000 and Nasdaq-100 inclusion through early July is the immediate catalyst. After index inclusion is complete, reassess the position size and whether to add more or hold at current allocation.",
+      "entry_date": "2026-04-14"
     },
     {
       "ticker": "CRWV",
@@ -63,7 +67,8 @@
       "catalyst": "CoreWeave recently IPO'd and the near-term catalyst is proving commercial traction \u2014 winning and renewing large contracts from AI labs and enterprises who need dedicated GPU compute. Any announcement of a major new customer or contract extension would be a positive signal.",
       "why": "This is a medium-term position in the AI infrastructure layer, specifically the compute supply side. As AI model training and inference demand grows, CoreWeave is positioned to capture that spend from companies that need dedicated GPU access beyond what general cloud providers offer.",
       "cost_basis": 58.3,
-      "what_to_do": "WATCH \u2014 Down 18% from entry. AI infrastructure thesis remains intact but no positive catalyst has emerged yet. Watch for any contract announcements or customer news as confirmation. If no catalyst emerges in the next 2-3 weeks, reassess allocation."
+      "what_to_do": "WATCH \u2014 Down 18% from entry. AI infrastructure thesis remains intact but no positive catalyst has emerged yet. Watch for any contract announcements or customer news as confirmation. If no catalyst emerges in the next 2-3 weeks, reassess allocation.",
+      "entry_date": "2026-05-01"
     },
     {
       "ticker": "NVDA",
@@ -76,7 +81,8 @@
       "catalyst": "Q2 FY2027 earnings on August 26th, where NVIDIA guided approximately $91 billion in revenue. This report is the single most important data release for the entire AI infrastructure trade \u2014 it will either confirm or question whether the massive capital spending on AI hardware is sustainable.",
       "why": "This is a long-term core holding in the AI infrastructure buildout. NVIDIA's position is genuinely dominant and defensible in a way that is rare in technology. The company is held for years, not quarters, as AI becomes the defining technology investment of this decade.",
       "cost_basis": 200.0,
-      "what_to_do": "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings \u2014 it is a position to hold through the AI infrastructure buildout cycle."
+      "what_to_do": "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings \u2014 it is a position to hold through the AI infrastructure buildout cycle.",
+      "entry_date": "2026-04-14"
     },
     {
       "ticker": "HUM",
@@ -89,7 +95,8 @@
       "catalyst": "Q2 FY2026 earnings on July 29th. The report will reveal whether Medicare Advantage medical cost trends have stabilized after a difficult period of elevated utilization. If the benefit ratio improves and management reaffirms full-year guidance, the stock should respond positively.",
       "why": "This is a short-term catalyst position entered specifically around the July 29 earnings event. The thesis is that managed care cost trends are normalizing after a difficult period, and Humana's earnings will confirm this. It is not intended to be held long-term beyond the earnings catalyst.",
       "cost_basis": 50.0,
-      "what_to_do": "WATCH \u2014 Earnings on July 29. You need to decide before that date whether to hold through or exit. Review the managed care regulatory environment and any CMS reimbursement news before then. Do not hold into the binary earnings event without a clear thesis on the outcome."
+      "what_to_do": "WATCH \u2014 Earnings on July 29. You need to decide before that date whether to hold through or exit. Review the managed care regulatory environment and any CMS reimbursement news before then. Do not hold into the binary earnings event without a clear thesis on the outcome.",
+      "entry_date": "2026-05-15"
     },
     {
       "ticker": "BTC",
@@ -102,7 +109,8 @@
       "catalyst": "No specific near-term company catalyst exists. Bitcoin's price is driven by macro liquidity conditions, institutional adoption flows, regulatory clarity, and broader risk appetite. A more dovish Fed stance or continued institutional ETF inflows would be positive catalysts.",
       "why": "This is a long-term structural allocation, not a trade. Bitcoin is held as a store of value and inflation hedge that is uncorrelated with traditional stock market movements. It is intended to be held through volatility rather than traded around short-term price swings.",
       "cost_basis": 2715.85,
-      "what_to_do": "Hold long-term. Up 7% from entry. No action needed. Only reassess if the macro thesis for Bitcoin changes materially \u2014 such as adverse regulatory action or a fundamental change in institutional adoption trends."
+      "what_to_do": "Hold long-term. Up 7% from entry. No action needed. Only reassess if the macro thesis for Bitcoin changes materially \u2014 such as adverse regulatory action or a fundamental change in institutional adoption trends.",
+      "entry_date": "2026-04-14"
     },
     {
       "ticker": "ZEC",
@@ -115,7 +123,8 @@
       "catalyst": "No specific near-term catalyst. Zcash's price is correlated with broader crypto market movements and would benefit from any major regulatory clarity around privacy coins or increased adoption by privacy-conscious users and institutions.",
       "why": "This is a long-term thematic position in privacy-preserving blockchain infrastructure. The thesis is that demand for financial privacy will grow as surveillance of traditional financial systems increases and as digital payments become more common globally.",
       "cost_basis": 482.28,
-      "what_to_do": "Hold. Down 8% from entry but within normal crypto volatility. No negative catalyst has emerged and the thesis is unchanged. This is a small position and the long-term thesis remains intact."
+      "what_to_do": "Hold. Down 8% from entry but within normal crypto volatility. No negative catalyst has emerged and the thesis is unchanged. This is a small position and the long-term thesis remains intact.",
+      "entry_date": "2026-04-14"
     },
     {
       "ticker": "ETH",
@@ -128,7 +137,8 @@
       "catalyst": "No specific near-term catalyst. Ethereum would benefit from continued DeFi and institutional adoption growth, any major network upgrades that improve transaction throughput or reduce fees, and broader crypto market strength driven by macro liquidity improvements.",
       "why": "This is a long-term core crypto holding in the decentralized finance infrastructure layer. Ethereum has the largest developer ecosystem, the most deployed applications, and the deepest institutional adoption of any smart contract platform. It is held for multi-year appreciation as the crypto economy grows.",
       "cost_basis": 413.42,
-      "what_to_do": "Hold long-term. Down 14.3% from entry but the staking rewards are generating yield while you hold. No action needed. Only reassess if a competing smart contract platform shows signs of significantly displacing Ethereum's ecosystem dominance."
+      "what_to_do": "Hold long-term. Down 14.3% from entry but the staking rewards are generating yield while you hold. No action needed. Only reassess if a competing smart contract platform shows signs of significantly displacing Ethereum's ecosystem dominance.",
+      "entry_date": "2026-04-14"
     },
     {
       "ticker": "XRP",
@@ -141,7 +151,8 @@
       "catalyst": "The primary catalyst is ongoing regulatory clarity \u2014 the SEC lawsuit against Ripple reached a partial resolution in 2023 and XRP is increasingly viewed as compliant with U.S. securities law. Continued expansion of Ripple's payment network and any new institutional partnership announcements would be positive catalysts.",
       "why": "This is a long-term position in the digital payment infrastructure thesis \u2014 specifically that cross-border payments will increasingly move to blockchain rails for speed, cost, and transparency reasons, and XRP is one of the primary beneficiaries of that shift.",
       "cost_basis": 295.75,
-      "what_to_do": "Hold long-term. Down 4.2% from entry which is minimal. The regulatory thesis is developing favorably and the payment network is growing. No action needed unless regulatory conditions deteriorate significantly."
+      "what_to_do": "Hold long-term. Down 4.2% from entry which is minimal. The regulatory thesis is developing favorably and the payment network is growing. No action needed unless regulatory conditions deteriorate significantly.",
+      "entry_date": "2026-04-14"
     },
     {
       "ticker": "INTC",
@@ -154,7 +165,8 @@
       "summary": "Intel Corporation is a legacy semiconductor company undergoing a major turnaround, investing heavily in domestic chip manufacturing through its Intel Foundry Services division. A recent partnership with Apple on U.S.-based chip design announced by President Trump sent the stock up 10%, signaling renewed commercial momentum for a company that has struggled against TSMC and AMD for years.",
       "catalyst": "The Apple chip partnership is the most immediate catalyst, creating potential for sustained momentum as the reshoring narrative strengthens. Intel's foundry business ramp and any new customer wins for its domestic manufacturing capacity would be additional positive catalysts.",
       "why": "Medium-term position in the semiconductor reshoring theme. Intel is the primary domestic chip manufacturer and benefits directly from government and commercial pressure to reduce dependence on Taiwan-based TSMC. The turnaround is still in progress but the Apple partnership validates the thesis.",
-      "what_to_do": "WATCH \u2014 The Apple partnership announcement is a genuine positive catalyst but the position needs monitoring. Watch for any follow-up contract details or volume data confirming the partnership is translating to real revenue. If no further confirmation emerges in the next 2-3 weeks, reassess."
+      "what_to_do": "WATCH \u2014 The Apple partnership announcement is a genuine positive catalyst but the position needs monitoring. Watch for any follow-up contract details or volume data confirming the partnership is translating to real revenue. If no further confirmation emerges in the next 2-3 weeks, reassess.",
+      "entry_date": "2026-05-01"
     },
     {
       "ticker": "SCO",
@@ -167,7 +179,8 @@
       "summary": "SCO is the ProShares UltraShort Bloomberg Crude Oil ETF, a 2x inverse leveraged ETF designed to return twice the inverse daily performance of crude oil prices. When oil prices fall, SCO rises approximately 2x. When oil prices rise, SCO falls approximately 2x. This is a short-term directional bet on falling oil prices.",
       "catalyst": "The US-Iran ceasefire agreement and potential reopening of the Strait of Hormuz is a direct catalyst \u2014 increased oil supply from Iran coming back to market puts downward pressure on crude prices, which benefits SCO. Oil prices have already fallen to 3-month lows on this news.",
       "why": "Short-term position expressing a view that oil prices decline as the Iran supply returns to market and the geopolitical risk premium unwinds. Leveraged ETFs decay over time and are not suitable for long-term holding \u2014 this must have a defined short-term exit.",
-      "what_to_do": "WATCH \u2014 Time-sensitive leveraged ETF position. The Iran deal oil supply catalyst is playing out. Leveraged ETFs decay over time \u2014 max hold is 2-3 weeks from entry. Monitor oil price direction daily. Exit if oil reverses and starts climbing, or when the catalyst has fully played out."
+      "what_to_do": "WATCH \u2014 Time-sensitive leveraged ETF position. The Iran deal oil supply catalyst is playing out. Leveraged ETFs decay over time \u2014 max hold is 2-3 weeks from entry. Monitor oil price direction daily. Exit if oil reverses and starts climbing, or when the catalyst has fully played out.",
+      "entry_date": "2026-06-10"
     },
     {
       "ticker": "NOK",
@@ -180,7 +193,8 @@
       "summary": "Nokia is a Finnish telecommunications equipment company that manufactures network infrastructure including 5G equipment, fixed broadband, and IP routing systems. After a difficult period, Nokia has been winning 5G network contracts globally and is seen as a beneficiary of the push to replace Chinese telecom equipment from Huawei and ZTE in Western networks.",
       "catalyst": "5G infrastructure buildout and the global push to replace Huawei equipment in Western telecom networks are the primary medium-term catalysts. Any major new contract wins or government-mandated Huawei replacement programs would be positive catalysts for Nokia.",
       "why": "Medium-term position in the 5G networking infrastructure theme and the Western telecom equipment reshoring narrative. Nokia is one of only two Western companies (alongside Ericsson) capable of supplying large-scale 5G network infrastructure, giving it a structural advantage as governments push to remove Chinese equipment.",
-      "what_to_do": "Hold. Position is up 1.44% and the thesis is intact. Nokia continues to win 5G contracts and the Huawei replacement narrative strengthens over time. No immediate action needed \u2014 this is a patient medium-term hold waiting for the 5G infrastructure buildout to accelerate."
+      "what_to_do": "Hold. Position is up 1.44% and the thesis is intact. Nokia continues to win 5G contracts and the Huawei replacement narrative strengthens over time. No immediate action needed \u2014 this is a patient medium-term hold waiting for the 5G infrastructure buildout to accelerate.",
+      "entry_date": "2026-05-01"
     }
   ],
   "total_cost_basis": 9446.68

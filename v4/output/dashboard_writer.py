@@ -20,6 +20,7 @@ def write_dashboard_data(
     cost_basis: float = 0,
     performance_history: list = None,
     intraday: dict = None,
+    rules_output: dict = None,
 ) -> None:
     """
     Write structured briefing data to dashboard_data.js.
@@ -360,6 +361,14 @@ def write_dashboard_data(
         "afternoon_positions": afternoon_positions,
         "afternoon_candidates": afternoon_candidates,
         "intraday": intraday or {},
+        "rules_engine": {
+            "regime_score": (rules_output or {}).get("regime_score", 0),
+            "regime": (rules_output or {}).get("regime", "Yellow"),
+            "exit_signals": (rules_output or {}).get("exit_signals", []),
+            "entry_signals": (rules_output or {}).get("entry_signals", []),
+            "crypto_check": (rules_output or {}).get("crypto_check", {}),
+            "kill_criteria": (rules_output or {}).get("kill_criteria", {}),
+        },
     }
 
     js_content = "window.BRIEFING_DATA = " + json.dumps(data, indent=2, default=str) + ";"

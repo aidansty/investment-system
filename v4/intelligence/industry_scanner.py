@@ -99,23 +99,28 @@ def calculate_conviction_score(
     industry_data: dict,
     earnings_score: float = 0,
     event_score: float = 0,
-    macro_score: float = 0
+    macro_score: float = 0,
+    revenue_growth_score: float = 0,
+    fcf_score: float = 0,
+    earnings_surprise_score: float = 0,
 ) -> int:
     """
-    Calculate overall conviction score 0-100.
-    Four components of 0-25 each:
-    - Industry momentum (quantitative)
-    - Earnings revision trend (quantitative)
-    - Event catalyst quality (event intelligence)
-    - Macro alignment (macro conditions)
+    7-component evidence-weighted conviction score 0-100.
+    Momentum (25%) + Earnings revisions (20%, capped combined at 38%) +
+    Revenue growth (15%) + FCF (15%) + Macro (10%) + Catalyst (10%) + Surprise (5%)
     """
     momentum_component = min(25, industry_data.get("momentum_score", 0))
-    earnings_component = min(25, round(earnings_score * 25))
-    event_component = min(25, round(event_score * 25))
-    macro_component = min(25, round(macro_score * 25))
-
-    total = momentum_component + earnings_component + event_component + macro_component
-
+    earnings_component = min(20, round(earnings_score * 20))
+    # Cap combined momentum+revisions at 38 to prevent double-counting
+    if momentum_component + earnings_component > 38:
+        earnings_component = max(0, 38 - momentum_component)
+    revenue_component = min(15, round(revenue_growth_score * 15))
+    fcf_component = min(15, round(fcf_score * 15))
+    macro_component = min(10, round(macro_score * 10))
+    event_component = min(10, round(event_score * 10))
+    surprise_component = min(5, round(earnings_surprise_score * 5))
+    total = (momentum_component + earnings_component + revenue_component +
+             fcf_component + macro_component + event_component + surprise_component)
     return min(100, max(0, total))
 
 
