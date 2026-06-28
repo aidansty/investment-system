@@ -892,9 +892,16 @@ function renderMgmtPositions() {
     const div = document.createElement('div');
     div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg-card);border:0.5px solid var(--border);border-radius:8px;';
     const left = document.createElement('div');
-    left.innerHTML = '<div style="font-weight:600;font-size:13px;">' + p.ticker + '</div>' +
-      '<div style="font-size:11px;color:var(--text-secondary);">' + term + ' &middot; ' + type + '</div>' +
-      '<div style="font-size:11px;color:var(--text-secondary);">Entry: $' + entry.toFixed(2) + ' &middot; Qty: ' + p.qty + '</div>';
+    const t1 = document.createElement('div');
+    t1.style.fontWeight = '600'; t1.style.fontSize = '13px';
+    t1.textContent = p.ticker;
+    const t2 = document.createElement('div');
+    t2.style.cssText = 'font-size:11px;color:var(--text-secondary);';
+    t2.textContent = term + ' · ' + type;
+    const t3 = document.createElement('div');
+    t3.style.cssText = 'font-size:11px;color:var(--text-secondary);';
+    t3.textContent = 'Entry: $' + entry.toFixed(2) + ' · Qty: ' + p.qty;
+    left.appendChild(t1); left.appendChild(t2); left.appendChild(t3);
     const right = document.createElement('div');
     right.style.textAlign = 'right';
     const pctEl = document.createElement('div');
