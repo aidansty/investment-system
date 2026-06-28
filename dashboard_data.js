@@ -713,18 +713,6 @@ window.BRIEFING_DATA = {
       ]
     },
     {
-      "ticker": "PLTR",
-      "action": "Hold",
-      "entry_price": 133.41,
-      "current_price": 112.59,
-      "qty": 1.0,
-      "pct_change": -15.61,
-      "bullets": [
-        "Entry: $133.41 | Current: $112.59 | P&L: -15.6%",
-        "Afternoon analysis unavailable \u2014 see morning briefing for full position review."
-      ]
-    },
-    {
       "ticker": "BTC",
       "action": "Hold",
       "entry_price": 59767.28,
