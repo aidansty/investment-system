@@ -956,6 +956,38 @@ document.getElementById('add-position-btn')?.addEventListener('click', () => {
   renderMgmtPositions();
 });
 
+function removePosition(ticker) {
+  const result = document.getElementById('add-position-result');
+  if (!result) return;
+  result.style.display = 'block';
+  result.style.background = 'rgba(226,80,79,0.1)';
+  result.style.color = '#e2504f';
+  result.innerHTML = '<b>' + ticker + ' staged for removal.</b> Export positions.json below, remove the ' + ticker + ' entry, then push to GitHub.';
+}
+function trimPosition(ticker) {
+  const result = document.getElementById('add-position-result');
+  if (!result) return;
+  result.style.display = 'block';
+  result.style.background = 'rgba(239,159,39,0.1)';
+  result.style.color = '#EF9F27';
+  result.innerHTML = '<b>' + ticker + ' trim noted.</b> After selling in Webull, update qty in positions.json and push to GitHub.';
+}
+function removePosition(ticker) {
+  const result = document.getElementById('add-position-result');
+  if (!result) return;
+  result.style.display = 'block';
+  result.style.background = 'rgba(226,80,79,0.1)';
+  result.style.color = '#e2504f';
+  result.innerHTML = '<b>' + ticker + ' staged for removal.</b> Export positions.json below, remove the ' + ticker + ' entry, then push to GitHub.';
+}
+function trimPosition(ticker) {
+  const result = document.getElementById('add-position-result');
+  if (!result) return;
+  result.style.display = 'block';
+  result.style.background = 'rgba(239,159,39,0.1)';
+  result.style.color = '#EF9F27';
+  result.innerHTML = '<b>' + ticker + ' trim noted.</b> After selling in Webull, update qty in positions.json and push to GitHub.';
+}
 document.getElementById('export-positions-btn')?.addEventListener('click', () => {
   const positions = POSITIONS_CONFIG.map(p => ({
     ticker: p.ticker,
@@ -980,11 +1012,7 @@ document.getElementById('export-positions-btn')?.addEventListener('click', () =>
   URL.revokeObjectURL(url);
 });
 
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (btn.dataset.tab === 'positions-mgmt') setTimeout(renderMgmtPositions, 100);
-  });
-});
+
 
 // ============================================================
 // ACTION BADGE HELPER
@@ -1526,14 +1554,7 @@ async function fetchIntradayChart(ticker, canvasId) {
 // ============================================================
 // TABS
 // ============================================================
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-  });
-});
+
 </script>
 </body>
 </html>
