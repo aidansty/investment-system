@@ -286,12 +286,18 @@ def build_and_send_afternoon_telegram(
     new_opportunities: list,
     notable_moves: list,
     today: str,
+    rules_output: dict = None,
 ) -> None:
     """
     Send afternoon portfolio update via Telegram.
-    Two messages: what changed + positions, then opportunities.
+    Message 1: What changed + rules engine exit signals + positions needing attention
+    Message 2: Entry signals + new opportunities + close watch
     """
     sections = update.get("sections", {}) if update else {}
+    re = rules_output or {}
+    aft_exit_signals = re.get("exit_signals", [])
+    aft_entry_signals = re.get("entry_signals", [])
+    kill_criteria = re.get("kill_criteria", {})
 
     msg1 = []
     msg1.append(f"<b>📈 Afternoon Update — {today}</b>")
@@ -303,11 +309,11 @@ def build_and_send_afternoon_telegram(
         sections.get("What Changed") or
         sections.get("Portfolio Review") or ""
     )
-    # Fallback: re-parse from raw text if sections are empty
+    # Fallback: re-parse from raw text
     if not what_changed:
-        import re
-        raw = briefing.get("raw_text", "") if briefing else ""
-        match = re.search(r"What Changed.*?\n(.*?)(?=##|$)", raw, re.DOTALL | re.IGNORECASE)
+        import re as re_mod
+        raw = update.get("raw_text", "") if update else ""
+        match = re_mod.search(r"What Changed.*?\n(.*?)(?=##|$)", raw, re_mod.DOTALL | re_mod.IGNORECASE)
         if match:
             what_changed = match.group(1).strip()
     if what_changed:
@@ -318,6 +324,22 @@ def build_and_send_afternoon_telegram(
         msg1.append("")
 
     # Notable moves intentionally excluded from Telegram — dashboard only
+
+    # Kill criteria alert
+    if kill_criteria.get("triggered"):
+        msg1.append("🚨 <b>KILL CRITERIA TRIGGERED</b>")
+        for alert in kill_criteria.get("alerts", []):
+            msg1.append(f"  {alert.get('message', '')[:150]}")
+        msg1.append("")
+
+    # Rules engine exit signals (fast exits — immediate action)
+    fast_exits = [s for s in aft_exit_signals if s.get("exit_type") == "fast" and s.get("action") == "exit"]
+    if fast_exits:
+        msg1.append("<b>🚨 Immediate Exit Signals</b>")
+        for sig in fast_exits:
+            msg1.append(f"  🔴 <b>{sig.get('ticker','')}</b> — {sig.get('urgency','').upper()}")
+            msg1.append(f"     {sig.get('reason','')[:120]}")
+        msg1.append("")
 
     # Position updates — only show positions where something changed or action needed
     position_review = (
@@ -390,6 +412,17 @@ def build_and_send_afternoon_telegram(
             opps_flat.extend(item)
         elif isinstance(item, dict):
             opps_flat.append(item)
+
+    # Rules engine entry signals
+    if aft_entry_signals:
+        msg2.append("<b>🎯 Entry Signals (Rules Engine)</b>")
+        for sig in aft_entry_signals[:2]:
+            size_pct = sig.get("size_pct", 0)
+            entry_type = sig.get("entry_type", "full")
+            type_label = "REDUCED" if entry_type == "reduced" else "FULL"
+            msg2.append(f"  📈 <b>{sig.get('ticker','')}</b> — {type_label} ENTRY {size_pct:.0%}")
+            msg2.append(f"     {sig.get('reason','')[:120]}")
+        msg2.append("")
 
     if opps_flat:
         msg2.append("<b>🏭 New or Strengthened Opportunities</b>")

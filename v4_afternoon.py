@@ -246,6 +246,7 @@ def main():
             new_opportunities=industry_results.get("top_industries", []),
             notable_moves=notable_moves_parsed,
             today=str(today),
+            rules_output=aft_rules_output,
         )
     except Exception as e:
         log(f"Telegram error: {e}")
