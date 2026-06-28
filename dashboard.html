@@ -52,6 +52,7 @@
     <button class="tab-btn active" data-tab="portfolio">Portfolio</button>
     <button class="tab-btn" data-tab="morning">Morning briefing</button>
     <button class="tab-btn" data-tab="afternoon">Afternoon update</button>
+    <button class="tab-btn" data-tab="positions-mgmt">Manage positions</button>
     <button class="tab-btn" data-tab="assistant">Ask the desk</button>
   </nav>
 
@@ -189,6 +190,34 @@
   </div>
 
   <!-- ASK THE DESK TAB -->
+  <div class="tab-panel" id="tab-positions-mgmt">
+    <h2 class="section-title">Manage positions</h2>
+    <p class="section-sub">Add or remove positions. Export positions.json and push to GitHub to make permanent.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+      <div>
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);margin-bottom:10px;">Current positions</div>
+        <div id="mgmt-positions-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);margin-bottom:10px;">Add new position</div>
+        <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;">
+          <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">Ticker</div><input id="new-ticker" type="text" placeholder="e.g. AAPL" style="width:100%;background:rgba(255,255,255,0.05);border:0.5px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px;font-family:inherit;box-sizing:border-box;"></div>
+          <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">Entry price ($)</div><input id="new-entry" type="number" placeholder="e.g. 150.00" style="width:100%;background:rgba(255,255,255,0.05);border:0.5px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px;font-family:inherit;box-sizing:border-box;"></div>
+          <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">Quantity</div><input id="new-qty" type="number" placeholder="e.g. 10" style="width:100%;background:rgba(255,255,255,0.05);border:0.5px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px;font-family:inherit;box-sizing:border-box;"></div>
+          <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">Term</div><select id="new-term" style="width:100%;background:rgba(255,255,255,0.05);border:0.5px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px;font-family:inherit;box-sizing:border-box;"><option value="Long-term">Long-term (5+ years)</option><option value="Medium-term" selected>Medium-term (2-12 months)</option><option value="Short-term">Short-term (days to 6 weeks)</option></select></div>
+          <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">Type</div><select id="new-type" style="width:100%;background:rgba(255,255,255,0.05);border:0.5px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px;font-family:inherit;box-sizing:border-box;"><option value="Stock" selected>Stock</option><option value="ETF">ETF</option><option value="Crypto">Crypto</option></select></div>
+          <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">Industry</div><input id="new-industry" type="text" placeholder="e.g. Semiconductors" style="width:100%;background:rgba(255,255,255,0.05);border:0.5px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px;font-family:inherit;box-sizing:border-box;"></div>
+          <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">Entry date</div><input id="new-date" type="date" style="width:100%;background:rgba(255,255,255,0.05);border:0.5px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px;font-family:inherit;box-sizing:border-box;"></div>
+          <div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">Thesis / what it is</div><textarea id="new-summary" placeholder="Why you hold this..." style="width:100%;background:rgba(255,255,255,0.05);border:0.5px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text-primary);font-size:13px;font-family:inherit;resize:vertical;min-height:60px;box-sizing:border-box;"></textarea></div>
+          <button id="add-position-btn" style="background:rgba(93,202,165,0.15);color:#5DCAA5;border:0.5px solid rgba(93,202,165,0.3);border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">+ Add Position</button>
+          <div id="add-position-result" style="font-size:12px;display:none;padding:8px;border-radius:6px;"></div>
+        </div>
+        <div style="margin-top:16px;padding:12px 14px;background:rgba(239,159,39,0.08);border:0.5px solid rgba(239,159,39,0.2);border-radius:10px;font-size:12px;color:#EF9F27;">⚠️ Changes are staged in browser only. Export below and replace your positions.json, then push to GitHub to make permanent.</div>
+        <div style="margin-top:10px;"><button id="export-positions-btn" style="background:rgba(255,255,255,0.06);color:var(--text-secondary);border:0.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;font-family:inherit;">Export positions.json</button></div>
+      </div>
+    </div>
+  </div>
+
   <div class="tab-panel" id="tab-assistant">
     <div class="desk-wrap">
       <div class="desk-header">
@@ -374,6 +403,26 @@ const CASH_KEY = 'investment_desk_cash';
 let currentCash = parseFloat(localStorage.getItem(CASH_KEY) || '0');
 // Ensure pipeline cash field never overwrites user-set value
 if (BRIEFING_DATA && BRIEFING_DATA.cash !== undefined) delete BRIEFING_DATA.cash;
+
+// Asymmetric cash drift band check (12-18%)
+function checkCashDriftBand(positions, cashBalance) {
+  let totalValue = cashBalance;
+  for (const p of positions) {
+    totalValue += (p.current_price || 0) * (p.qty || 0);
+  }
+  if (totalValue <= 0) return;
+  const cashPct = cashBalance / totalValue;
+  const cashEl = document.getElementById('s-cash');
+  const cashSubEl = document.querySelector('#s-cash + * .card-sub') || document.getElementById('s-cash-sub');
+  // Show warning if outside 12-18% band
+  if (cashPct < 0.12) {
+    if (cashEl) cashEl.style.color = 'var(--red)';
+  } else if (cashPct > 0.18) {
+    if (cashEl) cashEl.style.color = 'var(--amber)';
+  } else {
+    if (cashEl) cashEl.style.color = '';
+  }
+}
 document.getElementById('s-cash').textContent = fmt(currentCash);
 
 // Cash edit modal
@@ -740,6 +789,77 @@ function updateDualScoreboard(positions, cashBalance) {
 }
 updateRegimeScore();
 updateKillCriteria();
+
+// ============================================================
+// POSITION MANAGEMENT UI
+// ============================================================
+function renderMgmtPositions() {
+  const list = document.getElementById('mgmt-positions-list');
+  if (!list) return;
+  list.innerHTML = '';
+  const positions = POSITIONS_CONFIG || [];
+  positions.forEach((p) => {
+    const entry = ENTRY_PRICES[p.ticker] || p.entry_price || 0;
+    const current = p.current_price || 0;
+    const pct = entry > 0 ? ((current - entry) / entry * 100) : 0;
+    const pctColor = pct >= 0 ? '#5DCAA5' : '#e2504f';
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg-card);border:0.5px solid var(--border);border-radius:8px;';
+    div.innerHTML = `<div><div style="font-weight:600;font-size:13px;">${p.ticker}</div><div style="font-size:11px;color:var(--text-secondary);">${POSITION_META[p.ticker]?.term || p.term || ''} · ${POSITION_META[p.ticker]?.type || p.type || ''}</div><div style="font-size:11px;color:var(--text-secondary);">Entry: $${entry.toFixed(2)} · Qty: ${p.qty}</div></div><div style="text-align:right;"><div style="font-weight:600;color:${pctColor};">${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%</div></div>`;
+    list.appendChild(div);
+  });
+}
+
+document.getElementById('add-position-btn')?.addEventListener('click', () => {
+  const ticker = document.getElementById('new-ticker')?.value?.trim()?.toUpperCase();
+  const entry = parseFloat(document.getElementById('new-entry')?.value);
+  const qty = parseFloat(document.getElementById('new-qty')?.value);
+  const term = document.getElementById('new-term')?.value;
+  const type = document.getElementById('new-type')?.value;
+  const industry = document.getElementById('new-industry')?.value?.trim();
+  const date = document.getElementById('new-date')?.value;
+  const summary = document.getElementById('new-summary')?.value?.trim();
+  const result = document.getElementById('add-position-result');
+  if (!ticker || !entry || !qty) {
+    if (result) { result.style.display='block'; result.style.background='rgba(226,80,79,0.1)'; result.style.color='#e2504f'; result.textContent='Ticker, entry price, and quantity are required.'; }
+    return;
+  }
+  ENTRY_PRICES[ticker] = entry;
+  POSITION_META[ticker] = { term, type };
+  if (result) { result.style.display='block'; result.style.background='rgba(93,202,165,0.1)'; result.style.color='#5DCAA5'; result.textContent=`${ticker} staged. Export positions.json below and push to GitHub to make permanent.`; }
+  ['new-ticker','new-entry','new-qty','new-industry','new-date','new-summary'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  renderMgmtPositions();
+});
+
+document.getElementById('export-positions-btn')?.addEventListener('click', () => {
+  const positions = POSITIONS_CONFIG.map(p => ({
+    ticker: p.ticker,
+    type: POSITION_META[p.ticker]?.type || p.type || 'Stock',
+    term: POSITION_META[p.ticker]?.term || p.term || 'Medium-term',
+    qty: p.qty,
+    entry: ENTRY_PRICES[p.ticker] || p.entry_price || 0,
+    industry: p.industry || '',
+    entry_date: p.entry_date || '',
+    summary: p.summary || '',
+    catalyst: p.catalyst || '',
+    why: p.why || '',
+    what_to_do: p.what_to_do || '',
+  }));
+  const json = JSON.stringify({ positions }, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'positions.json';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.dataset.tab === 'positions-mgmt') setTimeout(renderMgmtPositions, 100);
+  });
+});
 
 // ============================================================
 // ACTION BADGE HELPER

@@ -11,11 +11,12 @@ def build_and_send_morning_telegram(
     briefing: dict,
     forward_catalysts: list,
     today: str,
+    rules_output: dict = None,
 ) -> None:
     """
     Send two Telegram messages every morning.
-    Message 1: Market overview + news + forward catalysts
-    Message 2: Position review + alerts + action items
+    Message 1: Regime score + news + catalysts
+    Message 2: Industries + rules engine signals + position actions
     """
     sections = briefing.get("sections", {}) if briefing else {}
     vix = macro.get("vix", 0)
@@ -26,7 +27,14 @@ def build_and_send_morning_telegram(
     high_conviction = industry_results.get("high_conviction", []) if industry_results else []
     recent_news = news_package.get("recent_news", []) if news_package else []
 
-    regime_emoji = "🟢" if vix_regime == "Green" else "🔴" if vix_regime == "Red" else "🟡"
+    # Use composite regime score from rules engine
+    re = rules_output or {}
+    regime_score = re.get("regime_score", 0)
+    regime = re.get("regime", vix_regime)
+    regime_emoji = "🟢" if regime == "Green" else "🔴" if regime == "Red" else "🟡"
+    kill_criteria = re.get("kill_criteria", {})
+    entry_signals = re.get("entry_signals", [])
+    exit_signals = re.get("exit_signals", [])
 
     # ─── MESSAGE 1: Market Regime + News + Catalysts ───────────────────────
 
@@ -34,16 +42,23 @@ def build_and_send_morning_telegram(
     msg1.append(f"<b>📊 Morning Briefing — {today}</b>")
     msg1.append("")
 
-    # Regime with plain English reasoning
-    msg1.append(f"<b>{regime_emoji} Market Regime</b>")
-    market_overview = sections.get("Market Overview", "")
+    # Kill criteria alert first if triggered
+    if kill_criteria.get("triggered"):
+        msg1.append("🚨 <b>KILL CRITERIA TRIGGERED</b>")
+        for alert in kill_criteria.get("alerts", []):
+            msg1.append(f"  {alert.get('message', '')[:150]}")
+        msg1.append("")
+
+    # Composite regime score
+    msg1.append(f"<b>{regime_emoji} Market Regime — {regime} ({regime_score}/100)</b>")
+    market_overview = sections.get("Market Snapshot Explanation", sections.get("Market Overview", ""))
     if market_overview:
-        sentences = [s.strip() for s in market_overview.replace("\n", " ").split(".") if len(s.strip()) > 20]
-        regime_summary = ". ".join(sentences[:2]) + "." if sentences else market_overview[:300]
-        msg1.append(regime_summary)
+        sentences = [s.strip().lstrip("- ") for s in market_overview.split(chr(10)) if len(s.strip()) > 20]
+        for s in sentences[:3]:
+            msg1.append(f"  • {s}")
     else:
         trend_word = "falling" if vix_trend == "Falling" else "rising" if vix_trend in ("Rising", "Spiking") else "flat"
-        msg1.append(f"VIX at {vix} ({vix_regime}), {trend_word} from {vix_avg} five-day average.")
+        msg1.append(f"  • VIX at {vix} ({vix_regime}), {trend_word} from {vix_avg} five-day average.")
     msg1.append("")
 
     # Key news labeled by how it affects you
@@ -185,6 +200,40 @@ def build_and_send_morning_telegram(
         msg2.append("<b>⚡ Action Items Today</b>")
         for item in action_items:
             msg2.append(item)
+        msg2.append("")
+
+    # Rules engine entry signals
+    if entry_signals:
+        msg2.append("<b>🎯 Entry Signals (Rules Engine)</b>")
+        for sig in entry_signals[:3]:
+            size_pct = sig.get("size_pct", 0)
+            entry_type = sig.get("entry_type", "full")
+            size_label = f"{size_pct:.0%}" if size_pct else ""
+            type_label = "REDUCED" if entry_type == "reduced" else "FULL"
+            msg2.append(f"  📈 <b>{sig.get('ticker','')}</b> — {type_label} ENTRY {size_label}")
+            msg2.append(f"     {sig.get('reason','')[:120]}")
+        msg2.append("")
+
+    # Rules engine exit signals
+    exits_triggered = [s for s in exit_signals if s.get("action") == "exit"]
+    if exits_triggered:
+        msg2.append("<b>🚨 Exit Signals (Rules Engine)</b>")
+        for sig in exits_triggered:
+            urgency = sig.get("urgency", "")
+            urgency_label = "IMMEDIATE" if urgency == "immediate" else "NEXT OPEN" if urgency == "next_open" else "TODAY"
+            msg2.append(f"  🔴 <b>{sig.get('ticker','')}</b> — EXIT {urgency_label}")
+            msg2.append(f"     {sig.get('reason','')[:120]}")
+        msg2.append("")
+
+    # Tax awareness flags
+    tax_warnings = []
+    for sig in exit_signals:
+        tax = sig.get("tax_awareness", {})
+        if tax.get("urgency") in ("high", "medium") and sig.get("action") != "exit":
+            tax_warnings.append(f"  💰 <b>{sig.get('ticker','')}</b>: {tax.get('tax_recommendation','')[:100]}")
+    if tax_warnings:
+        msg2.append("<b>💰 Tax Awareness</b>")
+        msg2.extend(tax_warnings[:3])
         msg2.append("")
 
     msg2.append("→ Full analysis on dashboard")

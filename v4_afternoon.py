@@ -22,6 +22,8 @@ from v4.intelligence.industry_scanner import run_industry_scan
 from v4.intelligence.event_engine import enrich_industries_with_events
 from v4.ai.afternoon_update import generate_afternoon_update
 from v4.output.telegram_output import build_and_send_afternoon_telegram
+from v4.intelligence.rules_engine import run_rules_engine
+from v4.intelligence.rules_engine import run_rules_engine
 from v4.output.dashboard_writer import write_dashboard_data
 from v4.config.settings import BENCHMARK_ETF
 
@@ -211,6 +213,20 @@ def main():
         log("Dashboard data written successfully")
     except Exception as e:
         log(f"Dashboard write error (non-fatal): {e}")
+
+    # Run rules engine for afternoon thesis monitoring
+    aft_rules_output = {}
+    try:
+        portfolio_value = sum(p.get("current_price", 0) * p.get("qty", 0) for p in positions)
+        cash_balance = portfolio_value * 0.15
+        position_reviews = [{"ticker": p.get("ticker", ""), "conviction_score": 50, "thesis_break": False, "thesis_break_reason": ""} for p in positions]
+        aft_rules_output = run_rules_engine(
+            positions=positions, industry_results=industry_results, macro=macro,
+            position_reviews=position_reviews, portfolio_value=portfolio_value, cash_balance=cash_balance,
+        )
+        log(f"Afternoon rules engine: regime={aft_rules_output.get('regime')} {aft_rules_output.get('regime_score')}/100")
+    except Exception as e:
+        log(f"Afternoon rules engine error (non-fatal): {e}")
 
     # Send Telegram (2 messages)
     try:

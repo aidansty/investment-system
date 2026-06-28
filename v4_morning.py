@@ -202,6 +202,7 @@ def main():
             briefing=briefing,
             forward_catalysts=forward_catalysts,
             today=str(today),
+            rules_output=rules_output,
         )
     except Exception as e:
         log(f"Telegram error: {e}")
