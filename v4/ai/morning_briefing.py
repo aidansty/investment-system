@@ -15,6 +15,7 @@ def build_morning_context(
     positions: list,
     today: str,
     earnings_calendar: dict = None,
+    rules_output: dict = None,
 ) -> str:
     """
     Assembles the complete context block for the morning briefing.
@@ -48,6 +49,37 @@ Economic events today: {len(econ_events)}"""
             news_block += f"   {summary}\n"
         if category:
             news_block += f"   Category: {category}\n"
+
+    # ── Rules Engine Signals ──────────────────────────────────────────────────
+    re_out = rules_output or {}
+    regime_score = re_out.get("regime_score", 0)
+    regime = re_out.get("regime", "Yellow")
+    entry_signals = re_out.get("entry_signals", [])
+    exit_signals = re_out.get("exit_signals", [])
+    kill_criteria = re_out.get("kill_criteria", {})
+
+    rules_block = "\n=== RULES ENGINE OUTPUT ===\n"
+    rules_block += f"REGIME: {regime} ({regime_score}/100)\n"
+    if kill_criteria.get("triggered"):
+        rules_block += "KILL CRITERIA TRIGGERED — defensive mode active\n"
+    rules_block += f"\nENTRY SIGNALS ({len(entry_signals)} found):\n"
+    if entry_signals:
+        for sig in entry_signals:
+            rules_block += f"  ENTER {sig.get('ticker','')} conviction={sig.get('conviction',0)}/100 size={sig.get('size_pct',0):.0%}\n"
+            rules_block += f"  {sig.get('reason','')[:150]}\n"
+    else:
+        rules_block += "  No qualifying entries today (conviction >= 75 + catalyst required)\n"
+    rules_block += f"\nPOSITION SIGNALS ({len(exit_signals)} evaluated):\n"
+    for sig in exit_signals:
+        action = sig.get("action", "hold").upper()
+        if action != "HOLD":
+            rules_block += f"  {action} {sig.get('ticker','')} — {sig.get('reason','')[:120]}\n"
+            tax = sig.get("tax_awareness", {})
+            if tax.get("urgency") in ("high", "medium"):
+                rules_block += f"  TAX: {tax.get('tax_recommendation','')}\n"
+    rules_block += "=== END RULES ENGINE OUTPUT ===\n"
+
+    context += rules_block
 
     # Forward catalysts block — events with specific future dates
     catalysts_block = ""
@@ -257,14 +289,16 @@ def generate_morning_briefing(
     positions: list,
     today: str,
     earnings_calendar: dict = None,
+    rules_output: dict = None,
 ) -> dict:
     """
     Generate the complete morning briefing using Claude.
+    Claude is the EXPLANATION layer — rules engine decisions are passed in.
     Returns dict with raw_text, sections, and token usage.
     """
     client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
 
-    context = build_morning_context(macro, industry_results, news, forward_catalysts, positions, today, earnings_calendar=earnings_calendar or {})
+    context = build_morning_context(macro, industry_results, news, forward_catalysts, positions, today, earnings_calendar=earnings_calendar or {}, rules_output=rules_output or {})
     instructions = build_morning_output_instructions()
     full_prompt = context + instructions
 

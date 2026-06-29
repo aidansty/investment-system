@@ -170,6 +170,7 @@ def main():
             positions=positions,
             today=str(today),
             earnings_calendar=earnings_calendar,
+            rules_output=rules_output,
         )
     except Exception as e:
         log(f"Briefing generation error: {e}")
