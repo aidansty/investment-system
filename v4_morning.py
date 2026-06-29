@@ -26,6 +26,7 @@ from v4.output.dashboard_writer import write_dashboard_data
 from v4.data.fetch_intraday import fetch_intraday_candles
 from v4.config.settings import BENCHMARK_ETF
 from v4.intelligence.rules_engine import run_rules_engine
+from v4.intelligence.win_tracker import log_recommendation
 
 
 def get_open_positions():
@@ -192,6 +193,42 @@ def main():
         exits = rules_output.get("summary", {}).get("exits_triggered", [])
         entries = rules_output.get("summary", {}).get("entries_available", [])
         log(f"Rules engine: regime={rules_output.get('regime')} {rules_output.get('regime_score')}/100, {len(exits)} exits, {len(entries)} entries")
+
+        # Log all entry signals to win tracker with component scores
+        regime_score = rules_output.get("regime_score", 0)
+        for sig in entries:
+            try:
+                log_recommendation(
+                    ticker=sig.get("ticker", ""),
+                    action=sig.get("action", "enter"),
+                    price_at_recommendation=0,  # will be enriched from price_cache
+                    reason=sig.get("reason", ""),
+                    conviction_score=sig.get("conviction", 0),
+                    run_type="morning",
+                    regime_score=regime_score,
+                    has_catalyst=sig.get("entry_type") == "full",
+                    entry_type=sig.get("entry_type", "full"),
+                )
+                log(f"Win tracker logged: {sig.get('ticker')} entry")
+            except Exception as e:
+                log(f"Win tracker log error: {e}")
+
+        # Log exit signals
+        for sig in exits:
+            try:
+                log_recommendation(
+                    ticker=sig.get("ticker", ""),
+                    action="exit",
+                    price_at_recommendation=0,
+                    reason=sig.get("reason", ""),
+                    conviction_score=sig.get("conviction", 0),
+                    run_type="morning",
+                    regime_score=regime_score,
+                    exit_reason_category=sig.get("exit_type", ""),
+                )
+                log(f"Win tracker logged: {sig.get('ticker')} exit")
+            except Exception as e:
+                log(f"Win tracker log error: {e}")
     except Exception as e:
         log(f"Rules engine error (non-fatal): {e}")
 
