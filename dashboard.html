@@ -1030,8 +1030,8 @@ async function removePosition(ticker) {
     });
     const dashRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/dashboard_data.js', {headers: headers});
     const dashData = await dashRes.json();
-    const dashRaw = atob(dashData.content.replace(/
-/g, ''));
+    const dashRaw = atob(dashData.content.split('\n').join(''));
+
     const briefing = JSON.parse(dashRaw.replace('window.BRIEFING_DATA = ', '').replace(/;$/, ''));
     for (const key of Object.keys(briefing)) {
       if (Array.isArray(briefing[key])) {
