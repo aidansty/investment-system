@@ -23,7 +23,6 @@ from v4.intelligence.event_engine import enrich_industries_with_events
 from v4.ai.afternoon_update import generate_afternoon_update
 from v4.output.telegram_output import build_and_send_afternoon_telegram
 from v4.intelligence.rules_engine import run_rules_engine
-from v4.intelligence.rules_engine import run_rules_engine
 from v4.output.dashboard_writer import write_dashboard_data
 from v4.config.settings import BENCHMARK_ETF
 

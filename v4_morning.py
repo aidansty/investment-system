@@ -72,7 +72,8 @@ def main():
     # Step 1 — ETF prices
     log("Fetching ETF prices...")
     prices = fetch_etf_prices(lookback_days=90)
-    stock_prices = fetch_stock_prices(lookback_days=90)
+    from v4.config.settings import ALL_STOCKS
+    stock_prices = fetch_stock_prices(tickers=ALL_STOCKS, lookback_days=90)
     prices = {**prices, **stock_prices}
     if not prices or BENCHMARK_ETF not in prices:
         send_telegram("⚠️ V4 Morning Run FAILED — ETF price fetch error.")
