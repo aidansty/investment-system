@@ -159,27 +159,7 @@ def main():
     except Exception as e:
         log(f"Event enrichment error: {e}")
 
-    # Step 7 — Generate briefing via Claude
-    log("Generating briefing...")
-    briefing = {"sections": {}}
-    try:
-        briefing = generate_morning_briefing(
-            macro=macro,
-            industry_results=industry_results,
-            news=news,
-            forward_catalysts=forward_catalysts,
-            positions=positions,
-            today=str(today),
-            earnings_calendar=earnings_calendar,
-            rules_output=rules_output,
-        )
-    except Exception as e:
-        log(f"Briefing generation error: {e}")
-
-    # Step 8 — Save morning snapshot for afternoon comparison
-    save_morning_snapshot(industry_results.get("top_industries", []), today)
-
-    # Step 8b — Run rules engine
+    # Step 7 — Run rules engine FIRST (briefing needs its output)
     log("Running rules engine...")
     rules_output = {}
     try:
@@ -201,7 +181,7 @@ def main():
                 log_recommendation(
                     ticker=sig.get("ticker", ""),
                     action=sig.get("action", "enter"),
-                    price_at_recommendation=0,  # will be enriched from price_cache
+                    price_at_recommendation=0,
                     reason=sig.get("reason", ""),
                     conviction_score=sig.get("conviction", 0),
                     run_type="morning",
@@ -213,7 +193,6 @@ def main():
             except Exception as e:
                 log(f"Win tracker log error: {e}")
 
-        # Log exit signals
         for sig in exits:
             try:
                 log_recommendation(
@@ -231,6 +210,26 @@ def main():
                 log(f"Win tracker log error: {e}")
     except Exception as e:
         log(f"Rules engine error (non-fatal): {e}")
+
+    # Step 8 — Generate briefing via Claude (rules_output now available)
+    log("Generating briefing...")
+    briefing = {"sections": {}}
+    try:
+        briefing = generate_morning_briefing(
+            macro=macro,
+            industry_results=industry_results,
+            news=news,
+            forward_catalysts=forward_catalysts,
+            positions=positions,
+            today=str(today),
+            earnings_calendar=earnings_calendar,
+            rules_output=rules_output,
+        )
+    except Exception as e:
+        log(f"Briefing generation error: {e}")
+
+    # Step 8b — Save morning snapshot for afternoon comparison
+    save_morning_snapshot(industry_results.get("top_industries", []), today)
 
     # Step 9 — Send Telegram (2 messages)
     try:
