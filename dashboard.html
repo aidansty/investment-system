@@ -1012,26 +1012,39 @@ async function removePosition(ticker) {
   }
   const owner = 'aidansty';
   const repo = 'investment-system';
-  const headers = {'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json'};
+  const headers = {
+    'Authorization': 'token ' + token,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
   try {
-    const posRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/v4/config/positions.json', {headers});
+    const posRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/v4/config/positions.json', {headers: headers});
     const posData = await posRes.json();
     const posContent = JSON.parse(atob(posData.content.replace(/
-/g,'')));
+/g, '')));
     posContent.positions = posContent.positions.filter(function(p) { return p.ticker !== ticker; });
-    await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/v4/config/positions.json', {method:'PUT',headers,body:JSON.stringify({message:'Close position: '+ticker,content:btoa(JSON.stringify(posContent,null,2)),sha:posData.sha})});
-    const dashRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/dashboard_data.js', {headers});
+    await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/v4/config/positions.json', {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify({message: 'Close position: ' + ticker, content: btoa(JSON.stringify(posContent, null, 2)), sha: posData.sha})
+    });
+    const dashRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/dashboard_data.js', {headers: headers});
     const dashData = await dashRes.json();
-    let dashContent = atob(dashData.content.replace(/
-/g,''));
-    const briefing = JSON.parse(dashContent.replace('window.BRIEFING_DATA = ','').replace(/;$/,''));
+    const dashRaw = atob(dashData.content.replace(/
+/g, ''));
+    const briefing = JSON.parse(dashRaw.replace('window.BRIEFING_DATA = ', '').replace(/;$/, ''));
     for (const key of Object.keys(briefing)) {
       if (Array.isArray(briefing[key])) {
         briefing[key] = briefing[key].filter(function(p) { return !p || p.ticker !== ticker; });
       }
     }
-    const newDash = 'window.BRIEFING_DATA = ' + JSON.stringify(briefing,null,2) + ';';
-    await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/dashboard_data.js', {method:'PUT',headers,body:JSON.stringify({message:'Remove '+ticker+' from dashboard',content:btoa(unescape(encodeURIComponent(newDash))),sha:dashData.sha})});
+    const newDash = 'window.BRIEFING_DATA = ' + JSON.stringify(briefing, null, 2) + ';';
+    const encoded = btoa(unescape(encodeURIComponent(newDash)));
+    await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/dashboard_data.js', {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify({message: 'Remove ' + ticker + ' from dashboard', content: encoded, sha: dashData.sha})
+    });
     result.style.background = 'rgba(93,202,165,0.1)';
     result.style.color = '#5DCAA5';
     result.innerHTML = '<b>' + ticker + ' fully removed.</b> Reloading in 3 seconds...';
