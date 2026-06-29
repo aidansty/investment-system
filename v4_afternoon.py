@@ -209,6 +209,7 @@ def main():
             cash=0,
             cost_basis=sum(p.get("cost_basis", 0) for p in positions),
             intraday={},
+            rules_output=aft_rules_output,
         )
         log("Dashboard data written successfully")
     except Exception as e:
