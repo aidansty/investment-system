@@ -286,7 +286,7 @@
           <div id="add-position-result" style="font-size:12px;display:none;padding:8px;border-radius:6px;"></div>
         </div>
         <div style="margin-top:16px;padding:12px 14px;background:rgba(239,159,39,0.08);border:0.5px solid rgba(239,159,39,0.2);border-radius:10px;font-size:12px;color:#EF9F27;">⚠️ Changes are staged in browser only. Export below and replace your positions.json, then push to GitHub to make permanent.</div>
-        <div style="margin-top:10px;"><button id="export-positions-btn" style="background:rgba(255,255,255,0.06);color:var(--text-secondary);border:0.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;font-family:inherit;">Export positions.json</button></div>
+        <div style="margin-top:10px;"><button onclick="setGHToken()" style="background:rgba(93,202,165,0.1);color:#5DCAA5;border:0.5px solid rgba(93,202,165,0.2);border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;font-family:inherit;margin-right:8px;">Set GitHub Token</button><button id="export-positions-btn" style="background:rgba(255,255,255,0.06);color:var(--text-secondary);border:0.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;font-family:inherit;">Export positions.json</button></div>
       </div>
     </div>
   </div>
@@ -935,6 +935,16 @@ function removePosition(ticker) {
   }
 }
 
+function setGHToken() {
+  const existing = localStorage.getItem('gh_pat') || '';
+  const token = prompt('Enter your GitHub Personal Access Token (ghp_...):', existing);
+  if (token && token.startsWith('ghp_')) {
+    localStorage.setItem('gh_pat', token);
+    alert('Token saved. Close button will now work instantly.');
+  } else if (token) {
+    alert('Invalid token - must start with ghp_');
+  }
+}
 function trimPosition(ticker) {
   const result = document.getElementById('add-position-result');
   if (result) {
@@ -986,13 +996,51 @@ document.getElementById('add-position-btn')?.addEventListener('click', () => {
   renderMgmtPositions();
 });
 
-function removePosition(ticker) {
+async function removePosition(ticker) {
   const result = document.getElementById('add-position-result');
   if (!result) return;
   result.style.display = 'block';
-  result.style.background = 'rgba(226,80,79,0.1)';
-  result.style.color = '#e2504f';
-  result.innerHTML = '<b>' + ticker + ' staged for removal.</b> Export positions.json below, remove the ' + ticker + ' entry, then push to GitHub.';
+  result.style.background = 'rgba(239,159,39,0.1)';
+  result.style.color = '#EF9F27';
+  result.innerHTML = 'Removing ' + ticker + '...';
+  const token = localStorage.getItem('gh_pat');
+  if (!token) {
+    result.style.background = 'rgba(226,80,79,0.1)';
+    result.style.color = '#e2504f';
+    result.innerHTML = 'No GitHub token set. Click Set GitHub Token below first.';
+    return;
+  }
+  const owner = 'aidansty';
+  const repo = 'investment-system';
+  const headers = {'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json'};
+  try {
+    const posRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/v4/config/positions.json', {headers});
+    const posData = await posRes.json();
+    const posContent = JSON.parse(atob(posData.content.replace(/
+/g,'')));
+    posContent.positions = posContent.positions.filter(function(p) { return p.ticker !== ticker; });
+    await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/v4/config/positions.json', {method:'PUT',headers,body:JSON.stringify({message:'Close position: '+ticker,content:btoa(JSON.stringify(posContent,null,2)),sha:posData.sha})});
+    const dashRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/dashboard_data.js', {headers});
+    const dashData = await dashRes.json();
+    let dashContent = atob(dashData.content.replace(/
+/g,''));
+    const briefing = JSON.parse(dashContent.replace('window.BRIEFING_DATA = ','').replace(/;$/,''));
+    for (const key of Object.keys(briefing)) {
+      if (Array.isArray(briefing[key])) {
+        briefing[key] = briefing[key].filter(function(p) { return !p || p.ticker !== ticker; });
+      }
+    }
+    const newDash = 'window.BRIEFING_DATA = ' + JSON.stringify(briefing,null,2) + ';';
+    await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/dashboard_data.js', {method:'PUT',headers,body:JSON.stringify({message:'Remove '+ticker+' from dashboard',content:btoa(unescape(encodeURIComponent(newDash))),sha:dashData.sha})});
+    result.style.background = 'rgba(93,202,165,0.1)';
+    result.style.color = '#5DCAA5';
+    result.innerHTML = '<b>' + ticker + ' fully removed.</b> Reloading in 3 seconds...';
+    setTimeout(function() { location.reload(); }, 3000);
+  } catch(e) {
+    result.style.background = 'rgba(226,80,79,0.1)';
+    result.style.color = '#e2504f';
+    result.innerHTML = 'Error: ' + e.message;
+  }
 }
 function trimPosition(ticker) {
   const result = document.getElementById('add-position-result');
