@@ -1020,7 +1020,7 @@ async function removePosition(ticker) {
   try {
     const posRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/v4/config/positions.json', {headers: headers});
     const posData = await posRes.json();
-    const posContent = JSON.parse(atob(posData.content.replace(/\n/g, '')));
+    const posContent = JSON.parse(atob(posData.content.split('\n').join('')));
 
     posContent.positions = posContent.positions.filter(function(p) { return p.ticker !== ticker; });
     await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/contents/v4/config/positions.json', {
