@@ -16,6 +16,7 @@ def build_morning_context(
     today: str,
     earnings_calendar: dict = None,
     rules_output: dict = None,
+    recent_earnings_results: dict = None,
 ) -> str:
     """
     Assembles the complete context block for the morning briefing.
@@ -78,6 +79,19 @@ Economic events today: {len(econ_events)}"""
             if tax.get("urgency") in ("high", "medium"):
                 rules_block += f"  TAX: {tax.get('tax_recommendation','')}\n"
     rules_block += "=== END RULES ENGINE OUTPUT ===\n"
+
+    # ── Recent Earnings Results (ACTUAL reported numbers, not estimates) ────────
+    rer = recent_earnings_results or {}
+    earnings_results_block = ""
+    if rer:
+        earnings_results_block = "\n=== RECENT EARNINGS RESULTS (last 14 days, ACTUAL reported) ===\n"
+        earnings_results_block += "Use these ACTUAL results. NEVER tell the user to go check earnings themselves — you already know the outcome.\n"
+        for ticker, r in rer.items():
+            earnings_results_block += f"\n{ticker} reported {r.get(\'report_date\',\'\')}: {r.get(\'verdict\',\'\')}\n"
+            earnings_results_block += f"  EPS: actual {r.get(\'eps_actual\')} vs estimate {r.get(\'eps_estimate\')} ({r.get(\'eps_surprise_pct\')}% surprise)\n"
+            if r.get("revenue_surprise_pct") is not None:
+                earnings_results_block += f"  Revenue surprise: {r.get(\'revenue_surprise_pct\')}%\n"
+        earnings_results_block += "=== END RECENT EARNINGS RESULTS ===\n"
 
     # Forward catalysts block — events with specific future dates
     catalysts_block = ""
@@ -262,6 +276,8 @@ TICKER — HOLD / WATCH / TRIM / EXIT / CLOSE
 - Bullet 3: Exact reasoning for the recommended action — cite the specific factor
 - Bullet 4: What to monitor next — specific data point, date, or event
 
+CRITICAL: If a position appears in the RECENT EARNINGS RESULTS section above, you already know whether that earnings report beat, missed, or was in-line. State the actual verdict and numbers directly — e.g. "MU reported June 25 and BEAT estimates with EPS of $X vs $Y expected, a Z% surprise." NEVER write phrases like "review the actual results" or "check what happened" — you have the data, use it.
+
 THESIS BREAK — flag as EXIT immediately if ANY confirmed:
 - Revenue growth reversal two consecutive negative quarters
 - Earnings estimates cut more than 10% from consensus
@@ -304,6 +320,7 @@ def generate_morning_briefing(
     today: str,
     earnings_calendar: dict = None,
     rules_output: dict = None,
+    recent_earnings_results: dict = None,
 ) -> dict:
     """
     Generate the complete morning briefing using Claude.
@@ -312,7 +329,7 @@ def generate_morning_briefing(
     """
     client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
 
-    context = build_morning_context(macro, industry_results, news, forward_catalysts, positions, today, earnings_calendar=earnings_calendar or {}, rules_output=rules_output or {})
+    context = build_morning_context(macro, industry_results, news, forward_catalysts, positions, today, earnings_calendar=earnings_calendar or {}, rules_output=rules_output or {}, recent_earnings_results=recent_earnings_results or {})
     instructions = build_morning_output_instructions()
     full_prompt = context + instructions
 

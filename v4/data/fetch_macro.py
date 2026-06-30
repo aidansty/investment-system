@@ -173,3 +173,57 @@ def fetch_earnings_calendar(tickers: list) -> dict:
         except Exception:
             continue
     return results
+
+
+def fetch_recent_earnings_results(tickers: list, lookback_days: int = 14) -> dict:
+    """
+    Fetch ACTUAL reported earnings results (not estimates) for the past N days.
+    This tells the system whether a recent earnings report was good or bad —
+    so it never has to tell the user to go check results themselves.
+    """
+    import requests, os, pytz
+    from datetime import datetime, timedelta
+    FINNHUB_KEY = os.environ.get("FINNHUB_KEY", "")
+    if not FINNHUB_KEY:
+        return {}
+    eastern = pytz.timezone("America/New_York")
+    today = datetime.now(eastern).date()
+    start = today - timedelta(days=lookback_days)
+    from_str = start.strftime("%Y-%m-%d")
+    to_str = today.strftime("%Y-%m-%d")
+    crypto = {"BTC", "ETH", "XRP", "ZEC", "BNB", "SOL", "DOGE"}
+    results = {}
+    for ticker in tickers:
+        if ticker in crypto:
+            continue
+        try:
+            url = f"https://finnhub.io/api/v1/calendar/earnings?symbol={ticker}&from={from_str}&to={to_str}&token={FINNHUB_KEY}"
+            r = requests.get(url, timeout=10)
+            if r.status_code != 200:
+                continue
+            data = r.json()
+            earnings_list = data.get("earningsCalendar", [])
+            for e in earnings_list:
+                eps_actual = e.get("epsActual")
+                eps_estimate = e.get("epsEstimate")
+                rev_actual = e.get("revenueActual")
+                rev_estimate = e.get("revenueEstimate")
+                if eps_actual is not None and eps_estimate is not None:
+                    eps_surprise_pct = round((eps_actual - eps_estimate) / abs(eps_estimate) * 100, 1) if eps_estimate != 0 else 0
+                    rev_surprise_pct = None
+                    if rev_actual is not None and rev_estimate is not None and rev_estimate != 0:
+                        rev_surprise_pct = round((rev_actual - rev_estimate) / abs(rev_estimate) * 100, 1)
+                    verdict = "BEAT" if eps_surprise_pct > 2 else "MISS" if eps_surprise_pct < -2 else "IN-LINE"
+                    results[ticker] = {
+                        "report_date": e.get("date", ""),
+                        "eps_actual": eps_actual,
+                        "eps_estimate": eps_estimate,
+                        "eps_surprise_pct": eps_surprise_pct,
+                        "revenue_actual": rev_actual,
+                        "revenue_estimate": rev_estimate,
+                        "revenue_surprise_pct": rev_surprise_pct,
+                        "verdict": verdict,
+                    }
+        except Exception:
+            continue
+    return results

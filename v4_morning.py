@@ -17,7 +17,7 @@ from v4.utils.market_calendar import is_trading_day, get_trading_date
 from v4.utils.telegram import send_telegram
 from v4.data.fetch_prices import fetch_etf_prices, fetch_stock_prices
 from v4.data.fetch_news import fetch_complete_news_package
-from v4.data.fetch_macro import fetch_macro_data, fetch_earnings_calendar
+from v4.data.fetch_macro import fetch_macro_data, fetch_earnings_calendar, fetch_recent_earnings_results
 from v4.intelligence.industry_scanner import run_industry_scan
 from v4.intelligence.event_engine import enrich_industries_with_events
 from v4.ai.morning_briefing import generate_morning_briefing
@@ -133,10 +133,13 @@ def main():
     # Step 4a — Confirmed earnings dates from Finnhub
     log("Fetching confirmed earnings dates...")
     earnings_calendar = {}
+    recent_earnings_results = {}
     try:
         tickers = [p["ticker"] for p in positions]
         earnings_calendar = fetch_earnings_calendar(tickers)
         log(f"Earnings calendar: {earnings_calendar}")
+        recent_earnings_results = fetch_recent_earnings_results(tickers, lookback_days=14)
+        log(f"Recent earnings results (last 14 days): {recent_earnings_results}")
     except Exception as e:
         log(f"Earnings calendar error (non-fatal): {e}")
 
@@ -230,6 +233,7 @@ def main():
             today=str(today),
             earnings_calendar=earnings_calendar,
             rules_output=rules_output,
+            recent_earnings_results=recent_earnings_results,
         )
     except Exception as e:
         log(f"Briefing generation error: {e}")
