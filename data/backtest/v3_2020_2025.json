@@ -1,0 +1,14 @@
+{
+  "period": "2020-01-01 to 2025-01-01",
+  "years": 5.0,
+  "strategy_return": 21.69,
+  "spy_return": 149.55,
+  "alpha": -127.87,
+  "strategy_cagr": 4.0,
+  "spy_cagr": 20.06,
+  "max_drawdown": -20.36,
+  "final_strategy": 12168.81,
+  "final_spy": 24955.44,
+  "entries": 15,
+  "exits": 15
+}

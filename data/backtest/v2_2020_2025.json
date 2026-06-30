@@ -1,0 +1,92 @@
+{
+  "period": "2020-01-01 to 2025-01-01",
+  "years": 5.0,
+  "strategy_return": -95.73,
+  "spy_return": 149.55,
+  "alpha": -245.29,
+  "strategy_cagr": -46.77,
+  "spy_cagr": 20.06,
+  "max_drawdown": -98.38,
+  "final_strategy": 426.6,
+  "final_spy": 24955.44,
+  "total_trades": 65,
+  "entries": 40,
+  "exits": 25,
+  "stock_entries": 32,
+  "etf_entries": 8,
+  "sample_trades": [
+    {
+      "date": "2020-04-02",
+      "action": "ENTER",
+      "ticker": "GILD",
+      "type": "stock",
+      "industry": "Biotech",
+      "conviction": 92
+    },
+    {
+      "date": "2020-04-02",
+      "action": "ENTER",
+      "ticker": "MSFT",
+      "type": "stock",
+      "industry": "Software",
+      "conviction": 85
+    },
+    {
+      "date": "2020-06-08",
+      "action": "EXIT",
+      "ticker": "GILD",
+      "reason": "conviction_below_45_5days"
+    },
+    {
+      "date": "2020-06-08",
+      "action": "ROTATE_OUT",
+      "ticker": "MSFT"
+    },
+    {
+      "date": "2020-06-08",
+      "action": "ENTER",
+      "ticker": "XOP",
+      "type": "etf",
+      "industry": "Energy",
+      "conviction": 92
+    },
+    {
+      "date": "2020-06-08",
+      "action": "ENTER",
+      "ticker": "NVDA",
+      "type": "stock",
+      "industry": "Semiconductors",
+      "conviction": 92
+    },
+    {
+      "date": "2020-06-08",
+      "action": "ENTER",
+      "ticker": "IGV",
+      "type": "etf",
+      "industry": "Software",
+      "conviction": 76
+    },
+    {
+      "date": "2020-07-29",
+      "action": "EXIT",
+      "ticker": "XOP",
+      "reason": "conviction_below_45_5days"
+    },
+    {
+      "date": "2020-08-11",
+      "action": "ENTER",
+      "ticker": "TSLA",
+      "type": "stock",
+      "industry": "Consumer Disc",
+      "conviction": 92
+    },
+    {
+      "date": "2020-10-14",
+      "action": "ENTER",
+      "ticker": "CRM",
+      "type": "stock",
+      "industry": "Software",
+      "conviction": 92
+    }
+  ]
+}

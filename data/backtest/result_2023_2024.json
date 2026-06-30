@@ -1,0 +1,13 @@
+{
+  "period": "2023-01-01 to 2024-12-31",
+  "years": 2.0,
+  "strategy_return": 16.4,
+  "spy_return": 50.72,
+  "alpha": -34.32,
+  "strategy_cagr": 7.9,
+  "spy_cagr": 22.79,
+  "max_drawdown": -16.96,
+  "final_strategy": 11640.43,
+  "final_spy": 15072.3,
+  "trades": 61
+}

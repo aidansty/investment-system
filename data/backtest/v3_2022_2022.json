@@ -1,0 +1,14 @@
+{
+  "period": "2022-01-01 to 2022-12-31",
+  "years": 1.0,
+  "strategy_return": -12.5,
+  "spy_return": -15.19,
+  "alpha": 2.68,
+  "strategy_cagr": -12.54,
+  "spy_cagr": -15.23,
+  "max_drawdown": -16.07,
+  "final_strategy": 8749.89,
+  "final_spy": 8481.41,
+  "entries": 3,
+  "exits": 3
+}
