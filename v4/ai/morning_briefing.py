@@ -85,12 +85,18 @@ Economic events today: {len(econ_events)}"""
     earnings_results_block = ""
     if rer:
         earnings_results_block = "\n=== RECENT EARNINGS RESULTS (last 14 days, ACTUAL reported) ===\n"
-        earnings_results_block += "Use these ACTUAL results. NEVER tell the user to go check earnings themselves — you already know the outcome.\n"
+        earnings_results_block += "Use these ACTUAL results. NEVER tell the user to go check earnings themselves.\n"
         for ticker, r in rer.items():
-            earnings_results_block += f"\n{ticker} reported {r.get(\'report_date\',\'\')}: {r.get(\'verdict\',\'\')}\n"
-            earnings_results_block += f"  EPS: actual {r.get(\'eps_actual\')} vs estimate {r.get(\'eps_estimate\')} ({r.get(\'eps_surprise_pct\')}% surprise)\n"
-            if r.get("revenue_surprise_pct") is not None:
-                earnings_results_block += f"  Revenue surprise: {r.get(\'revenue_surprise_pct\')}%\n"
+            report_date = r.get("report_date", "")
+            verdict = r.get("verdict", "")
+            eps_actual = r.get("eps_actual")
+            eps_estimate = r.get("eps_estimate")
+            eps_surprise = r.get("eps_surprise_pct")
+            rev_surprise = r.get("revenue_surprise_pct")
+            earnings_results_block += "\n" + ticker + " reported " + str(report_date) + ": " + str(verdict) + "\n"
+            earnings_results_block += "  EPS: actual " + str(eps_actual) + " vs estimate " + str(eps_estimate) + " (" + str(eps_surprise) + "% surprise)\n"
+            if rev_surprise is not None:
+                earnings_results_block += "  Revenue surprise: " + str(rev_surprise) + "%\n"
         earnings_results_block += "=== END RECENT EARNINGS RESULTS ===\n"
 
     # Forward catalysts block — events with specific future dates

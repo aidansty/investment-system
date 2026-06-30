@@ -93,10 +93,19 @@ def filter_relevant_news(news_items: list) -> list:
 
     industries_list = ", ".join(INDUSTRY_ETF_MAP.keys())
 
+    # Pull current holdings dynamically instead of hardcoding a stale list
+    try:
+        import json, os
+        pos_path = os.path.join(os.path.dirname(__file__), "..", "config", "positions.json")
+        with open(pos_path) as f:
+            current_holdings = ", ".join([p["ticker"] for p in json.load(f).get("positions", [])])
+    except Exception:
+        current_holdings = "SPY, NVDA, SPCX, AMD, MU, INTC, CRWV, NOK, SCO, HUM, BTC, ETH, ZEC, XRP"
+
     prompt = f"""Here are {len(news_items)} recent financial news headlines.
 
 INDUSTRIES WE TRACK: {industries_list}
-CURRENT HOLDINGS: SPY, NVDA, SPCX, AMD, MU, INTC, PLTR, CRWV, NOK, SCO, HUM, BTC, ETH, ZEC, XRP
+CURRENT HOLDINGS: {current_holdings}
 
 HEADLINES:
 {headlines_block}
@@ -106,9 +115,11 @@ Identify which headline numbers are relevant to:
 - Our current holdings
 - Broad market regime (Fed policy, major economic data, geopolitical events with market impact, major IPOs)
 
-Exclude: sports, entertainment, weather, celebrity news, general politics with no market/economic connection.
+Exclude: sports, entertainment, weather, celebrity news, general politics with no market/economic connection, AND generic single-company analyst notes/price-target changes for companies that are NOT in our tracked industries or current holdings (e.g. a random utility or industrial company analyst rating with no sector-wide implication).
 
-Include: Fed/FOMC decisions, economic data, trade policy, regulatory rulings, industry-specific news, company earnings, major corporate events, IPOs, geopolitical events affecting markets.
+Include: Fed/FOMC decisions, economic data, trade policy, regulatory rulings, industry-specific news with sector-wide implications, earnings from our current holdings or major sector bellwethers, major corporate events, IPOs, geopolitical events affecting markets.
+
+A headline only qualifies if you could write one specific sentence explaining why it matters to a portfolio holding SPY, NVDA, SPCX, AMD, MU, INTC, CRWV, NOK, SCO, HUM, BTC, ETH, ZEC, XRP or the industries listed above. If you cannot articulate that connection specifically, exclude it.
 
 Return ONLY a JSON array of relevant headline numbers, nothing else.
 Example: [1, 3, 7, 12, 15]"""
@@ -134,8 +145,8 @@ Example: [1, 3, 7, 12, 15]"""
             return news_items
 
     except Exception as e:
-        log(f"Relevance filter error: {e}")
-        return news_items
+        log(f"Relevance filter error: {e} — returning empty list rather than unfiltered dump")
+        return []
 
 
 def deduplicate_and_summarize(news_items: list) -> list:
