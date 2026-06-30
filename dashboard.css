@@ -130,8 +130,12 @@
     letter-spacing: 0.06em; padding: 2px 8px; border-radius: 4px;
     margin-top: 6px; text-transform: uppercase;
   }
-  .badge-hold    { background: rgba(239,159,39,0.15);  color: #EF9F27; }
-  .badge-watch   { background: rgba(239,159,39,0.15);  color: #EF9F27; }
+  .badge-hold    { background: rgba(148,163,184,0.15); color: #94A3B8; }
+  .badge-watch   { background: rgba(239,159,39,0.15);   color: #EF9F27; }
+  .badge-buy, .badge-green { background: rgba(93,202,165,0.15); color: #5DCAA5; }
+  .badge-sell, .badge-close, .badge-red { background: rgba(226,80,79,0.15); color: #e2504f; }
+  .badge-trim, .badge-amber { background: rgba(216,90,48,0.15); color: #D85A30; }
+  .badge-gray { background: rgba(148,163,184,0.15); color: #94A3B8; }
   .badge-buy     { background: rgba(93,202,165,0.15);  color: #5DCAA5; }
   .badge-sell    { background: rgba(226,80,79,0.15);   color: #e2504f; }
   .badge-trim    { background: rgba(216,90,48,0.15);   color: #D85A30; }
