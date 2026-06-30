@@ -79,8 +79,6 @@ Economic events today: {len(econ_events)}"""
                 rules_block += f"  TAX: {tax.get('tax_recommendation','')}\n"
     rules_block += "=== END RULES ENGINE OUTPUT ===\n"
 
-    context += rules_block
-
     # Forward catalysts block — events with specific future dates
     catalysts_block = ""
     for cat in forward_catalysts:
@@ -171,6 +169,8 @@ Thesis: {p.get('thesis', 'Not recorded')}
 
 === OPEN POSITIONS ===
 {positions_block if positions else "No open positions."}
+
+{rules_block}
 """
 
 
