@@ -143,25 +143,30 @@ def write_dashboard_data(
             pr["avg_surprise"] = quant.get("avg_earnings_surprise_pct")
             pr["analyst_target"] = quant.get("analyst_price_target")
 
-    # Industry opportunities
+    # Industry opportunities — uses the actual Layer 2 scanner output directly
+    # (recommended_security, recommended_type, recommended_conviction, stock_leaders)
+    # rather than recreating vehicle-selection logic that the scanner already did.
     top_industries = industry_results.get("top_industries", []) if industry_results else []
     industry_opportunities = []
-    # Get industry section from Claude briefing for richer reasoning
     sections = briefing.get("sections", {}) if briefing else {}
-    ind_briefing_text = (
-        sections.get("Industry Opportunities") or
-        sections.get("Top Industry Opportunities") or
-        sections.get("Industry Candidates") or ""
-    )
+    rules_engine_text = sections.get("Rules Engine Signals", "")
+    industry_analysis_text = sections.get("Industry Analysis (Layer 1 — Context Only)", "")
 
-    for ind in top_industries[:3]:
+    for ind in top_industries[:4]:
         ind_news = ind.get("relevant_news", [])
         industry_name = ind["industry"]
+        conviction = ind.get("conviction_score", ind.get("etf_conv", 0))
 
-        # Build rich bullets from actual data + news
+        # Pull Layer 2 recommendation directly — this IS the decision, not a recreation of it
+        rec_security = ind.get("recommended_security", ind.get("etf", ""))
+        rec_type = ind.get("recommended_type", "etf")
+        rec_conviction = ind.get("recommended_conviction", conviction)
+        stock_leaders = ind.get("stock_leaders", [])
+
+        # Build bullets from actual data + news
         bullets = []
         excess = ind.get("excess_63d", 0)
-        bullets.append(f"{ind['etf']} is outperforming SPY by {excess:+.1f} percentage points over the last 63 trading days — sustained momentum that goes beyond a one-day move.")
+        bullets.append(f"{ind['etf']} is outperforming SPY by {excess:+.1f} percentage points over the last 63 trading days.")
 
         if ind_news:
             for n in ind_news[:2]:
@@ -173,28 +178,25 @@ def write_dashboard_data(
         if ind.get("ripple_benefits"):
             bullets.append(f"Ripple tailwinds flowing in from related sectors: {', '.join(ind['ripple_benefits'][:3])}.")
 
-        macro = ind.get("macro_alignment", "Neutral")
-        event_score = int(ind.get("event_score", 0.5) * 100)
-        bullets.append(f"Macro environment is {macro} for this industry. Event catalyst score: {event_score}/100 — {'multiple confirmed catalysts' if event_score >= 60 else 'moderate catalyst activity'}.")
-
-        # Vehicle: ETF vs stocks with specific reasoning
-        conviction = ind.get("conviction_score", 0)
-        top_stocks = ind.get("top_stocks", []) or ind.get("validated_stocks", []) or []
-        if conviction >= 70 and top_stocks:
-            vehicle = f"Individual stocks — at this conviction level, concentrated positions in sector leaders outperform the ETF. Focus on: {', '.join(top_stocks[:3])}."
-        elif conviction >= 55:
-            vehicle = f"{ind['etf']} ETF — conviction is building but not yet high enough to concentrate in individual names. The ETF captures the sector move with less single-stock risk."
+        # Vehicle reasoning now comes directly from what the Layer 2 scanner decided
+        if rec_type == "stock":
+            stock_list_str = ", ".join([f"{s['ticker']} ({s['conviction']}/100)" for s in stock_leaders[:3]])
+            vehicle = f"{rec_security} (individual stock) — scored {rec_conviction}/100, outscoring the {ind['etf']} ETF itself ({conviction}/100). Other leaders scanned in this industry: {stock_list_str if stock_list_str else 'none above threshold'}."
         else:
-            vehicle = f"{ind['etf']} ETF — early-stage opportunity. Use the ETF for broad exposure until a clear sector leader emerges."
+            vehicle = f"{ind['etf']} ETF — no individual stock in this industry scored meaningfully higher than the ETF itself ({conviction}/100). Broad sector exposure is the better risk-adjusted vehicle right now."
 
         industry_opportunities.append({
             "industry": industry_name,
             "etf": ind["etf"],
             "conviction": conviction,
+            "recommended_security": rec_security,
+            "recommended_type": rec_type,
+            "recommended_conviction": rec_conviction,
+            "stock_leaders": stock_leaders,
             "term": _classify_term(ind),
             "bullets": bullets,
             "vehicle": vehicle,
-            "stocks": top_stocks[:4],
+            "stocks": [s["ticker"] for s in stock_leaders[:4]],
             "why_now": _get_why_now(ind),
         })
 

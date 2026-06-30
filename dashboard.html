@@ -1392,9 +1392,9 @@ const indOpps = document.getElementById('industry-opportunities');
     <div class="candidate-header">
       <div>
         <div class="candidate-title">${ind.industry}</div>
-        <div class="candidate-sub">${ind.term || ''} &middot; ${ind.etf || ''}</div>
+        <div class="candidate-sub">${ind.term || ''} &middot; Recommended: <b style="color:var(--text-primary);">${ind.recommended_security || ind.etf || ''}</b> (${ind.recommended_type === 'stock' ? 'individual stock' : 'ETF'})</div>
       </div>
-      <span class="badge badge-green">${ind.conviction}/100</span>
+      <span class="badge badge-green">${ind.recommended_conviction || ind.conviction}/100</span>
     </div>
     <ul>${(ind.bullets || []).map(b => '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">' + b + '</li>').join('')}</ul>
     ${ind.vehicle ? '<div style="font-size:13px;color:var(--text-body);margin-top:10px;"><b style="color:var(--text-primary);">Vehicle:</b> ' + ind.vehicle + '</div>' : ''}
