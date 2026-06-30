@@ -165,6 +165,25 @@ def main():
         industry_results["high_conviction"] = [
             i for i in enriched if i["conviction_score"] >= 70
         ]
+
+        # Re-apply Layer 2 stock-leader scoring to the final top_industries —
+        # event enrichment replaced the objects that already had this data.
+        from v4.intelligence.industry_scanner import score_stock_leaders
+        spy_prices_for_l2 = prices.get("SPY", [])
+        for ind in industry_results["top_industries"]:
+            industry_name = ind.get("industry", "")
+            stock_scores = score_stock_leaders(prices, industry_name, spy_prices_for_l2)
+            ind["stock_leaders"] = stock_scores[:3]
+            etf_conv = ind.get("conviction_score", 0)
+            if stock_scores and stock_scores[0]["conviction"] > etf_conv + 5:
+                ind["recommended_security"] = stock_scores[0]["ticker"]
+                ind["recommended_type"] = "stock"
+                ind["recommended_conviction"] = stock_scores[0]["conviction"]
+            else:
+                ind["recommended_security"] = ind.get("etf", "")
+                ind["recommended_type"] = "etf"
+                ind["recommended_conviction"] = etf_conv
+        log(f"Re-applied Layer 2 stock scoring to {len(industry_results['top_industries'])} final top industries")
     except Exception as e:
         log(f"Event enrichment error: {e}")
 

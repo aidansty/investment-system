@@ -63,8 +63,8 @@ def write_dashboard_data(
         if not market_bullets:
             # Fall back to sentence splitting
             market_bullets = [s.strip() + "." for s in market_overview.replace(chr(10), " ").split(".") if len(s.strip()) > 20][:5]
-    # Last resort: if still empty, build a basic explanation from macro data directly
-    if not market_bullets and macro:
+    # Last resort: if still empty OR too sparse to be useful, build from macro data directly
+    if len(market_bullets) < 2 and macro:
         vix_val = macro.get("vix", 0)
         vix_regime = macro.get("vix_regime", "Yellow")
         vix_trend = macro.get("vix_trend", "Flat")
@@ -90,6 +90,12 @@ def write_dashboard_data(
         impact = n.get("portfolio_impact", "") or n.get("impact", "")
         if impact and impact not in bullets:
             bullets.append(impact)
+        # Fallback: if still only 1 bullet, at least show the headline itself as context
+        if len(bullets) < 2:
+            headline = n.get("headline", "")
+            category = n.get("category", "")
+            if headline and headline not in bullets:
+                bullets.append(f"Filed under: {category}." if category else headline)
         # Add affected tickers
         affected = n.get("affected_tickers", []) or n.get("tickers", [])
         if affected:
