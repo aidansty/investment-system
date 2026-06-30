@@ -185,6 +185,35 @@ def write_dashboard_data(
         else:
             vehicle = f"{ind['etf']} ETF — no individual stock in this industry scored meaningfully higher than the ETF itself ({conviction}/100). Broad sector exposure is the better risk-adjusted vehicle right now."
 
+        # Build per-stock reasoning so each chip explains WHY it ranks where it does
+        stock_reasoning = []
+        for s in stock_leaders[:4]:
+            tk = s.get("ticker", "")
+            conv = s.get("conviction", 0)
+            exc63 = s.get("excess_63d", 0)
+            exc21 = s.get("excess_21d", 0)
+            breakout = s.get("is_breakout", False)
+            is_rec = (tk == rec_security)
+            if breakout:
+                reason = f"{tk} is showing a sharp 21-day breakout (+{exc21:.1f}pp vs SPY) — momentum just turned strong even though the 63-day trend hasn't fully confirmed yet ({exc63:+.1f}pp)."
+            elif exc63 > 0 and exc21 > 0:
+                reason = f"{tk} is outperforming SPY on both timeframes — +{exc63:.1f}pp over 63 days and +{exc21:.1f}pp over 21 days — sustained, not a one-week spike."
+            elif exc63 > 0:
+                reason = f"{tk} has a positive 63-day trend (+{exc63:.1f}pp vs SPY) but has cooled off recently ({exc21:+.1f}pp over 21 days)."
+            else:
+                reason = f"{tk} is currently lagging SPY ({exc63:+.1f}pp over 63 days) — included here for context, not currently the leader."
+            stock_reasoning.append({
+                "ticker": tk,
+                "conviction": conv,
+                "is_recommended": is_rec,
+                "reason": reason,
+            })
+
+        # ETF-side reasoning when the ETF itself is the recommendation
+        etf_reasoning = None
+        if rec_type == "etf":
+            etf_reasoning = f"{ind['etf']} scored {conviction}/100 on its own 63-day momentum vs SPY ({excess:+.1f}pp). The strongest individual stock scanned inside this industry only reached {stock_leaders[0]['conviction'] if stock_leaders else 0}/100 — not enough edge over the ETF to justify single-stock concentration risk right now."
+
         industry_opportunities.append({
             "industry": industry_name,
             "etf": ind["etf"],
@@ -193,6 +222,8 @@ def write_dashboard_data(
             "recommended_type": rec_type,
             "recommended_conviction": rec_conviction,
             "stock_leaders": stock_leaders,
+            "stock_reasoning": stock_reasoning,
+            "etf_reasoning": etf_reasoning,
             "term": _classify_term(ind),
             "bullets": bullets,
             "vehicle": vehicle,
