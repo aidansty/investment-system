@@ -1,5 +1,5 @@
 window.BRIEFING_DATA = {
-  "last_updated": "June 29, 2026 10:04 PM ET",
+  "last_updated": "June 30, 2026 08:50 AM ET",
   "finnhub_key": "d8fo751r01qn443av1rgd8fo751r01qn443av1s0",
   "run_type": "morning",
   "regime": "Neutral",
@@ -10,11 +10,11 @@ window.BRIEFING_DATA = {
   "vix_trend": "Flat",
   "vix_regime": "Yellow",
   "market_bullets": [
-    "VIX at 18.41 sits just below the 20 threshold, meaning investors are not currently pricing in near-term shock risk \u2014 this is the lower half of the Yellow zone, not approaching elevated fear territory.",
-    "The 5-day VIX trend is flat, which signals that sentiment has stabilized rather than trending in either direction \u2014 neither a deteriorating environment nor a recovering one, simply a pause.",
-    "A Yellow regime score of 58/100 means conditions are mixed \u2014 not bearish enough to go fully defensive, but not clean enough to chase momentum signals without a confirmed catalyst and conviction score above 75.",
-    "For this portfolio specifically, today's regime supports holding all current positions while being disciplined about adding new ones \u2014 no industry has cleared the 75 conviction threshold, making cash the correct posture for uninvested capital.",
-    "No economic events are scheduled today, so session direction will be driven by news flow (Iran deal, China PMI reaction) rather than data surprises \u2014 expect moderate volume and sector-specific moves rather than broad directional conviction."
+    "**VIX at 18.41 sits comfortably below the 20 threshold**, meaning options markets are not pricing in near-term shock risk \u2014 this is a calm reading consistent with an orderly, if moderately uncertain, environment.",
+    "**The VIX trend is flat**, which signals that investor sentiment has stabilized after recent volatility; neither a fresh deterioration nor a meaningful improvement in confidence is occurring \u2014 the market is in a holding pattern at the end of Q2.",
+    "**A Yellow regime score of 58/100 means conditions are genuinely mixed** \u2014 not bearish enough to go defensive and raise cash aggressively, but not bullish enough to justify chasing any momentum signal without a confirmed catalyst and conviction above 75.",
+    "**For this portfolio specifically**, the Yellow regime supports holding all current positions with intact theses while requiring high discipline on any new entries \u2014 the absence of any 75+ conviction signal today is the regime speaking clearly: no new deployments until the setup improves.",
+    "**No economic events are scheduled today**, but quarter-end window dressing flows could create intraday noise \u2014 do not mistake rebalancing-driven price moves for genuine directional signals."
   ],
   "positions": [
     {
@@ -142,10 +142,10 @@ window.BRIEFING_DATA = {
       "term": "Long-term",
       "qty": 0.04544048,
       "entry_price": 59767.28,
-      "current_price": 59792.99,
-      "balance": 2717.02,
-      "pct_change": 0.04,
-      "dollar_change": 1.17,
+      "current_price": 58591.43,
+      "balance": 2662.42,
+      "pct_change": -1.97,
+      "dollar_change": -53.43,
       "summary": "Bitcoin is the original and largest cryptocurrency by market capitalization, widely held as a digital store of value and inflation hedge. It operates on a decentralized network with a fixed supply of 21 million coins, making it increasingly scarce as institutional and retail adoption grows. Bitcoin is now held in corporate treasuries and ETFs by major financial institutions.",
       "catalyst": "No specific near-term company catalyst exists. Bitcoin's price is driven by macro liquidity conditions, institutional adoption flows, regulatory clarity, and broader risk appetite. A more dovish Fed stance or continued institutional ETF inflows would be positive catalysts.",
       "why": "This is a long-term structural allocation, not a trade. Bitcoin is held as a store of value and inflation hedge that is uncorrelated with traditional stock market movements. It is intended to be held through volatility rather than traded around short-term price swings.",
@@ -159,10 +159,10 @@ window.BRIEFING_DATA = {
       "term": "Long-term",
       "qty": 1.00032929,
       "entry_price": 482.12,
-      "current_price": 397.53,
-      "balance": 397.66,
-      "pct_change": -17.55,
-      "dollar_change": -84.62,
+      "current_price": 389.12,
+      "balance": 389.25,
+      "pct_change": -19.29,
+      "dollar_change": -93.03,
       "summary": "Zcash is a privacy-focused cryptocurrency that uses advanced zero-knowledge cryptography to allow fully shielded transactions where the sender, receiver, and amount are all hidden. It is one of the few cryptocurrencies with mathematically proven transaction privacy, making it valuable for use cases where financial privacy is essential.",
       "catalyst": "No specific near-term catalyst. Zcash's price is correlated with broader crypto market movements and would benefit from any major regulatory clarity around privacy coins or increased adoption by privacy-conscious users and institutions.",
       "why": "This is a long-term thematic position in privacy-preserving blockchain infrastructure. The thesis is that demand for financial privacy will grow as surveillance of traditional financial systems increases and as digital payments become more common globally.",
@@ -176,10 +176,10 @@ window.BRIEFING_DATA = {
       "term": "Long-term",
       "qty": 0.2056305,
       "entry_price": 2010.52,
-      "current_price": 1589.13,
-      "balance": 326.77,
-      "pct_change": -20.96,
-      "dollar_change": -86.65,
+      "current_price": 1557.91,
+      "balance": 320.35,
+      "pct_change": -22.51,
+      "dollar_change": -93.07,
       "summary": "Ethereum is the leading smart contract platform and the foundation layer for decentralized finance, NFTs, and Web3 applications. 99% of your ETH is staked, meaning it is earning staking rewards of approximately $0.53 per month while contributing to network security. Ethereum processes more value in transactions than any other blockchain.",
       "catalyst": "No specific near-term catalyst. Ethereum would benefit from continued DeFi and institutional adoption growth, any major network upgrades that improve transaction throughput or reduce fees, and broader crypto market strength driven by macro liquidity improvements.",
       "why": "This is a long-term core crypto holding in the decentralized finance infrastructure layer. Ethereum has the largest developer ecosystem, the most deployed applications, and the deepest institutional adoption of any smart contract platform. It is held for multi-year appreciation as the crypto economy grows.",
@@ -193,10 +193,10 @@ window.BRIEFING_DATA = {
       "term": "Long-term",
       "qty": 250.635305,
       "entry_price": 1.18,
-      "current_price": 1.05,
-      "balance": 263.17,
-      "pct_change": -11.02,
-      "dollar_change": -32.58,
+      "current_price": 1.03,
+      "balance": 258.15,
+      "pct_change": -12.71,
+      "dollar_change": -37.6,
       "summary": "XRP is a cryptocurrency designed specifically for cross-border payment settlement, enabling financial institutions to transfer value between currencies in seconds at a fraction of the cost of traditional wire transfers. Ripple, the company behind XRP, has partnered with hundreds of banks and payment providers globally to use XRP as a bridge currency.",
       "catalyst": "The primary catalyst is ongoing regulatory clarity \u2014 the SEC lawsuit against Ripple reached a partial resolution in 2023 and XRP is increasingly viewed as compliant with U.S. securities law. Continued expansion of Ripple's payment network and any new institutional partnership announcements would be positive catalysts.",
       "why": "This is a long-term position in the digital payment infrastructure thesis \u2014 specifically that cross-border payments will increasingly move to blockchain rails for speed, cost, and transparency reasons, and XRP is one of the primary beneficiaries of that shift.",
@@ -264,78 +264,81 @@ window.BRIEFING_DATA = {
   "performance_spy": [],
   "news": [
     {
-      "headline": "China factory activity grows faster than expected in June on tech export demand",
-      "url": "https://www.cnbc.com/2026/06/30/china-factory-activity-june-tech-export-demand-pmi-nbs.html",
-      "source": "CNBC Top News",
-      "bullets": [],
-      "affected_tickers": [],
-      "sentiment": ""
-    },
-    {
-      "headline": "Japanese yen sinks to 40-year low, keeping intervention risks in focus",
-      "url": "https://www.cnbc.com/2026/06/30/japan-yen-falls-lowest-level-since-1986-dollar-intervention-risk.html",
-      "source": "CNBC Top News",
+      "headline": "Stock market today: Dow, S&P 500, Nasdaq futures nudge higher after record-setting session",
+      "url": "https://finance.yahoo.com/news/live/stock-market-today-dow-sp-500-nasdaq-futures-nudge-higher-after-record-setting-session-224823556.html",
+      "source": "Yahoo Finance",
       "bullets": [
-        "The Japanese yen weakened to its lowest level against the U.S.",
-        "dollar since 1986 on Tuesday, keeping investors on alert for possible intervention from Japanese authorities."
+        "Stock market today: Dow, S&P 500, Nasdaq futures nudge higher after record-setting session"
       ],
       "affected_tickers": [],
       "sentiment": ""
     },
     {
-      "headline": "Eli Lilly, Regeneron among first companies selected for FDA initiative to speed review of new manufacturing facilities",
-      "url": "https://www.cnbc.com/2026/06/29/eli-lilly-regeneron-in-fda-precheck-manufacturing-program.html",
-      "source": "CNBC Top News",
+      "headline": "Drone Company AeroVironment Skyrockets 30% After Revenue, Backlog Double",
+      "url": "https://www.investors.com/news/drone-aerovironment-pentagon-trump-aerospace-defense-elbit-kratos/?src=A00220&yptr=yahoo",
+      "source": "Yahoo Finance",
       "bullets": [
-        "Eli Lilly and Regeneron are among the first seven companies the FDA has selected for its PreCheck Pilot Program, CNBC has learned."
+        "Drone Company AeroVironment Skyrockets 30% After Revenue, Backlog Double"
       ],
       "affected_tickers": [],
       "sentiment": ""
     },
     {
-      "headline": "CNBC's The China Connection newsletter: U.S.-China tech rivalry heats up\u2014in other countries",
-      "url": "https://www.cnbc.com/2026/06/29/cnbcs-the-china-connection-newsletter-us-tech-rivalry-heats-up.html",
-      "source": "CNBC Top News",
+      "headline": "Silver prices today, Tuesday, June 30: Silver prices hovering near December '25 levels",
+      "url": "https://finance.yahoo.com/personal-finance/investing/article/silver-prices-today-tuesday-june-30-silver-prices-hovering-near-december-25-levels-122050636.html",
+      "source": "Yahoo Finance",
       "bullets": [
-        "and Chinese tech companies are increasingly pursuing opportunities outside their home markets, with government policy support."
+        "Silver prices today, Tuesday, June 30: Silver prices hovering near December '25 levels"
       ],
       "affected_tickers": [],
       "sentiment": ""
     },
     {
-      "headline": "Supreme Court lets presidents fire independent regulators, rules for Trump in FTC case",
-      "url": "https://www.cnbc.com/2026/06/29/supreme-court-trump-slaughter-ftc.html",
-      "source": "CNBC Top News",
+      "headline": "Snowflake\u2019s (SNOW) AI Business Is Growing Faster Than Many Expected As Analysts Revise Target Price Upward",
+      "url": "https://finance.yahoo.com/technology/ai/articles/snowflake-snow-ai-business-growing-121507644.html",
+      "source": "Yahoo Finance",
       "bullets": [
-        "The ruling allowing President Donald Trump to fire FTC Commissioner Rebecca Slaughter overturns a key precedent known as \"Humphrey\u2019s Executor.\""
+        "Snowflake\u2019s (SNOW) AI Business Is Growing Faster Than Many Expected As Analysts Revise Target Price Upward"
       ],
       "affected_tickers": [],
       "sentiment": ""
     },
     {
-      "headline": "SpaceX bulls are back betting on huge, fast gains as Rocket Lab surges",
-      "url": "https://www.cnbc.com/2026/06/29/spacex-bulls-are-back-betting-on-huge-fast-gains-as-rocket-lab-surges.html",
-      "source": "CNBC Top News",
-      "bullets": [],
-      "affected_tickers": [],
-      "sentiment": ""
-    },
-    {
-      "headline": "AeroVironment soars 19% on earnings beat, backlog grows to $1.2 billion",
-      "url": "https://www.cnbc.com/2026/06/29/aerovironment-stock-soars-on-earnings-beat-backlog-grows-to-1point2b.html",
-      "source": "CNBC Top News",
+      "headline": "Despite Recent Stock Surge, Marvell Technology\u2019s (MRVL) Best Days May Still Be Ahead",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/despite-recent-stock-surge-marvell-121504377.html",
+      "source": "Yahoo Finance",
       "bullets": [
-        "Dronemaker AeroVironment's autonomous system revenue beat expectations by $90 million and its backlog continued to grow."
+        "Despite Recent Stock Surge, Marvell Technology\u2019s (MRVL) Best Days May Still Be Ahead"
       ],
       "affected_tickers": [],
       "sentiment": ""
     },
     {
-      "headline": "Industry lobbyists push House committee to block a ban on Pentagon defense contractors buying back their own stock",
-      "url": "https://www.cnbc.com/2026/06/29/pentagon-defense-contractor-buyback-ban-lobbying.html",
-      "source": "CNBC Top News",
+      "headline": "Dell (DELL) Raises Money As Its AI Opportunity Gets Bigger And Bigger",
+      "url": "https://finance.yahoo.com/technology/ai/articles/dell-dell-raises-money-ai-121503511.html",
+      "source": "Yahoo Finance",
       "bullets": [
-        "Defense companies and their trade groups are pressing Congress not to require that the Pentagon approve stock buybacks."
+        "Dell (DELL) Raises Money As Its AI Opportunity Gets Bigger And Bigger"
+      ],
+      "affected_tickers": [],
+      "sentiment": ""
+    },
+    {
+      "headline": "Palo Alto Networks (PANW) Gets Massive Upward Price Target Revisions, Here\u2019s Why PANW Stock Should Be In Your Portfolio",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/palo-alto-networks-panw-gets-121501841.html",
+      "source": "Yahoo Finance",
+      "bullets": [
+        "Palo Alto Networks (PANW) Gets Massive Upward Price Target Revisions, Here\u2019s Why PANW Stock Should Be In Your Portfolio"
+      ],
+      "affected_tickers": [],
+      "sentiment": ""
+    },
+    {
+      "headline": "'Not constructive': Tim Cook blames Micron for Apple's $300 price hike. Micron suggests Apple helped cause the shortage",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/not-constructive-tim-cook-blames-121500109.html",
+      "source": "Yahoo Finance",
+      "bullets": [
+        "'Not constructive': Tim Cook blames Micron for Apple's $300 price hike. Micron suggests Apple helped cause the shortage"
       ],
       "affected_tickers": [],
       "sentiment": ""
@@ -344,89 +347,53 @@ window.BRIEFING_DATA = {
   "forward_catalysts": [
     {
       "date": "2026-07-02",
-      "event": "June Jobs Report Release",
+      "event": "June Employment Situation Report (NFP)",
       "action": "Hold",
-      "entry_opportunity": "If print comes in weak below 100K jobs, buy more SPY and BTC on rate-cut optimism boost.",
-      "exit_opportunity": "If print comes in hot above 200K jobs, trim SPY and BTC as rate-hike risk re-prices higher.",
+      "entry_opportunity": "Strong beat above consensus lifts risk sentiment and supports adding to SPY; a meaningful miss raises recession fears and warrants caution.",
+      "exit_opportunity": "Strong beat above consensus lifts risk sentiment and supports adding to SPY; a meaningful miss raises recession fears and warrants caution.",
       "affected_holdings": [
-        "SPY",
-        "BTC",
-        "ETH",
-        "XRP",
-        "ZEC"
+        "SPY"
       ],
       "trim_percentage": "N/A"
     },
     {
       "date": "2026-07-10",
-      "event": "SK Hynix Nasdaq ADR Debut",
-      "action": "Trim",
-      "entry_opportunity": "N/A",
-      "exit_opportunity": "Trim MU into July 10 debut day as institutional rotation from MU into SKHY ADR could suppress MU price near-term.",
-      "affected_holdings": [
-        "MU"
-      ],
-      "trim_percentage": "20"
-    },
-    {
-      "date": "2026-07-16",
-      "event": "TSMC Q2 2026 Earnings Conference",
+      "event": "SK Hynix Nasdaq ADR Listing (SKHY)",
       "action": "Buy",
-      "entry_opportunity": "Buy TSM shares if Q2 2026 revenue meets or beats the 39-40B guidance and CEO reiterates extremely robust AI demand language.",
+      "entry_opportunity": "Enter SKHY on or shortly after July 10 listing day if ADR prices at or below $166 and opens without a large premium; strong HBM demand backdrop supports a long-term position.",
       "exit_opportunity": "N/A",
       "affected_holdings": [
-        "NVDA",
-        "AMD",
-        "MU",
-        "INTC"
+        "MU"
       ],
       "trim_percentage": "N/A"
     },
     {
       "date": "2026-07-14",
-      "event": "June CPI Report Release",
-      "action": "Hold",
-      "entry_opportunity": "If headline CPI comes in below 3.8% MoM trend, add to BTC and ETH as rate-cut path reopens.",
-      "exit_opportunity": "If headline CPI prints above 4.5% year-over-year, trim SPY 15% and reduce crypto exposure as a hike becomes more likely at July FOMC.",
+      "event": "June CPI Inflation Report",
+      "action": "Trim",
+      "entry_opportunity": "N/A",
+      "exit_opportunity": "Trim SPY and crypto positions before July 14 print if CPI is tracking above 3.5% based on Cleveland Fed nowcast; restore on a cooler-than-expected reading.",
       "affected_holdings": [
         "SPY",
         "BTC",
         "ETH",
-        "XRP",
         "ZEC",
-        "NVDA",
-        "PLTR"
+        "XRP"
       ],
-      "trim_percentage": "N/A"
-    },
-    {
-      "date": "2026-07-28",
-      "event": "Microsoft FY26 Q4 Earnings",
-      "action": "Buy",
-      "entry_opportunity": "Buy MSFT after-hours on July 28 if Azure growth exceeds 40% CC and full-year FY27 guidance is raised, signaling AI capex cycle acceleration.",
-      "exit_opportunity": "N/A",
-      "affected_holdings": [
-        "NVDA",
-        "PLTR",
-        "CRWV"
-      ],
-      "trim_percentage": "N/A"
+      "trim_percentage": "15"
     },
     {
       "date": "2026-07-29",
-      "event": "FOMC Rate Decision July Meeting",
+      "event": "FOMC Rate Decision and Press Conference",
       "action": "Hold",
-      "entry_opportunity": "If FOMC holds rates and removes hike bias from statement, add to SPY, BTC, and ETH on reopening of cut cycle expectations.",
-      "exit_opportunity": "If FOMC signals a rate hike is imminent or raises the dot plot median further, trim SPY 15-20% and trim crypto positions as cost-of-capital shock hits growth assets.",
+      "entry_opportunity": "A dovish hold with no hike signal resolves uncertainty bullishly and supports adding to rate-sensitive names; a hike or explicit hike signal would trigger trimming financials and growth.",
+      "exit_opportunity": "A dovish hold with no hike signal resolves uncertainty bullishly and supports adding to rate-sensitive names; a hike or explicit hike signal would trigger trimming financials and growth.",
       "affected_holdings": [
         "SPY",
-        "BTC",
-        "ETH",
-        "XRP",
-        "ZEC",
-        "NVDA",
         "PLTR",
-        "HUM"
+        "NVDA",
+        "AMD",
+        "CRWV"
       ],
       "trim_percentage": "N/A"
     },
@@ -434,19 +401,41 @@ window.BRIEFING_DATA = {
       "date": "2026-07-29",
       "event": "Humana Q2 2026 Earnings",
       "action": "Hold",
-      "entry_opportunity": "If Q2 benefit ratio prints below 90% and management raises full-year EPS guidance, add more HUM as the Medicare Advantage recovery thesis gets confirmed.",
-      "exit_opportunity": "If Q2 benefit ratio deteriorates above 91% or management cuts full-year guidance, trim HUM by 30% as medical cost pressure signals structural damage.",
+      "entry_opportunity": "A Q2 beat with lowered medical cost ratio guidance and raised full-year EPS would signal the turnaround is on track and support adding to HUM.",
+      "exit_opportunity": "A Q2 beat with lowered medical cost ratio guidance and raised full-year EPS would signal the turnaround is on track and support adding to HUM.",
       "affected_holdings": [
         "HUM"
       ],
       "trim_percentage": "N/A"
     },
     {
+      "date": "2026-08-03",
+      "event": "Palantir Q2 2026 Earnings",
+      "action": "Buy More",
+      "entry_opportunity": "Add to PLTR on any post-earnings dip if Q2 revenue meets or beats the $1.797-1.801B guidance midpoint and US commercial growth remains above 100% YoY.",
+      "exit_opportunity": "N/A",
+      "affected_holdings": [
+        "PLTR"
+      ],
+      "trim_percentage": "N/A"
+    },
+    {
+      "date": "2026-08-05",
+      "event": "SPCX First Lockup Unlock Window Opens",
+      "action": "Trim",
+      "entry_opportunity": "N/A",
+      "exit_opportunity": "Trim 25% of SPCX position ahead of or at the Q2 earnings date when the first unlock window opens; consider rebuilding the position after float expansion and supply pressure abate in September.",
+      "affected_holdings": [
+        "SPCX"
+      ],
+      "trim_percentage": "25"
+    },
+    {
       "date": "2026-08-18",
       "event": "CoreWeave Q2 2026 Earnings",
       "action": "Hold",
-      "entry_opportunity": "If Q2 revenue beats 2.6B guidance top-end and adjusted operating margins expand sequentially, add to CRWV as the debt-funded growth model earns credibility.",
-      "exit_opportunity": "If Q2 revenue misses guidance midpoint or net loss widens further and backlog growth stalls below 100B, trim CRWV 30% as execution risk outweighs backlog narrative.",
+      "entry_opportunity": "A Q2 revenue beat above $2.60B with improving adjusted operating margins and positive guidance commentary on backlog conversion would resolve uncertainty bullishly.",
+      "exit_opportunity": "A Q2 revenue beat above $2.60B with improving adjusted operating margins and positive guidance commentary on backlog conversion would resolve uncertainty bullishly.",
       "affected_holdings": [
         "CRWV"
       ],
@@ -558,7 +547,7 @@ window.BRIEFING_DATA = {
     },
     {
       "ticker": "NVDA",
-      "action": "Hold",
+      "action": "Watch",
       "entry_price": 205.33,
       "current_price": 194.97,
       "pct_change": -5.05,
@@ -598,12 +587,12 @@ window.BRIEFING_DATA = {
     },
     {
       "ticker": "BTC",
-      "action": "Hold",
+      "action": "Watch",
       "entry_price": 59767.28,
-      "current_price": 59792.99,
-      "pct_change": 0.04,
+      "current_price": 58591.43,
+      "pct_change": -1.97,
       "bullets": [
-        "Entry: $59767.28 | Current: $59792.99 | P&L: +0.0%",
+        "Entry: $59767.28 | Current: $58591.43 | P&L: -2.0%",
         "Only reassess if the macro thesis for Bitcoin changes materially \u2014 such as adverse regulatory action or a fundamental change in institutional adoption trends."
       ],
       "reasoning": "Hold long-term. Up 7% from entry. No action needed. Only reassess if the macro thesis for Bitcoin changes materially \u2014 such as adverse regulatory action or a fundamental change in institutional adoption trends.",
@@ -618,10 +607,10 @@ window.BRIEFING_DATA = {
       "ticker": "ZEC",
       "action": "Hold",
       "entry_price": 482.12,
-      "current_price": 397.53,
-      "pct_change": -17.55,
+      "current_price": 389.12,
+      "pct_change": -19.29,
       "bullets": [
-        "Entry: $482.12 | Current: $397.53 | P&L: -17.6%",
+        "Entry: $482.12 | Current: $389.12 | P&L: -19.3%",
         "Down 8% from entry but within normal crypto volatility.",
         "No negative catalyst has emerged and the thesis is unchanged.",
         "This is a small position and the long-term thesis remains intact."
@@ -638,10 +627,10 @@ window.BRIEFING_DATA = {
       "ticker": "ETH",
       "action": "Hold",
       "entry_price": 2010.52,
-      "current_price": 1589.13,
-      "pct_change": -20.96,
+      "current_price": 1557.91,
+      "pct_change": -22.51,
       "bullets": [
-        "Entry: $2010.52 | Current: $1589.13 | P&L: -21.0%",
+        "Entry: $2010.52 | Current: $1557.91 | P&L: -22.5%",
         "3% from entry but the staking rewards are generating yield while you hold.",
         "Only reassess if a competing smart contract platform shows signs of significantly displacing Ethereum's ecosystem dominance."
       ],
@@ -657,10 +646,10 @@ window.BRIEFING_DATA = {
       "ticker": "XRP",
       "action": "Hold",
       "entry_price": 1.18,
-      "current_price": 1.05,
-      "pct_change": -11.02,
+      "current_price": 1.03,
+      "pct_change": -12.71,
       "bullets": [
-        "Entry: $1.18 | Current: $1.05 | P&L: -11.0%",
+        "Entry: $1.18 | Current: $1.03 | P&L: -12.7%",
         "2% from entry which is minimal.",
         "The regulatory thesis is developing favorably and the payment network is growing.",
         "No action needed unless regulatory conditions deteriorate significantly."
@@ -739,7 +728,7 @@ window.BRIEFING_DATA = {
     {
       "industry": "Semiconductors",
       "etf": "SOXX",
-      "conviction": 48,
+      "conviction": 50,
       "recommended_security": "AMD",
       "recommended_type": "stock",
       "recommended_conviction": 95,
@@ -793,16 +782,84 @@ window.BRIEFING_DATA = {
       "term": "Medium-term",
       "bullets": [
         "SOXX is outperforming SPY by +80.8 percentage points over the last 63 trading days.",
-        "Micron's monster post-earnings rally is almost gone. Traders divided on where it goes next \u2014 The maker of memory chips slid to start the week, marking an about-face from its post-earnings surge.",
+        "Micron\u2019s (MU) Memory Boom Is Not Over, But Here\u2019s What Analysts Think Of The Stock Price",
+        "ASML Holdings (ASML) Is One Of The Top Surging AI Stocks, Here\u2019s What Analysts Make Of It",
         "Ripple tailwinds flowing in from related sectors: defense_spending_increase."
       ],
-      "vehicle": "AMD (individual stock) \u2014 scored 95/100, outscoring the SOXX ETF itself (48/100). Other leaders scanned in this industry: AMD (95/100), MU (95/100), INTC (95/100).",
+      "vehicle": "AMD (individual stock) \u2014 scored 95/100, outscoring the SOXX ETF itself (50/100). Other leaders scanned in this industry: AMD (95/100), MU (95/100), INTC (95/100).",
       "stocks": [
         "AMD",
         "MU",
         "INTC"
       ],
-      "why_now": "This industry has outrun SPY by 80.8pp over 63 days \u2014 that is not noise, it is sustained institutional buying. Event catalyst score of 80/100 indicates multiple confirmed near-term catalysts that could drive further upside. Positive spillover effects from: defense_spending_increase are amplifying sector momentum. Macro is neutral \u2014 sector strength here is coming from fundamentals and catalysts, not just a rising tide."
+      "why_now": "This industry has outrun SPY by 80.8pp over 63 days \u2014 that is not noise, it is sustained institutional buying. Event catalyst score of 95/100 indicates multiple confirmed near-term catalysts that could drive further upside. Positive spillover effects from: defense_spending_increase are amplifying sector momentum. Macro is neutral \u2014 sector strength here is coming from fundamentals and catalysts, not just a rising tide."
+    },
+    {
+      "industry": "Managed Care",
+      "etf": "IHF",
+      "conviction": 46,
+      "recommended_security": "UNH",
+      "recommended_type": "stock",
+      "recommended_conviction": 95,
+      "stock_leaders": [
+        {
+          "ticker": "UNH",
+          "conviction": 95,
+          "excess_63d": 43.73,
+          "excess_21d": 12.81,
+          "current_price": 419.82,
+          "is_breakout": false
+        },
+        {
+          "ticker": "CVS",
+          "conviction": 95,
+          "excess_63d": 31.42,
+          "excess_21d": 15.64,
+          "current_price": 103.58,
+          "is_breakout": true
+        },
+        {
+          "ticker": "HUM",
+          "conviction": 95,
+          "excess_63d": 117.28,
+          "excess_21d": 29.43,
+          "current_price": 388.9,
+          "is_breakout": true
+        }
+      ],
+      "stock_reasoning": [
+        {
+          "ticker": "UNH",
+          "conviction": 95,
+          "is_recommended": true,
+          "reason": "UNH is outperforming SPY on both timeframes \u2014 +43.7pp over 63 days and +12.8pp over 21 days \u2014 sustained, not a one-week spike."
+        },
+        {
+          "ticker": "CVS",
+          "conviction": 95,
+          "is_recommended": false,
+          "reason": "CVS is showing a sharp 21-day breakout (+15.6pp vs SPY) \u2014 momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+31.4pp)."
+        },
+        {
+          "ticker": "HUM",
+          "conviction": 95,
+          "is_recommended": false,
+          "reason": "HUM is showing a sharp 21-day breakout (+29.4pp vs SPY) \u2014 momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+117.3pp)."
+        }
+      ],
+      "etf_reasoning": null,
+      "term": "Medium-term",
+      "bullets": [
+        "IHF is outperforming SPY by +17.6 percentage points over the last 63 trading days.",
+        "Medicare will start covering obesity drugs for the first time. Here's what patients should know \u2014 The move could unlock millions of new patients for Novo Nordisk and Eli Lilly and expand access to medications that were previously out of reach for seniors."
+      ],
+      "vehicle": "UNH (individual stock) \u2014 scored 95/100, outscoring the IHF ETF itself (46/100). Other leaders scanned in this industry: UNH (95/100), CVS (95/100), HUM (95/100).",
+      "stocks": [
+        "UNH",
+        "CVS",
+        "HUM"
+      ],
+      "why_now": "Consistent 17.6pp outperformance vs SPY over 63 days signals real money rotating into this sector. Event score of 60/100 \u2014 moderate near-term catalyst activity supporting the thesis. Macro is neutral \u2014 sector strength here is coming from fundamentals and catalysts, not just a rising tide."
     },
     {
       "industry": "Pharmaceuticals",
@@ -872,90 +929,71 @@ window.BRIEFING_DATA = {
       "why_now": "Consistent 11.9pp outperformance vs SPY over 63 days signals real money rotating into this sector. Event score of 60/100 \u2014 moderate near-term catalyst activity supporting the thesis. Macro is neutral \u2014 sector strength here is coming from fundamentals and catalysts, not just a rising tide."
     },
     {
-      "industry": "Emerging Markets",
-      "etf": "EEM",
-      "conviction": 44,
-      "recommended_security": "EEM",
-      "recommended_type": "etf",
-      "recommended_conviction": 44,
-      "stock_leaders": [],
-      "stock_reasoning": [],
-      "etf_reasoning": "EEM scored 44/100 on its own 63-day momentum vs SPY (+6.2pp). The strongest individual stock scanned inside this industry only reached 0/100 \u2014 not enough edge over the ETF to justify single-stock concentration risk right now.",
-      "term": "Short-term",
-      "bullets": [
-        "EEM is outperforming SPY by +6.2 percentage points over the last 63 trading days.",
-        "China factory activity grows faster than expected in June on tech export demand",
-        "CNBC's The China Connection newsletter: U.S.-China tech rivalry heats up\u2014in other countries \u2014 U.S. and Chinese tech companies are increasingly pursuing opportunities outside their home markets, with government policy support."
-      ],
-      "vehicle": "EEM ETF \u2014 no individual stock in this industry scored meaningfully higher than the ETF itself (44/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
-      "stocks": [],
-      "why_now": "Event catalyst score of 90/100 indicates multiple confirmed near-term catalysts that could drive further upside. Macro is neutral \u2014 sector strength here is coming from fundamentals and catalysts, not just a rising tide."
-    },
-    {
-      "industry": "Managed Care",
-      "etf": "IHF",
-      "conviction": 43,
-      "recommended_security": "UNH",
+      "industry": "Cybersecurity",
+      "etf": "CIBR",
+      "conviction": 40,
+      "recommended_security": "CRWD",
       "recommended_type": "stock",
       "recommended_conviction": 95,
       "stock_leaders": [
         {
-          "ticker": "UNH",
+          "ticker": "CRWD",
           "conviction": 95,
-          "excess_63d": 43.73,
-          "excess_21d": 12.81,
-          "current_price": 419.82,
+          "excess_63d": 77.92,
+          "excess_21d": 3.42,
+          "current_price": 742.91,
           "is_breakout": false
         },
         {
-          "ticker": "CVS",
+          "ticker": "PANW",
           "conviction": 95,
-          "excess_63d": 31.42,
-          "excess_21d": 15.64,
-          "current_price": 103.58,
+          "excess_63d": 97.54,
+          "excess_21d": 19.65,
+          "current_price": 332.0,
           "is_breakout": true
         },
         {
-          "ticker": "HUM",
+          "ticker": "FTNT",
           "conviction": 95,
-          "excess_63d": 117.28,
-          "excess_21d": 29.43,
-          "current_price": 388.9,
-          "is_breakout": true
+          "excess_63d": 79.06,
+          "excess_21d": 14.44,
+          "current_price": 155.42,
+          "is_breakout": false
         }
       ],
       "stock_reasoning": [
         {
-          "ticker": "UNH",
+          "ticker": "CRWD",
           "conviction": 95,
           "is_recommended": true,
-          "reason": "UNH is outperforming SPY on both timeframes \u2014 +43.7pp over 63 days and +12.8pp over 21 days \u2014 sustained, not a one-week spike."
+          "reason": "CRWD is outperforming SPY on both timeframes \u2014 +77.9pp over 63 days and +3.4pp over 21 days \u2014 sustained, not a one-week spike."
         },
         {
-          "ticker": "CVS",
+          "ticker": "PANW",
           "conviction": 95,
           "is_recommended": false,
-          "reason": "CVS is showing a sharp 21-day breakout (+15.6pp vs SPY) \u2014 momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+31.4pp)."
+          "reason": "PANW is showing a sharp 21-day breakout (+19.6pp vs SPY) \u2014 momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+97.5pp)."
         },
         {
-          "ticker": "HUM",
+          "ticker": "FTNT",
           "conviction": 95,
           "is_recommended": false,
-          "reason": "HUM is showing a sharp 21-day breakout (+29.4pp vs SPY) \u2014 momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+117.3pp)."
+          "reason": "FTNT is outperforming SPY on both timeframes \u2014 +79.1pp over 63 days and +14.4pp over 21 days \u2014 sustained, not a one-week spike."
         }
       ],
       "etf_reasoning": null,
       "term": "Short-term",
       "bullets": [
-        "IHF is outperforming SPY by +17.6 percentage points over the last 63 trading days."
+        "CIBR is outperforming SPY by +28.1 percentage points over the last 63 trading days.",
+        "Ripple tailwinds flowing in from related sectors: defense_spending_increase."
       ],
-      "vehicle": "UNH (individual stock) \u2014 scored 95/100, outscoring the IHF ETF itself (43/100). Other leaders scanned in this industry: UNH (95/100), CVS (95/100), HUM (95/100).",
+      "vehicle": "CRWD (individual stock) \u2014 scored 95/100, outscoring the CIBR ETF itself (40/100). Other leaders scanned in this industry: CRWD (95/100), PANW (95/100), FTNT (95/100).",
       "stocks": [
-        "UNH",
-        "CVS",
-        "HUM"
+        "CRWD",
+        "PANW",
+        "FTNT"
       ],
-      "why_now": "Consistent 17.6pp outperformance vs SPY over 63 days signals real money rotating into this sector. Macro is neutral \u2014 sector strength here is coming from fundamentals and catalysts, not just a rising tide."
+      "why_now": "This industry has outrun SPY by 28.1pp over 63 days \u2014 that is not noise, it is sustained institutional buying. Event score of 50/100 \u2014 moderate near-term catalyst activity supporting the thesis. Positive spillover effects from: defense_spending_increase are amplifying sector momentum. Macro is neutral \u2014 sector strength here is coming from fundamentals and catalysts, not just a rising tide."
     }
   ],
   "what_changed": [],
@@ -976,7 +1014,7 @@ window.BRIEFING_DATA = {
           "ticker": "SPY",
           "currently_short_term": true,
           "long_term_date": "2027-04-15",
-          "days_to_long_term": 289,
+          "days_to_long_term": 288,
           "tax_recommendation": "Short-term position. Long-term gain date: Apr 15, 2027.",
           "urgency": "low"
         }
@@ -992,7 +1030,7 @@ window.BRIEFING_DATA = {
           "ticker": "MU",
           "currently_short_term": true,
           "long_term_date": "2027-04-15",
-          "days_to_long_term": 289,
+          "days_to_long_term": 288,
           "tax_recommendation": "Short-term position. Long-term gain date: Apr 15, 2027.",
           "urgency": "low"
         }
@@ -1007,7 +1045,7 @@ window.BRIEFING_DATA = {
           "ticker": "AMD",
           "currently_short_term": true,
           "long_term_date": "2027-04-15",
-          "days_to_long_term": 289,
+          "days_to_long_term": 288,
           "tax_recommendation": "Short-term position. Long-term gain date: Apr 15, 2027.",
           "urgency": "low"
         }
@@ -1022,7 +1060,7 @@ window.BRIEFING_DATA = {
           "ticker": "SPCX",
           "currently_short_term": true,
           "long_term_date": "2027-04-15",
-          "days_to_long_term": 289,
+          "days_to_long_term": 288,
           "tax_recommendation": "Short-term position. Long-term gain date: Apr 15, 2027.",
           "urgency": "low"
         }
@@ -1038,7 +1076,7 @@ window.BRIEFING_DATA = {
           "ticker": "CRWV",
           "currently_short_term": true,
           "long_term_date": "2027-05-02",
-          "days_to_long_term": 306,
+          "days_to_long_term": 305,
           "tax_recommendation": "Short-term position. Long-term gain date: May 02, 2027.",
           "urgency": "low"
         }
@@ -1054,7 +1092,7 @@ window.BRIEFING_DATA = {
           "ticker": "NVDA",
           "currently_short_term": true,
           "long_term_date": "2027-04-15",
-          "days_to_long_term": 289,
+          "days_to_long_term": 288,
           "tax_recommendation": "Short-term position. Long-term gain date: Apr 15, 2027.",
           "urgency": "low"
         }
@@ -1070,7 +1108,7 @@ window.BRIEFING_DATA = {
           "ticker": "HUM",
           "currently_short_term": true,
           "long_term_date": "2027-05-16",
-          "days_to_long_term": 320,
+          "days_to_long_term": 319,
           "tax_recommendation": "Short-term position. Long-term gain date: May 16, 2027.",
           "urgency": "low"
         }
@@ -1110,7 +1148,7 @@ window.BRIEFING_DATA = {
           "ticker": "INTC",
           "currently_short_term": true,
           "long_term_date": "2027-05-02",
-          "days_to_long_term": 306,
+          "days_to_long_term": 305,
           "tax_recommendation": "Short-term position. Long-term gain date: May 02, 2027.",
           "urgency": "low"
         }
@@ -1126,7 +1164,7 @@ window.BRIEFING_DATA = {
           "ticker": "SCO",
           "currently_short_term": true,
           "long_term_date": "2027-06-11",
-          "days_to_long_term": 346,
+          "days_to_long_term": 345,
           "tax_recommendation": "Short-term position. Long-term gain date: Jun 11, 2027.",
           "urgency": "low"
         }
@@ -1141,7 +1179,7 @@ window.BRIEFING_DATA = {
           "ticker": "NOK",
           "currently_short_term": true,
           "long_term_date": "2027-05-02",
-          "days_to_long_term": 306,
+          "days_to_long_term": 305,
           "tax_recommendation": "Short-term position. Long-term gain date: May 02, 2027.",
           "urgency": "low"
         }
@@ -1149,11 +1187,11 @@ window.BRIEFING_DATA = {
     ],
     "entry_signals": [],
     "crypto_check": {
-      "crypto_pct": 0.379,
+      "crypto_pct": 0.375,
       "max_allowed_pct": 0.2,
       "over_limit": true,
       "regime": "Yellow",
-      "warning": "\u26a0\ufe0f Crypto 37.9% exceeds 20% limit in Yellow regime."
+      "warning": "\u26a0\ufe0f Crypto 37.5% exceeds 20% limit in Yellow regime."
     },
     "kill_criteria": {
       "triggered": false,
