@@ -43,23 +43,35 @@ def write_dashboard_data(
         sections_dict.get("Market Snapshot Explanation") or
         sections_dict.get("Market Overview") or ""
     )
-    if not market_overview and briefing:
+    if briefing:
         raw = briefing.get("raw_text", "")
         if raw:
             import re
-            m = re.search(r"## Market Snapshot.*?\n(.*?)(?=##|$)", raw, re.DOTALL | re.IGNORECASE)
-            if m:
-                market_overview = m.group(1).strip()
+            # Try multiple section name variants since Claude formatting can vary slightly
+            for pattern in [r"## Market Snapshot.*?\n(.*?)(?=##|$)", r"## Market Overview.*?\n(.*?)(?=##|$)"]:
+                m = re.search(pattern, raw, re.DOTALL | re.IGNORECASE)
+                if m and len(m.group(1).strip()) > 30:
+                    market_overview = m.group(1).strip()
+                    break
     # Extract bullets from Market Overview — handle both dash bullets and prose sentences
     market_bullets = []
     if market_overview:
         for line in market_overview.split(chr(10)):
-            stripped = line.strip().lstrip("- •*").strip()
+            stripped = line.strip().lstrip("-•*").strip()
             if len(stripped) > 20:
                 market_bullets.append(stripped)
         if not market_bullets:
             # Fall back to sentence splitting
             market_bullets = [s.strip() + "." for s in market_overview.replace(chr(10), " ").split(".") if len(s.strip()) > 20][:5]
+    # Last resort: if still empty, build a basic explanation from macro data directly
+    if not market_bullets and macro:
+        vix_val = macro.get("vix", 0)
+        vix_regime = macro.get("vix_regime", "Yellow")
+        vix_trend = macro.get("vix_trend", "Flat")
+        market_bullets = [
+            f"VIX at {vix_val} is currently in the {vix_regime.lower()} range, trending {vix_trend.lower()}.",
+            f"Regime classification: {vix_regime} — {'favorable for new entries' if vix_regime == 'Green' else 'selective entries only, catalyst required' if vix_regime == 'Yellow' else 'defensive posture, no new entries'}.",
+        ]
 
     # News
     recent_news = news_package.get("recent_news", [])
