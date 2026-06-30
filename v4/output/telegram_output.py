@@ -375,6 +375,9 @@ def build_and_send_afternoon_telegram(
                     elif "WATCH" in upper or "MONITOR" in upper:
                         action = "WATCH"
                         reason = line.strip()[:120]
+                    elif "HOLD" in upper:
+                        action = "HOLD"
+                        reason = line.strip()[:120]
                     break
 
             if action:
@@ -405,15 +408,8 @@ def build_and_send_afternoon_telegram(
     msg1.append("→ Full update on dashboard")
 
     msg2 = []
-    # Flatten new_opportunities — it may arrive as a list-of-lists from the pipeline
-    opps_flat = []
-    for item in (new_opportunities or []):
-        if isinstance(item, list):
-            opps_flat.extend(item)
-        elif isinstance(item, dict):
-            opps_flat.append(item)
 
-    # Rules engine entry signals
+    # Rules engine entry signals (highest priority — these are the real actionable signals)
     if aft_entry_signals:
         msg2.append("<b>🎯 Entry Signals (Rules Engine)</b>")
         for sig in aft_entry_signals[:2]:
@@ -424,27 +420,24 @@ def build_and_send_afternoon_telegram(
             msg2.append(f"     {sig.get('reason','')[:120]}")
         msg2.append("")
 
-    if opps_flat:
+    # Claude's actual written analysis of new/strengthened candidates
+    candidates_text = sections.get("New or Strengthened Candidates", "")
+    if candidates_text and "no new" not in candidates_text.lower() and "nothing changed" not in candidates_text.lower():
         msg2.append("<b>🏭 New or Strengthened Opportunities</b>")
-        for opp in opps_flat[:3]:
-            if not isinstance(opp, dict):
+        # Split into blocks by industry name lines (all caps or contains "—")
+        lines = [l.strip() for l in candidates_text.split(chr(10)) if l.strip()]
+        sentences_shown = 0
+        for line in lines:
+            if sentences_shown >= 8:
+                break
+            if line.startswith("#"):
                 continue
-            name = opp.get("industry", "")
-            etf = opp.get("etf", "")
-            score = opp.get("conviction_score", opp.get("conviction", 0))
-            excess = opp.get("excess_63d", 0)
-            ripple = opp.get("ripple_benefits", [])
-            rel_news = opp.get("relevant_news", [])
-            msg2.append(f"• <b>{name} ({etf})</b> — Conviction {score}/100")
-            if excess > 0:
-                msg2.append(f"  · Outperforming SPY by {excess:.1f}% over 3 months.")
-            if ripple:
-                ripple_clean = [r.replace("_", " ") for r in ripple[:2]]
-                msg2.append(f"  · Tailwinds from: {', '.join(ripple_clean)}.")
-            if rel_news:
-                headline = rel_news[0].get("headline", "")
-                if headline:
-                    msg2.append(f"  · {headline[:90]}")
+            msg2.append(f"• {line[:150]}")
+            sentences_shown += 1
+        msg2.append("")
+    elif not aft_entry_signals:
+        msg2.append("<b>🏭 Opportunities</b>")
+        msg2.append("• No new or strengthened candidates since this morning.")
         msg2.append("")
 
     close_watch = sections.get("Market Close Watch", "")
