@@ -185,6 +185,7 @@ Thesis: {p.get('thesis', 'Not recorded')}
 {positions_block if positions else "No open positions."}
 
 {rules_block}
+{earnings_results_block}
 """
 
 
