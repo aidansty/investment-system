@@ -169,10 +169,16 @@ def main():
         # Re-apply Layer 2 stock-leader scoring to the final top_industries —
         # event enrichment replaced the objects that already had this data.
         from v4.intelligence.industry_scanner import score_stock_leaders
+        from v4.config.settings import INDUSTRY_STOCK_LEADERS
         spy_prices_for_l2 = prices.get("SPY", [])
+        log(f"DEBUG Layer 2: spy_prices length={len(spy_prices_for_l2)}, total tickers in prices dict={len(prices)}")
         for ind in industry_results["top_industries"]:
             industry_name = ind.get("industry", "")
+            expected_stocks = INDUSTRY_STOCK_LEADERS.get(industry_name, [])
+            stocks_with_data = [t for t in expected_stocks if t in prices and len(prices.get(t, [])) >= 63]
+            log(f"DEBUG Layer 2: {industry_name} expects {len(expected_stocks)} stocks, {len(stocks_with_data)} have >=63 days of price data: {stocks_with_data[:5]}")
             stock_scores = score_stock_leaders(prices, industry_name, spy_prices_for_l2)
+            log(f"DEBUG Layer 2: {industry_name} scored {len(stock_scores)} stocks")
             ind["stock_leaders"] = stock_scores[:3]
             etf_conv = ind.get("conviction_score", 0)
             if stock_scores and stock_scores[0]["conviction"] > etf_conv + 5:

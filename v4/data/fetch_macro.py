@@ -213,6 +213,30 @@ def fetch_recent_earnings_results(tickers: list, lookback_days: int = 14) -> dic
                     rev_surprise_pct = None
                     if rev_actual is not None and rev_estimate is not None and rev_estimate != 0:
                         rev_surprise_pct = round((rev_actual - rev_estimate) / abs(rev_estimate) * 100, 1)
+                elif e.get("date"):
+                    # Finnhub hasn't backfilled actuals yet — try yfinance as fallback
+                    try:
+                        import yfinance as yf
+                        yf_ticker = yf.Ticker(ticker)
+                        yf_earnings = yf_ticker.earnings_dates
+                        if yf_earnings is not None and not yf_earnings.empty:
+                            report_date_str = e.get("date")
+                            for idx, row in yf_earnings.iterrows():
+                                if str(idx.date()) == report_date_str:
+                                    yf_eps_actual = row.get("Reported EPS")
+                                    yf_eps_estimate = row.get("EPS Estimate")
+                                    if yf_eps_actual == yf_eps_actual and yf_eps_estimate == yf_eps_estimate:  # not NaN
+                                        eps_actual = float(yf_eps_actual)
+                                        eps_estimate = float(yf_eps_estimate)
+                                        eps_surprise_pct = round((eps_actual - eps_estimate) / abs(eps_estimate) * 100, 1) if eps_estimate != 0 else 0
+                                        rev_actual = None
+                                        rev_estimate = None
+                                        rev_surprise_pct = None
+                                    break
+                    except Exception:
+                        pass
+                    if eps_actual is None:
+                        continue
                     verdict = "BEAT" if eps_surprise_pct > 2 else "MISS" if eps_surprise_pct < -2 else "IN-LINE"
                     results[ticker] = {
                         "report_date": e.get("date", ""),
