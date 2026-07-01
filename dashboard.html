@@ -851,10 +851,15 @@ function updateDualScoreboard(positions, cashBalance) {
     if (entry > 0 && qty > 0) { activeInvested += entry * qty; activeValue += current * qty; }
   }
   const activeReturn = activeInvested > 0 ? ((activeValue - activeInvested) / activeInvested * 100) : 0;
-  const spyEntry = ENTRY_PRICES['SPY'] || 659.44;
-  const spyPos = positions.find(p => p.ticker === 'SPY');
-  const spyCurrent = spyPos ? (spyPos.current_price || spyEntry) : spyEntry;
-  const spyReturn = ((spyCurrent - spyEntry) / spyEntry * 100);
+  // Use the SAME verified SPY time series the chart uses, for the SAME period,
+  // instead of a separate entry-price calc that compared mismatched time windows.
+  const chartSpySeries = window.BRIEFING_DATA?.performance_spy || [];
+  const spyReturn = chartSpySeries.length > 0 ? chartSpySeries[chartSpySeries.length - 1] : (() => {
+    const spyEntry = ENTRY_PRICES['SPY'] || 659.44;
+    const spyPos = positions.find(p => p.ticker === 'SPY');
+    const spyCurrent = spyPos ? (spyPos.current_price || spyEntry) : spyEntry;
+    return ((spyCurrent - spyEntry) / spyEntry * 100);
+  })();
   const equityVsSpy = activeReturn - spyReturn;
   const eqRet = document.getElementById('dual-equity-return');
   const eqVs = document.getElementById('dual-equity-vs-spy');
