@@ -71,9 +71,13 @@ def get_active_positions(positions: list) -> list:
 
 
 def evaluate_entry(opportunity, positions, macro, regime_score, portfolio_value, cash_balance):
-    ticker = opportunity.get("etf") or opportunity.get("ticker", "")
+    # Use the Layer 2 two-layer recommendation (stock or ETF, whichever scored higher)
+    # instead of always defaulting to the ETF — this is what actually gets recommended
+    # on the dashboard, so the rules engine must agree with it.
+    rec_type = opportunity.get("recommended_type", "etf")
+    ticker = opportunity.get("recommended_security") or opportunity.get("etf") or opportunity.get("ticker", "")
+    conviction = opportunity.get("recommended_conviction", opportunity.get("conviction_score", 0))
     industry = opportunity.get("industry", "")
-    conviction = opportunity.get("conviction_score", 0)
     in_layer1 = opportunity.get("in_layer2", False)
     has_catalyst = bool(opportunity.get("catalyst") or opportunity.get("relevant_news"))
     active_positions = get_active_positions(positions)
