@@ -70,33 +70,6 @@ def fetch_etf_prices(lookback_days: int = 90) -> dict:
     return results
 
 
-def fetch_stock_prices(lookback_days: int = 90) -> dict:
-    """
-    Fetch price history for all stock leaders across industries.
-    Returns dict: {ticker: [prices]}
-    """
-    import yfinance as yf
-    from v4.utils.logger import log
-    results = {}
-    try:
-        tickers = ALL_STOCKS + [BENCHMARK_ETF]
-        unique_tickers = list(set(tickers))
-        data = yf.download(unique_tickers, period=f"{lookback_days}d", auto_adjust=True, progress=False)
-        if hasattr(data.columns, 'levels'):
-            closes = data['Close']
-        else:
-            closes = data
-        for ticker in unique_tickers:
-            if ticker in closes.columns:
-                prices = closes[ticker].dropna().tolist()
-                if prices:
-                    results[ticker] = prices
-        log(f"Stock prices fetched: {len(results)} tickers")
-    except Exception as e:
-        log(f"Stock price fetch error: {e}")
-    return results
-
-
 def fetch_current_etf_prices(tickers: list) -> dict:
     """
     Fetch current prices for a list of ETF tickers.
@@ -126,16 +99,20 @@ def fetch_stock_prices(tickers: list, lookback_days: int = 90) -> dict:
     """
     Fetch price history for individual stocks within top industries.
     Used for stock-level analysis after industry selection.
+    Uses "4mo" period (not "3mo") to reliably get 63+ trading days —
+    "3mo" calendar days often yields only ~60-62 trading days, which was
+    silently failing the >=63 day requirement in score_stock_leaders().
     """
     if not tickers:
         return {}
 
     log(f"Fetching stock prices for {len(tickers)} tickers...")
 
-    period_map = {63: "3mo", 90: "3mo", 126: "6mo", 252: "1y"}
-    period = period_map.get(lookback_days, "3mo")
+    period_map = {63: "4mo", 90: "4mo", 126: "6mo", 252: "1y"}
+    period = period_map.get(lookback_days, "4mo")
 
     results = {}
+    skipped_too_short = []
     # Batch in groups of 50 to avoid rate limits
     batch_size = 50
     for i in range(0, len(tickers), batch_size):
@@ -154,10 +131,14 @@ def fetch_stock_prices(tickers: list, lookback_days: int = 90) -> dict:
             for ticker in batch:
                 if ticker in close.columns:
                     series = close[ticker].dropna()
-                    if len(series) >= 30:
+                    if len(series) >= 63:
                         results[ticker] = series.tolist()
+                    elif len(series) >= 30:
+                        skipped_too_short.append(ticker)
         except Exception as e:
             log(f"Stock price batch error: {e}")
+    if skipped_too_short:
+        log(f"Stock prices: {len(skipped_too_short)} tickers had 30-62 days (below 63-day threshold), excluded: {skipped_too_short[:10]}")
         time.sleep(0.5)
 
     log(f"Stock prices fetched: {len(results)}/{len(tickers)}")
