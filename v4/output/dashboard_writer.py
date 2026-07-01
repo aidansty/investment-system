@@ -228,8 +228,35 @@ def write_dashboard_data(
         if rec_type == "etf":
             etf_reasoning = f"{ind['etf']} scored {conviction}/100 on its own 63-day momentum vs SPY ({excess:+.1f}pp). The strongest individual stock scanned inside this industry only reached {stock_leaders[0]['conviction'] if stock_leaders else 0}/100 — not enough edge over the ETF to justify single-stock concentration risk right now."
 
+        # Capital allocation guidance — how much of YOUR actual cash this would use
+        active_sleeve_value = sum(
+            (p.get("current_price", 0) or 0) * (p.get("qty", 0) or 0)
+            for p in positions
+            if p.get("ticker") not in ("SPY", "BTC", "ETH", "XRP", "ZEC")
+        ) + (cash or 0)
+        if rec_conviction >= 88:
+            size_pct = 0.25
+        elif rec_conviction >= 80:
+            size_pct = 0.20
+        elif rec_conviction >= 75:
+            size_pct = 0.15
+        else:
+            size_pct = 0.0  # below entry threshold — informational only, not an actionable size
+
+        if size_pct > 0 and active_sleeve_value > 0:
+            dollar_size = round(active_sleeve_value * size_pct, 0)
+            cash_available = cash or 0
+            if cash_available >= dollar_size:
+                allocation_guidance = f"At {rec_conviction}/100 conviction this would size at {size_pct:.0%} of your active sleeve (~${dollar_size:,.0f}). You currently have ${cash_available:,.0f} in cash — enough to fund this without touching existing positions."
+            else:
+                shortfall = dollar_size - cash_available
+                allocation_guidance = f"At {rec_conviction}/100 conviction this would size at {size_pct:.0%} of your active sleeve (~${dollar_size:,.0f}). You have ${cash_available:,.0f} in cash, about ${shortfall:,.0f} short — this would require trimming an existing lower-conviction position or using less than full size."
+        else:
+            allocation_guidance = f"Conviction {rec_conviction}/100 is below the 75 entry threshold — this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises."
+
         industry_opportunities.append({
             "industry": industry_name,
+            "allocation_guidance": allocation_guidance,
             "etf": ind["etf"],
             "conviction": conviction,
             "recommended_security": rec_security,
