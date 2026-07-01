@@ -1432,6 +1432,8 @@ const moveRow = document.getElementById('notable-moves');
 
 const aftPos = document.getElementById('afternoon-positions');
 (BRIEFING_DATA.afternoon_positions || []).forEach(p => {
+  // Skip broken/incomplete entries — no real ticker or no content to show
+  if (!p.ticker || p.ticker === '-' || p.ticker.includes('*') || (!p.bullets || !p.bullets.length)) return;
   const badgeClass = { 'Hold': 'badge-hold', 'Watch': 'badge-watch', 'Buy More': 'badge-green', 'Buy more': 'badge-green', 'Trim': 'badge-amber', 'Sell': 'badge-red', 'Close': 'badge-red', 'Exit': 'badge-red', 'Reduce': 'badge-amber' }[p.action] || 'badge-gray';
   const reasonColor = { 'Hold': '#94A3B8', 'Watch': 'var(--amber)', 'Buy More': 'var(--green)', 'Trim': 'var(--amber)', 'Sell': 'var(--red)', 'Close': 'var(--red)', 'Exit': 'var(--red)' }[p.action] || '#aeada5';
   const card = document.createElement('div');

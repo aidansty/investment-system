@@ -278,10 +278,12 @@ You are the explanation layer. The rules engine decides. You explain WHY using r
 For EVERY position write exactly:
 
 TICKER — HOLD / WATCH / TRIM / EXIT / CLOSE
-- Bullet 1: What specific data, news, or event is most relevant TODAY (cite actual numbers)
-- Bullet 2: Thesis status in measurable terms — revenue growth %, earnings revision direction, relative strength
+- Bullet 1: What specific data, news, or event is most relevant TODAY for THIS ticker specifically (cite actual numbers). Check the TODAY'S NEWS section above for any headline mentioning this ticker or its industry — if one exists, reference it directly by name and explain what it means. If there is genuinely no new information today, say so explicitly rather than writing generic filler.
+- Bullet 2: Thesis status in measurable terms — revenue growth %, earnings revision direction, relative strength vs SPY over the last 21 and 63 days
 - Bullet 3: Exact reasoning for the recommended action — cite the specific factor
 - Bullet 4: What to monitor next — specific data point, date, or event
+
+MANDATORY: This position review must reflect information CURRENT as of today's date above — not generic evergreen reasoning that could apply on any day. Every position gets fresh eyes every single morning: check recent earnings results, check today's news for this ticker or its industry, check current momentum data. Do not reuse the same boilerplate reasoning across multiple days.
 
 CRITICAL: If a position appears in the RECENT EARNINGS RESULTS section above, you already know whether that earnings report beat, missed, or was in-line. State the actual verdict and numbers directly — e.g. "MU reported June 25 and BEAT estimates with EPS of $X vs $Y expected, a Z% surprise." NEVER write phrases like "review the actual results" or "check what happened" — you have the data, use it.
 
