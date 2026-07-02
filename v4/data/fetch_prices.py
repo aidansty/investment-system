@@ -17,13 +17,16 @@ def fetch_etf_prices(lookback_days: int = 90) -> dict:
 
     log(f"Fetching prices for {len(tickers)} ETFs ({lookback_days} days)...")
 
+    # "3mo" period was returning exactly 62 trading days — 1 day short of the
+    # 63-day MOMENTUM_LOOKBACK_DAYS threshold, causing every single ETF to fail.
+    # Extended to "4mo" for a reliable safety margin, same fix applied to stocks.
     period_map = {
-        63:  "3mo",
-        90:  "3mo",
+        63:  "4mo",
+        90:  "4mo",
         126: "6mo",
         252: "1y",
     }
-    period = period_map.get(lookback_days, "3mo")
+    period = period_map.get(lookback_days, "4mo")
 
     results = {}
     failed = []
