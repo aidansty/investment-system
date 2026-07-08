@@ -615,6 +615,7 @@ async function fetchAndUpdatePrices() {
 
     rebuildAllocChart(updatedPositions, currentCash);
     updateDualScoreboard(updatedPositions, currentCash);
+    updateGoalTracker(updatedPositions, currentCash);
     window._livePositions = updatedPositions;
     document.getElementById('last-run').textContent = 'Prices updated live · ' + new Date().toLocaleTimeString();
 
