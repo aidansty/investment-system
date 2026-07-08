@@ -127,6 +127,22 @@
       <canvas id="perf-chart" aria-label="Portfolio performance versus S&P 500 over time"></canvas>
     </div>
 
+    <!-- Goal Tracker -->
+    <div class="section-gap" id="goal-tracker" style="background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px 20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);">Stock & ETF Goal Tracker</div>
+        <div id="goal-current-value" style="font-size:15px;font-weight:700;color:var(--text-primary);">—</div>
+      </div>
+      <div style="position:relative;background:rgba(255,255,255,0.06);border-radius:6px;height:24px;overflow:hidden;margin-bottom:8px;">
+        <div id="goal-progress-bar" style="height:100%;border-radius:6px;background:linear-gradient(90deg, #5DCAA5, #4AB892);transition:width 0.8s ease;min-width:2%;"></div>
+        <div id="goal-checkpoints" style="position:absolute;top:0;left:0;right:0;bottom:0;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div id="goal-status" style="font-size:12px;color:var(--text-secondary);">—</div>
+        <div id="goal-next" style="font-size:12px;font-weight:600;color:var(--green);">—</div>
+      </div>
+    </div>
+
     <h2 class="section-title">Capital allocation</h2>
     <div class="alloc-grid section-gap">
       <div class="alloc-canvas-wrap">
@@ -891,6 +907,77 @@ function updateDualScoreboard(positions, cashBalance) {
 }
 updateRegimeScore();
 updateKillCriteria();
+
+// ============================================================
+// GOAL TRACKER
+// ============================================================
+function updateGoalTracker(positions, cashBalance) {
+  const cryptoTickers = new Set(['BTC','ETH','XRP','ZEC','BNB','SOL']);
+  let stockEtfValue = 0;
+  for (const p of positions) {
+    if (cryptoTickers.has(p.ticker)) continue;
+    const current = p.current_price || 0;
+    const qty = p.qty || 0;
+    stockEtfValue += current * qty;
+  }
+  stockEtfValue += (cashBalance || 0);
+
+  const checkpoints = [6500, 7000, 7500, 8000, 9000, 10000];
+  const minVal = 5000; // chart floor
+  const maxVal = checkpoints[checkpoints.length - 1];
+
+  // Find current and next checkpoint
+  let nextCheckpoint = checkpoints[checkpoints.length - 1];
+  let nextIdx = checkpoints.length - 1;
+  for (let i = 0; i < checkpoints.length; i++) {
+    if (stockEtfValue < checkpoints[i]) {
+      nextCheckpoint = checkpoints[i];
+      nextIdx = i;
+      break;
+    }
+  }
+  const prevCheckpoint = nextIdx > 0 ? checkpoints[nextIdx - 1] : minVal;
+  const remaining = Math.max(0, nextCheckpoint - stockEtfValue);
+  const pctToNext = Math.min(100, Math.max(0, ((stockEtfValue - minVal) / (maxVal - minVal)) * 100));
+
+  // Update UI
+  const valEl = document.getElementById('goal-current-value');
+  const barEl = document.getElementById('goal-progress-bar');
+  const statusEl = document.getElementById('goal-status');
+  const nextEl = document.getElementById('goal-next');
+  const cpEl = document.getElementById('goal-checkpoints');
+
+  if (valEl) valEl.textContent = '$' + stockEtfValue.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+  if (barEl) barEl.style.width = pctToNext.toFixed(1) + '%';
+  if (statusEl) {
+    if (remaining > 0) {
+      statusEl.innerHTML = '$' + remaining.toLocaleString('en-US', {maximumFractionDigits: 0}) + ' to next checkpoint';
+    } else {
+      statusEl.innerHTML = 'All checkpoints cleared!';
+      statusEl.style.color = 'var(--green)';
+    }
+  }
+  if (nextEl) {
+    const cleared = checkpoints.filter(c => stockEtfValue >= c).length;
+    nextEl.textContent = cleared + '/' + checkpoints.length + ' checkpoints cleared';
+  }
+
+  // Draw checkpoint markers on the progress bar
+  if (cpEl) {
+    cpEl.innerHTML = '';
+    for (const cp of checkpoints) {
+      const leftPct = ((cp - minVal) / (maxVal - minVal)) * 100;
+      const cleared = stockEtfValue >= cp;
+      const marker = document.createElement('div');
+      marker.style.cssText = 'position:absolute;top:0;bottom:0;width:2px;background:' + (cleared ? 'var(--green)' : 'rgba(255,255,255,0.25)') + ';left:' + leftPct.toFixed(1) + '%;';
+      const label = document.createElement('div');
+      label.style.cssText = 'position:absolute;top:-16px;left:' + leftPct.toFixed(1) + '%;transform:translateX(-50%);font-size:9px;color:' + (cleared ? 'var(--green)' : 'var(--text-secondary)') + ';white-space:nowrap;';
+      label.textContent = '$' + (cp/1000).toFixed(cp >= 10000 ? 0 : 1) + 'k';
+      cpEl.appendChild(marker);
+      cpEl.appendChild(label);
+    }
+  }
+}
 
 // ============================================================
 // POSITION MANAGEMENT UI
