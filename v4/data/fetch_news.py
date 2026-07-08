@@ -78,75 +78,11 @@ def _clean_html(text: str) -> str:
 
 def filter_relevant_news(news_items: list) -> list:
     """
-    Filter news to only what affects our industries, holdings, or market regime.
-    Uses Claude to judge relevance rather than keyword matching.
+    Relevance filtering is now handled inside deduplicate_and_summarize()
+    in a single merged Claude call — cutting one full redundant API round-trip.
+    This function passes items through unchanged.
     """
-    if not news_items:
-        return []
-
-    client = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
-
-    headlines_block = "\n".join([
-        f"{i+1}. {item['headline']} — {item.get('summary', '')[:150]}"
-        for i, item in enumerate(news_items)
-    ])
-
-    industries_list = ", ".join(INDUSTRY_ETF_MAP.keys())
-
-    # Pull current holdings dynamically instead of hardcoding a stale list
-    try:
-        import json, os
-        pos_path = os.path.join(os.path.dirname(__file__), "..", "config", "positions.json")
-        with open(pos_path) as f:
-            current_holdings = ", ".join([p["ticker"] for p in json.load(f).get("positions", [])])
-    except Exception:
-        current_holdings = "SPY, NVDA, SPCX, AMD, MU, INTC, CRWV, NOK, SCO, HUM, BTC, ETH, ZEC, XRP"
-
-    prompt = f"""Here are {len(news_items)} recent financial news headlines.
-
-INDUSTRIES WE TRACK: {industries_list}
-CURRENT HOLDINGS: {current_holdings}
-
-HEADLINES:
-{headlines_block}
-
-Identify which headline numbers are relevant to:
-- Any of the tracked industries above
-- Our current holdings
-- Broad market regime (Fed policy, major economic data, geopolitical events with market impact, major IPOs)
-
-Exclude: sports, entertainment, weather, celebrity news, general politics with no market/economic connection, AND generic single-company analyst notes/price-target changes for companies that are NOT in our tracked industries or current holdings (e.g. a random utility or industrial company analyst rating with no sector-wide implication).
-
-Include: Fed/FOMC decisions, economic data, trade policy, regulatory rulings, industry-specific news with sector-wide implications, earnings from our current holdings or major sector bellwethers, major corporate events, IPOs, geopolitical events affecting markets.
-
-A headline only qualifies if you could write one specific sentence explaining why it matters to a portfolio holding SPY, NVDA, SPCX, AMD, MU, INTC, CRWV, NOK, SCO, HUM, BTC, ETH, ZEC, XRP or the industries listed above. If you cannot articulate that connection specifically, exclude it.
-
-Return ONLY a JSON array of relevant headline numbers, nothing else.
-Example: [1, 3, 7, 12, 15]"""
-
-    try:
-        response = client.messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=500,
-            messages=[{"role": "user", "content": prompt}]
-        )
-
-        text = response.content[0].text.strip()
-        import json
-        # Extract JSON array
-        match = re.search(r"\[[\d,\s]*\]", text)
-        if match:
-            relevant_indices = json.loads(match.group())
-            relevant_news = [news_items[i-1] for i in relevant_indices if 0 < i <= len(news_items)]
-            log(f"Relevance filter: {len(relevant_news)}/{len(news_items)} items relevant")
-            return relevant_news
-        else:
-            log("Relevance filter: could not parse response, returning all items")
-            return news_items
-
-    except Exception as e:
-        log(f"Relevance filter error: {e} — returning empty list rather than unfiltered dump")
-        return []
+    return news_items
 
 
 def deduplicate_and_summarize(news_items: list) -> list:
@@ -168,8 +104,14 @@ def deduplicate_and_summarize(news_items: list) -> list:
         for i, item in enumerate(news_items)
     ])
 
-    # Build positions context for impact analysis
-    positions_str = "SPY, NVDA, SPCX, AMD, MU, INTC, PLTR, CRWV, NOK, SCO, HUM, BTC, ZEC, ETH, XRP"
+    # Build positions context dynamically
+    try:
+        import json as _json, os as _os
+        _pos_path = _os.path.join(_os.path.dirname(__file__), "..", "config", "positions.json")
+        with open(_pos_path) as _f:
+            positions_str = ", ".join([p["ticker"] for p in _json.load(_f).get("positions", [])])
+    except Exception:
+        positions_str = "SPY, NVDA, SPCX, AMD, MU, INTC, CRWV, NOK, SCO, HUM, BTC, ETH, ZEC, XRP"
 
     prompt = f"""You are analyzing financial news for an investor with these holdings: {positions_str}
 
@@ -202,7 +144,7 @@ Return ONLY a valid JSON array. No markdown, no explanation, just the JSON:
     "bullets": [
       "What happened: one clear sentence",
       "Why it matters: one clear sentence on market or sector impact",
-      "Portfolio relevance: how this affects the investor specifically"
+      "Portfolio relevance: name the SPECIFIC holding(s) from the list above this affects and explain exactly how (bullish/bearish, thesis strengthened/weakened). If no current holding is affected, name the specific NEW investment opportunity this points to. NEVER write a generic sentence — always name specific tickers."
     ],
     "affected_tickers": ["list of tickers from holdings affected, or new tickers representing opportunities"],
     "sentiment": "bullish or bearish or neutral",

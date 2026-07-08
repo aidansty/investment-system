@@ -177,20 +177,31 @@ def write_dashboard_data(
         rec_conviction = ind.get("recommended_conviction", conviction)
         stock_leaders = ind.get("stock_leaders", [])
 
-        # Build bullets from actual data + news
+        # Build bullets from actual data + news — momentum alone is never
+        # sufficient reasoning; a catalyst/news basis is required.
         bullets = []
         excess = ind.get("excess_63d", 0)
         bullets.append(f"{ind['etf']} is outperforming SPY by {excess:+.1f} percentage points over the last 63 trading days.")
 
+        has_real_catalyst = False
         if ind_news:
             for n in ind_news[:2]:
                 headline = n.get("headline", "")
                 summary = n.get("summary", "")
                 if headline:
                     bullets.append(f"{headline}" + (f" — {summary[:300]}" if summary else ""))
+                    has_real_catalyst = True
 
         if ind.get("ripple_benefits"):
             bullets.append(f"Ripple tailwinds flowing in from related sectors: {', '.join(ind['ripple_benefits'][:3])}.")
+            has_real_catalyst = True
+
+        event_score = ind.get("event_score", 0)
+        if event_score and event_score > 0.5:
+            has_real_catalyst = True
+
+        if not has_real_catalyst:
+            bullets.append("\u26a0\ufe0f No confirmed catalyst or news driver identified — this is a momentum-only signal. Momentum alone is not sufficient reason to invest; treat as a watch item until a specific catalyst emerges.")
 
         # Vehicle reasoning now comes directly from what the Layer 2 scanner decided
         if rec_type == "stock":
@@ -507,14 +518,31 @@ def _parse_afternoon_positions(text: str, positions: list) -> list:
                 current_bullets = []
             continue
 
-        # Detect ticker line: "TICKER — ACTION"
-        upper = line.upper()
-        for action in ["EXIT", "REDUCE", "TRIM", "WATCH", "HOLD", "BUY MORE"]:
-            if action in upper and chr(8212) in line or " — " in line or " - " in line:
-                parts = line.replace(chr(8212), "—").split("—")
-                if parts:
-                    candidate = parts[0].strip().split()[0].upper()
-                    if candidate in pos_lookup or len(candidate) <= 5:
+        # Detect ticker line: "TICKER — ACTION" — strip markdown bold first
+        clean_line = line.replace("**", "").replace("__", "")
+        upper = clean_line.upper()
+        has_sep = chr(8212) in clean_line or " — " in clean_line or " - " in clean_line
+        detected = False
+        if has_sep:
+            parts = clean_line.replace(chr(8212), "—").split("—")
+            if parts:
+                candidate_raw = parts[0].strip().split()[0].upper() if parts[0].strip() else ""
+                candidate = "".join(c for c in candidate_raw if c.isalnum())
+                action_text = parts[1].strip().upper() if len(parts) > 1 else ""
+                first_words = " ".join(action_text.split()[:3])
+                matched_action = "Hold"
+                if first_words.startswith("EXIT") or first_words.startswith("CLOSE") or first_words.startswith("SELL"):
+                    matched_action = "Exit"
+                elif first_words.startswith("TRIM") or first_words.startswith("REDUCE"):
+                    matched_action = "Trim"
+                elif first_words.startswith("WATCH") or first_words.startswith("MONITOR"):
+                    matched_action = "Watch"
+                elif "BUY MORE" in first_words or first_words.startswith("BUY"):
+                    matched_action = "Buy More"
+                elif first_words.startswith("HOLD"):
+                    matched_action = "Hold"
+                action = matched_action
+                if candidate in pos_lookup or (len(candidate) <= 5 and candidate.isalpha()):
                         if current_ticker:
                             raw = pos_lookup.get(current_ticker, {})
                             entry = raw.get("entry", 0) or raw.get("entry_price", 0) or 0
@@ -534,10 +562,10 @@ def _parse_afternoon_positions(text: str, positions: list) -> list:
                         current_action = action.title()
                         current_bullets = []
                         break
-        else:
+        if not has_sep or not detected:
             # Bullet line
-            if current_ticker and len(line) > 10:
-                cleaned = line.lstrip("•-* ").strip()
+            if current_ticker and len(clean_line) > 10:
+                cleaned = clean_line.lstrip("•-* ").strip()
                 if cleaned:
                     current_bullets.append(cleaned)
 
