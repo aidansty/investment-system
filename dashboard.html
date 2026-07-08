@@ -185,6 +185,10 @@
     <h2 class="section-title">Industry opportunities</h2>
     <div id="industry-opportunities"></div>
 
+    <h2 class="section-title" style="margin-top:32px;">Catalyst scanner</h2>
+    <p class="section-sub">Stocks with confirmed catalysts in the next 30 days — sorted by momentum and urgency</p>
+    <div id="catalyst-scanner"></div>
+
   </div>
 
   <!-- AFTERNOON TAB -->
@@ -1534,6 +1538,59 @@ const indOpps = document.getElementById('industry-opportunities');
 });
 if (!BRIEFING_DATA.industry_opportunities || !BRIEFING_DATA.industry_opportunities.length) {
   indOpps.innerHTML = '<p class="hint">No high-conviction opportunities today.</p>';
+}
+
+// ============================================================
+// CATALYST SCANNER
+// ============================================================
+const catScan = document.getElementById('catalyst-scanner');
+const catOpps = BRIEFING_DATA.catalyst_opportunities || [];
+catOpps.forEach(c => {
+  const card = document.createElement('div');
+  card.className = 'candidate-card';
+  const isPreCatalyst = c.catalyst_type === 'pre-catalyst';
+  const typeLabel = {
+    'earnings': 'Earnings',
+    'pre-catalyst': 'Pre-Catalyst Positioning',
+    'event': 'Upcoming Event',
+    'news': 'Bullish News',
+    'fed': 'Fed/Macro',
+    'industry': 'Industry Event',
+    'company': 'Company Event',
+    'geopolitical': 'Geopolitical',
+  }[c.catalyst_type] || c.catalyst_type || 'Catalyst';
+
+  const daysText = c.days_until === 0 ? 'Today' : c.days_until === 1 ? 'Tomorrow' : c.days_until + ' days away';
+  const momentumColor = c.excess_21d > 10 ? 'var(--green)' : c.excess_21d > 3 ? 'var(--amber)' : 'var(--text-secondary)';
+
+  let bullets = '';
+  if (c.earnings_date) {
+    bullets += '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">Catalyst date: <b>' + c.earnings_date + '</b> (' + daysText + ')</li>';
+  }
+  bullets += '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">21-day momentum vs SPY: <b style="color:' + momentumColor + ';">+' + c.excess_21d + 'pp</b>' + (isPreCatalyst ? ' <span style="color:var(--amber);font-size:11px;">(pre-catalyst — price hasn't fully reacted yet)</span>' : '') + '</li>';
+  if (c.price) {
+    bullets += '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">Current price: $' + c.price + '</li>';
+  }
+  if (c.eps_estimate) {
+    bullets += '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">EPS estimate: ' + c.eps_estimate + '</li>';
+  }
+  if (c.news_headlines && c.news_headlines.length) {
+    c.news_headlines.forEach(h => {
+      if (h) bullets += '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">📰 ' + h + '</li>';
+    });
+  }
+
+  card.innerHTML = '<div class="candidate-header"><div>' +
+    '<div class="candidate-title">' + c.ticker + '</div>' +
+    '<div class="candidate-sub">' + (c.industry || 'Unknown industry') + ' &middot; ' + typeLabel + '</div>' +
+    '</div>' +
+    '<span class="badge ' + (isPreCatalyst ? 'badge-amber' : 'badge-green') + '">' + daysText + '</span>' +
+    '</div>' +
+    '<ul>' + bullets + '</ul>';
+  catScan.appendChild(card);
+});
+if (!catOpps.length) {
+  catScan.innerHTML = '<p class="hint">No catalyst opportunities found today. The scanner checks for stocks with upcoming earnings, FDA decisions, index inclusions, product launches, and other price-moving events within 30 days.</p>';
 }
 
 // ============================================================
