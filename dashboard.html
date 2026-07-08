@@ -923,8 +923,42 @@ function updateGoalTracker(positions, cashBalance) {
   }
   stockEtfValue += (cashBalance || 0);
 
-  const checkpoints = [6500, 7000, 7500, 8000, 9000, 10000];
-  const minVal = 5000; // chart floor
+  // Dynamic checkpoints that extend forever as you grow
+  function generateCheckpoints(currentValue) {
+    const base = [6500, 7000, 7500, 8000, 9000, 10000];
+    const tiers = [
+      { floor: 10000, ceil: 20000, step: 2500 },
+      { floor: 20000, ceil: 50000, step: 5000 },
+      { floor: 50000, ceil: 100000, step: 10000 },
+      { floor: 100000, ceil: 250000, step: 25000 },
+      { floor: 250000, ceil: 1000000, step: 50000 },
+    ];
+    let cps = [...base];
+    let last = base[base.length - 1];
+    for (const tier of tiers) {
+      let v = tier.floor + tier.step;
+      while (v <= tier.ceil) {
+        cps.push(v);
+        last = v;
+        v += tier.step;
+      }
+      if (currentValue < tier.ceil) break;
+    }
+    // Always show at least 2 checkpoints ahead of current value
+    while (cps[cps.length - 1] <= currentValue) {
+      const lastCp = cps[cps.length - 1];
+      const step = lastCp >= 250000 ? 50000 : lastCp >= 100000 ? 25000 : lastCp >= 50000 ? 10000 : lastCp >= 20000 ? 5000 : 2500;
+      cps.push(lastCp + step);
+    }
+    return cps;
+  }
+  const allCheckpoints = generateCheckpoints(stockEtfValue);
+  // Show: all cleared checkpoints + next 3 upcoming
+  const firstUncleared = allCheckpoints.findIndex(c => stockEtfValue < c);
+  const visibleStart = Math.max(0, firstUncleared - 3);
+  const visibleEnd = Math.min(allCheckpoints.length, firstUncleared + 3);
+  const checkpoints = allCheckpoints.slice(visibleStart, visibleEnd);
+  const minVal = checkpoints[0] - 500;
   const maxVal = checkpoints[checkpoints.length - 1];
 
   // Find current and next checkpoint
