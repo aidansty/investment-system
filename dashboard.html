@@ -1006,8 +1006,8 @@ function updateGoalTracker(positions, cashBalance) {
       const marker = document.createElement('div');
       marker.style.cssText = 'position:absolute;top:0;bottom:0;width:2px;background:' + (cleared ? 'var(--green)' : 'rgba(255,255,255,0.25)') + ';left:' + leftPct.toFixed(1) + '%;';
       const label = document.createElement('div');
-      label.style.cssText = 'position:absolute;top:-16px;left:' + leftPct.toFixed(1) + '%;transform:translateX(-50%);font-size:9px;color:' + (cleared ? 'var(--green)' : 'var(--text-secondary)') + ';white-space:nowrap;';
-      label.textContent = '$' + (cp/1000).toFixed(cp >= 10000 ? 0 : 1) + 'k';
+      label.style.cssText = 'position:absolute;bottom:-18px;left:' + leftPct.toFixed(1) + '%;transform:translateX(-50%);font-size:10px;font-weight:600;color:' + (cleared ? 'var(--green)' : 'var(--text-secondary)') + ';white-space:nowrap;';
+      label.textContent = '$' + cp.toLocaleString('en-US');
       cpEl.appendChild(marker);
       cpEl.appendChild(label);
     }
