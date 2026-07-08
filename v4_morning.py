@@ -374,6 +374,75 @@ def main():
         except Exception as e:
             log(f"Catalyst scanner phase 2/3 error (non-fatal): {e}")
 
+        # PHASE 4: Pre-catalyst positioning — high-quality dated catalysts
+        # even WITHOUT existing momentum. These are earlier entries where the
+        # market hasn't priced in the event yet. Higher risk but higher reward
+        # if the catalyst plays out.
+        try:
+            for fc in (forward_catalysts or []):
+                affected = fc.get("affected_holdings", []) or fc.get("tickers", [])
+                if not isinstance(affected, list):
+                    affected = []
+                fc_date = fc.get("date", "") or fc.get("event_date", "")
+                fc_event = fc.get("event", "") or fc.get("description", "")
+                fc_action = (fc.get("action", "") or "").upper()
+
+                # Only include Tier 1 catalyst types for pre-momentum entries
+                tier1_keywords = ["EARNINGS", "FDA", "PDUFA", "APPROVAL", "INDEX",
+                    "INCLUSION", "REBALANCE", "ACQUISITION", "MERGER", "BUYOUT",
+                    "CONTRACT", "LAUNCH", "SPLIT", "BUYBACK"]
+                is_tier1 = any(kw in fc_event.upper() for kw in tier1_keywords) or                            any(kw in fc_action for kw in ["BUY", "HOLD", "WATCH"])
+
+                if not is_tier1:
+                    continue
+
+                days_until = 99
+                if fc_date:
+                    try:
+                        fc_dt = datetime.strptime(fc_date, "%Y-%m-%d").date()
+                        days_until = (fc_dt - today_dt).days
+                    except Exception:
+                        continue
+
+                if days_until < 0 or days_until > 30:
+                    continue
+
+                for tk in affected:
+                    already_listed = any(c["ticker"] == tk for c in catalyst_opportunities)
+                    if already_listed:
+                        continue
+
+                    # Get price data if available (doesn't need to be momentum-positive)
+                    tk_price = 0
+                    tk_excess = 0
+                    if tk in prices and len(prices[tk]) >= 2:
+                        tk_price = round(prices[tk][-1], 2)
+                        if len(prices[tk]) >= 21 and len(spy_prices_cat) >= 21:
+                            stk_21d = (prices[tk][-1] / prices[tk][-21] - 1) * 100 if prices[tk][-21] > 0 else 0
+                            tk_excess = round(stk_21d - spy_21d, 1)
+
+                    stock_industry = ""
+                    for ind_name, tickers in INDUSTRY_STOCK_LEADERS.items():
+                        if tk in tickers:
+                            stock_industry = ind_name
+                            break
+
+                    catalyst_opportunities.append({
+                        "ticker": tk,
+                        "industry": stock_industry,
+                        "earnings_date": fc_date,
+                        "eps_estimate": None,
+                        "excess_21d": tk_excess,
+                        "price": tk_price,
+                        "has_news": True,
+                        "news_headlines": [fc_event[:100]],
+                        "catalyst_type": "pre-catalyst",
+                        "days_until": days_until,
+                    })
+                    log(f"  PRE-CATALYST: {tk} — {fc_event[:60]} in {days_until} days (no momentum required)")
+        except Exception as e:
+            log(f"Catalyst scanner phase 4 error (non-fatal): {e}")
+
         # Deduplicate by ticker, keep highest momentum entry
         seen_tickers = set()
         deduped = []
