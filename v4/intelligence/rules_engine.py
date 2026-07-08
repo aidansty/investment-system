@@ -202,6 +202,63 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
     if ticker in PERMANENT_HOLDS:
         return {"action": "hold", "ticker": ticker, "exit_type": None, "reason": f"{ticker} is a permanent hold."}
 
+    # ── Checkpoint Goal Evaluation ────────────────────────────────────────────
+    # Every non-permanent, non-crypto stock position is evaluated against:
+    # "Is this position actively helping us reach our growth checkpoints?"
+    # Dead capital in positions with no catalyst and no momentum should be
+    # redeployed into higher-conviction opportunities.
+    CRYPTO_TICKERS = {"BTC", "ETH", "XRP", "ZEC", "BNB", "SOL", "DOGE"}
+    if ticker not in CRYPTO_TICKERS and ticker != "SPY":
+        has_forward_catalyst = bool(position.get("catalyst_date") or position.get("catalyst_type"))
+
+        # Check if there's an upcoming earnings date for this ticker
+        if not has_forward_catalyst and earnings_calendar:
+            earn_info = (earnings_calendar or {}).get(ticker, {})
+            earn_date = earn_info.get("date", "")
+            if earn_date:
+                try:
+                    from datetime import datetime, timedelta
+                    import pytz
+                    eastern = pytz.timezone("America/New_York")
+                    today_ck = datetime.now(eastern).date()
+                    earn_dt = datetime.strptime(earn_date, "%Y-%m-%d").date()
+                    if 0 < (earn_dt - today_ck).days <= 30:
+                        has_forward_catalyst = True
+                except Exception:
+                    pass
+
+        # Evaluate: losing + no catalyst = dead capital
+        if pct_change <= -8 and not has_forward_catalyst:
+            return {
+                "action": "exit",
+                "ticker": ticker,
+                "exit_type": "checkpoint",
+                "urgency": "next_open",
+                "conviction": conviction,
+                "reason": f"CHECKPOINT REVIEW: Position is DOWN {pct_change:+.1f}% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
+                "pct_change": pct_change,
+            }
+        elif pct_change <= -5 and not has_forward_catalyst and conviction < 50:
+            return {
+                "action": "watch",
+                "ticker": ticker,
+                "exit_type": "checkpoint",
+                "urgency": "monitor",
+                "conviction": conviction,
+                "reason": f"CHECKPOINT WARNING: Position is DOWN {pct_change:+.1f}% with low conviction ({conviction}/100) and no catalyst ahead. If no catalyst emerges within the next week, exit and redeploy this capital into a position with a defined catalyst and growth path.",
+                "pct_change": pct_change,
+            }
+        elif pct_change > 0 and pct_change < 3 and not has_forward_catalyst and conviction < 50:
+            return {
+                "action": "watch",
+                "ticker": ticker,
+                "exit_type": "checkpoint",
+                "urgency": "monitor",
+                "conviction": conviction,
+                "reason": f"CHECKPOINT REVIEW: Position is barely positive ({pct_change:+.1f}%) with low conviction ({conviction}/100) and no forward catalyst. This capital may be better deployed in a higher-conviction setup with a specific growth driver.",
+                "pct_change": pct_change,
+            }
+
     if thesis_break and thesis_break_reason:
         return {"action": "exit", "ticker": ticker, "exit_type": "fast", "urgency": "immediate", "reason": f"THESIS BREAK: {thesis_break_reason}", "pct_change": pct_change}
 
