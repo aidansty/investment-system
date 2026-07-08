@@ -8,8 +8,8 @@ import json
 from datetime import datetime, timedelta
 from v4.utils.logger import log
 
-MIN_CONVICTION_FULL_ENTRY = 75
-MIN_CONVICTION_REDUCED_ENTRY = 85
+MIN_CONVICTION_FULL_ENTRY = 65
+MIN_CONVICTION_REDUCED_ENTRY = 75
 MIN_CONVICTION_HOLD = 40
 MIN_REGIME_SCORE = 40
 MAX_ACTIVE_POSITIONS = 4
@@ -104,9 +104,9 @@ def evaluate_entry(opportunity, positions, macro, regime_score, portfolio_value,
 
     if conviction >= MIN_CONVICTION_FULL_ENTRY:
         # Conviction-based sizing proven by backtest
-        if conviction >= 88: size_pct = 0.25
-        elif conviction >= 80: size_pct = 0.20
-        elif conviction >= 75: size_pct = 0.15
+        if conviction >= 85: size_pct = 0.25
+        elif conviction >= 75: size_pct = 0.20
+        elif conviction >= 65: size_pct = 0.15
         else: size_pct = 0.10
 
         if has_catalyst:

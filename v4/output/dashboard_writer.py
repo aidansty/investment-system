@@ -21,6 +21,7 @@ def write_dashboard_data(
     performance_history: list = None,
     intraday: dict = None,
     rules_output: dict = None,
+    catalyst_opportunities: list = None,
 ) -> None:
     """
     Write structured briefing data to dashboard_data.js.
@@ -458,6 +459,7 @@ def write_dashboard_data(
         "afternoon_positions": afternoon_positions,
         "afternoon_candidates": afternoon_candidates,
         "intraday": intraday or {},
+        "catalyst_opportunities": catalyst_opportunities or [],
         "rules_engine": {
             "regime_score": (rules_output or {}).get("regime_score", 0),
             "regime": (rules_output or {}).get("regime", "Yellow"),

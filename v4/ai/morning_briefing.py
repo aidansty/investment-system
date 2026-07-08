@@ -17,6 +17,7 @@ def build_morning_context(
     earnings_calendar: dict = None,
     rules_output: dict = None,
     recent_earnings_results: dict = None,
+    catalyst_opportunities: list = None,
 ) -> str:
     """
     Assembles the complete context block for the morning briefing.
@@ -194,6 +195,22 @@ Thesis: {p.get('thesis', 'Not recorded')}
         for t,i in (earnings_calendar or {}).items()
     ) or "No confirmed earnings dates in next 90 days."
 
+
+    cat_opps = catalyst_opportunities or []
+    if cat_opps:
+        catalyst_block = ""
+        for c in cat_opps:
+            catalyst_block += "\n" + c["ticker"] + " (" + c.get("industry","Unknown") + ")\n"
+            catalyst_block += "  Earnings date: " + c["earnings_date"] + " (" + str(c["days_until"]) + " days away)\n"
+            catalyst_block += "  21-day momentum vs SPY: +" + str(c["excess_21d"]) + "pp\n"
+            catalyst_block += "  Current price: $" + str(c["price"]) + "\n"
+            if c.get("eps_estimate"):
+                catalyst_block += "  EPS estimate: " + str(c["eps_estimate"]) + "\n"
+            if c.get("news_headlines"):
+                catalyst_block += "  Recent news: " + c["news_headlines"][0][:100] + "\n"
+    else:
+        catalyst_block = "No stocks currently have both strong 21-day momentum and upcoming earnings within 30 days."
+
     return f"""DATE: {today}
 
 === CONFIRMED EARNINGS DATES (Finnhub verified — use these, not estimates) ===
@@ -220,6 +237,12 @@ Thesis: {p.get('thesis', 'Not recorded')}
 
 {rules_block}
 {earnings_results_block}
+
+=== CATALYST SCANNER (highest-priority new opportunities) ===
+These stocks have BOTH strong 21-day momentum AND confirmed earnings dates within 30 days.
+For each one, explain why the momentum + upcoming earnings makes this a high-probability setup.
+{catalyst_block}
+=== END CATALYST SCANNER ===
 """
 
 
@@ -358,6 +381,7 @@ def generate_morning_briefing(
     earnings_calendar: dict = None,
     rules_output: dict = None,
     recent_earnings_results: dict = None,
+    catalyst_opportunities: list = None,
 ) -> dict:
     """
     Generate the complete morning briefing using Claude.
@@ -366,7 +390,7 @@ def generate_morning_briefing(
     """
     client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
 
-    context = build_morning_context(macro, industry_results, news, forward_catalysts, positions, today, earnings_calendar=earnings_calendar or {}, rules_output=rules_output or {}, recent_earnings_results=recent_earnings_results or {})
+    context = build_morning_context(macro, industry_results, news, forward_catalysts, positions, today, earnings_calendar=earnings_calendar or {}, rules_output=rules_output or {}, recent_earnings_results=recent_earnings_results or {}, catalyst_opportunities=catalyst_opportunities or [])
     instructions = build_morning_output_instructions()
     full_prompt = context + instructions
 

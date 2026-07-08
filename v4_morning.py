@@ -193,6 +193,102 @@ def main():
     except Exception as e:
         log(f"Event enrichment error: {e}")
 
+    # Step 6b — Catalyst Scanner (forward-looking, 30-day window)
+    log("Running catalyst scanner...")
+    catalyst_opportunities = []
+    try:
+        from v4.config.settings import ALL_STOCKS, INDUSTRY_STOCK_LEADERS, INDUSTRY_ETF_MAP
+        from datetime import datetime, timedelta
+        import pytz
+
+        eastern = pytz.timezone("America/New_York")
+        today_dt = datetime.now(eastern).date()
+        thirty_days = today_dt + timedelta(days=30)
+
+        stocks_with_momentum = []
+        spy_prices_cat = prices.get("SPY", [])
+        if len(spy_prices_cat) >= 21:
+            spy_21d = (spy_prices_cat[-1] / spy_prices_cat[-21] - 1) * 100 if spy_prices_cat[-21] > 0 else 0
+            for ticker, price_list in prices.items():
+                if ticker == "SPY" or len(price_list) < 21:
+                    continue
+                stk_21d = (price_list[-1] / price_list[-21] - 1) * 100 if price_list[-21] > 0 else 0
+                excess_21d = stk_21d - spy_21d
+                if excess_21d > 3:
+                    stocks_with_momentum.append({
+                        "ticker": ticker,
+                        "excess_21d": round(excess_21d, 1),
+                        "price": round(price_list[-1], 2),
+                    })
+
+        stocks_with_momentum.sort(key=lambda x: x["excess_21d"], reverse=True)
+        top_momentum = stocks_with_momentum[:30]
+        log(f"Catalyst scanner: {len(stocks_with_momentum)} stocks with 21d momentum > SPY+3pp, scanning top {len(top_momentum)}")
+
+        import requests, os
+        FINNHUB_KEY = os.environ.get("FINNHUB_KEY", "")
+        catalyst_earnings = dict(earnings_calendar or {})
+        momentum_tickers_to_scan = [s["ticker"] for s in top_momentum if s["ticker"] not in catalyst_earnings]
+
+        for ticker in momentum_tickers_to_scan[:15]:
+            try:
+                url = f"https://finnhub.io/api/v1/calendar/earnings?symbol={ticker}&from={today_dt.strftime('%Y-%m-%d')}&to={thirty_days.strftime('%Y-%m-%d')}&token={FINNHUB_KEY}"
+                r = requests.get(url, timeout=5)
+                if r.status_code == 200:
+                    data = r.json()
+                    el = data.get("earningsCalendar", [])
+                    if el:
+                        catalyst_earnings[ticker] = {
+                            "date": el[0].get("date", ""),
+                            "hour": el[0].get("hour", ""),
+                            "eps_estimate": el[0].get("epsEstimate"),
+                        }
+            except Exception:
+                continue
+
+        for s in top_momentum:
+            tk = s["ticker"]
+            if tk in catalyst_earnings:
+                earn = catalyst_earnings[tk]
+                earn_date = earn.get("date", "")
+                if earn_date:
+                    stock_industry = ""
+                    for ind_name, tickers in INDUSTRY_STOCK_LEADERS.items():
+                        if tk in tickers:
+                            stock_industry = ind_name
+                            break
+
+                    ticker_news = []
+                    for n in news:
+                        affected = n.get("affected_tickers", [])
+                        if isinstance(affected, list) and tk in affected:
+                            ticker_news.append(n.get("headline", ""))
+                        elif tk in n.get("headline", "").upper():
+                            ticker_news.append(n.get("headline", ""))
+
+                    catalyst_opportunities.append({
+                        "ticker": tk,
+                        "industry": stock_industry,
+                        "earnings_date": earn_date,
+                        "eps_estimate": earn.get("eps_estimate"),
+                        "excess_21d": s["excess_21d"],
+                        "price": s["price"],
+                        "has_news": len(ticker_news) > 0,
+                        "news_headlines": ticker_news[:2],
+                        "catalyst_type": "earnings",
+                        "days_until": (datetime.strptime(earn_date, "%Y-%m-%d").date() - today_dt).days if earn_date else 99,
+                    })
+
+        catalyst_opportunities.sort(key=lambda x: (-x["excess_21d"], x["days_until"]))
+        catalyst_opportunities = catalyst_opportunities[:5]
+        log(f"Catalyst scanner: {len(catalyst_opportunities)} stocks with momentum + upcoming earnings in 30 days")
+        for c in catalyst_opportunities:
+            log(f"  {c['ticker']}: earnings {c['earnings_date']} ({c['days_until']}d away), 21d excess +{c['excess_21d']}pp" + (f", news: {c['news_headlines'][0][:60]}" if c['news_headlines'] else ""))
+    except Exception as e:
+        log(f"Catalyst scanner error (non-fatal): {e}")
+        import traceback
+        traceback.print_exc()
+
     # Step 7 — Run rules engine FIRST (briefing needs its output)
     log("Running rules engine...")
     rules_output = {}
@@ -259,6 +355,7 @@ def main():
             earnings_calendar=earnings_calendar,
             rules_output=rules_output,
             recent_earnings_results=recent_earnings_results,
+            catalyst_opportunities=catalyst_opportunities,
         )
     except Exception as e:
         log(f"Briefing generation error: {e}")
@@ -297,6 +394,7 @@ def main():
             cost_basis=cost_basis,
             intraday=intraday_data,
             rules_output=rules_output,
+            catalyst_opportunities=catalyst_opportunities,
         )
         log("Dashboard data written successfully.")
     except Exception as e:

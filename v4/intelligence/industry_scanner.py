@@ -147,7 +147,7 @@ def layer1_filter(momentum_data: dict) -> list:
     ]
 
     # Sort by 63-day excess return
-    qualifying.sort(key=lambda x: x["excess_63d"], reverse=True)
+    qualifying.sort(key=lambda x: (x["excess_21d"] * 2 + x["excess_63d"]), reverse=True)
 
     top = qualifying[:LAYER1_TOP_N]
     log(f"Layer 1 filter: {len(qualifying)} outperforming → top {len(top)} selected")
@@ -164,22 +164,22 @@ def calculate_conviction_score(
     earnings_surprise_score: float = 0,
 ) -> int:
     """
-    7-component evidence-weighted conviction score 0-100.
-    Momentum (25%) + Earnings revisions (20%, capped combined at 38%) +
-    Revenue growth (15%) + FCF (15%) + Macro (10%) + Catalyst (10%) + Surprise (5%)
+    Catalyst-driven conviction score 0-100.
+    Reweighted for aggressive monthly growth goals:
+    Event catalyst (35%) + 21d breakout momentum (20%) + Earnings revisions (20%) +
+    Macro alignment (10%) + 63d sustained momentum (10%) + Earnings surprise (5%)
     """
-    momentum_component = min(25, industry_data.get("momentum_score", 0))
-    earnings_component = min(20, round(earnings_score * 20))
-    # Cap combined momentum+revisions at 38 to prevent double-counting
-    if momentum_component + earnings_component > 38:
-        earnings_component = max(0, 38 - momentum_component)
-    revenue_component = min(15, round(revenue_growth_score * 15))
-    fcf_component = min(15, round(fcf_score * 15))
+    excess_21d = industry_data.get("excess_21d", 0)
+    breakout_score = min(1.0, max(0, excess_21d / 20))
+    breakout_component = min(20, round(breakout_score * 20))
+    momentum_component = min(10, industry_data.get("momentum_score", 0) // 2.5)
+    event_component = min(35, round(event_score * 35))
+    combined_fundamental = (earnings_score * 0.6 + revenue_growth_score * 0.2 + fcf_score * 0.2)
+    earnings_component = min(20, round(combined_fundamental * 20))
     macro_component = min(10, round(macro_score * 10))
-    event_component = min(10, round(event_score * 10))
     surprise_component = min(5, round(earnings_surprise_score * 5))
-    total = (momentum_component + earnings_component + revenue_component +
-             fcf_component + macro_component + event_component + surprise_component)
+    total = (event_component + breakout_component + earnings_component +
+             macro_component + momentum_component + surprise_component)
     return min(100, max(0, total))
 
 
