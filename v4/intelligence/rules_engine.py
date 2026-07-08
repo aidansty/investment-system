@@ -120,7 +120,7 @@ def evaluate_entry(opportunity, positions, macro, regime_score, portfolio_value,
     return {"action": "no_entry", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": "Entry conditions not fully met.", "size_pct": 0}
 
 
-def evaluate_exit(position, macro, regime_score, position_review, consecutive_low_conviction_days=0, consecutive_layer1_miss_days=0):
+def evaluate_exit(position, macro, regime_score, position_review, consecutive_low_conviction_days=0, consecutive_layer1_miss_days=0, earnings_calendar=None):
     ticker = position.get("ticker", "")
     entry = position.get("entry", 0) or position.get("entry_price", 0) or 0
     current = position.get("current_price", 0) or 0
@@ -128,6 +128,75 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
     what_to_do = position.get("what_to_do", "")
     conviction = position_review.get("conviction_score", 50)
     thesis_break = position_review.get("thesis_break", False)
+
+    # ── Catalyst Position Exit Logic ──────────────────────────────────────────
+    # If this position was entered for a specific catalyst, check if that event
+    # has passed and whether there's still a reason to hold.
+    catalyst_date_str = position.get("catalyst_date", "")
+    catalyst_type = position.get("catalyst_type", "")
+    if catalyst_date_str and catalyst_type:
+        try:
+            from datetime import datetime, timedelta
+            import pytz
+            eastern = pytz.timezone("America/New_York")
+            today = datetime.now(eastern).date()
+            catalyst_date = datetime.strptime(catalyst_date_str, "%Y-%m-%d").date()
+            days_since_catalyst = (today - catalyst_date).days
+
+            if days_since_catalyst >= 1:
+                # Catalyst event has passed — evaluate based on outcome
+                has_next_catalyst = False
+                if earnings_calendar and ticker in (earnings_calendar or {}):
+                    next_earn_date = (earnings_calendar or {}).get(ticker, {}).get("date", "")
+                    if next_earn_date:
+                        try:
+                            next_dt = datetime.strptime(next_earn_date, "%Y-%m-%d").date()
+                            if 0 < (next_dt - today).days <= 30:
+                                has_next_catalyst = True
+                        except Exception:
+                            pass
+
+                if pct_change <= -3:
+                    # Down after catalyst — thesis failed, exit immediately
+                    return {
+                        "action": "exit",
+                        "ticker": ticker,
+                        "conviction": conviction,
+                        "reason": f"CATALYST EXIT: {catalyst_type} event on {catalyst_date_str} has passed and position is DOWN {pct_change:+.1f}%. The catalyst did not produce the expected move — thesis failed. Exit to preserve capital for the next opportunity.",
+                        "exit_type": "catalyst_failed",
+                        "pct_change": pct_change,
+                    }
+                elif pct_change < 2:
+                    # Flat after catalyst — didn't deliver, no reason to hold
+                    return {
+                        "action": "exit",
+                        "ticker": ticker,
+                        "conviction": conviction,
+                        "reason": f"CATALYST EXIT: {catalyst_type} event on {catalyst_date_str} has passed and position is FLAT ({pct_change:+.1f}%). The expected move did not materialize. Exit and redeploy capital into a higher-conviction opportunity.",
+                        "exit_type": "catalyst_flat",
+                        "pct_change": pct_change,
+                    }
+                elif pct_change >= 2 and not has_next_catalyst:
+                    # Up after catalyst but no next catalyst — lock in gains
+                    return {
+                        "action": "exit",
+                        "ticker": ticker,
+                        "conviction": conviction,
+                        "reason": f"CATALYST EXIT: {catalyst_type} event on {catalyst_date_str} has passed and position is UP {pct_change:+.1f}%. No next catalyst within 30 days — lock in gains now before the post-catalyst drift erodes them. Redeploy into the next high-conviction setup.",
+                        "exit_type": "catalyst_profit_take",
+                        "pct_change": pct_change,
+                    }
+                elif pct_change >= 2 and has_next_catalyst:
+                    # Up after catalyst AND next catalyst exists — hold
+                    return {
+                        "action": "hold",
+                        "ticker": ticker,
+                        "conviction": conviction,
+                        "reason": f"CATALYST HOLD: Position is UP {pct_change:+.1f}% after {catalyst_type} event AND another catalyst is confirmed within 30 days. Hold for the next event — the momentum has a forward driver.",
+                        "pct_change": pct_change,
+                    }
+        except Exception:
+            pass  # If date parsing fails, fall through to normal exit logic
     thesis_break_reason = position_review.get("thesis_break_reason", "")
 
     if ticker in PERMANENT_HOLDS:
