@@ -16,7 +16,7 @@ from v4.utils.logger import log
 from v4.utils.market_calendar import is_trading_day, get_trading_date
 from v4.utils.telegram import send_telegram
 from v4.data.fetch_prices import fetch_etf_prices
-from v4.data.fetch_news import fetch_complete_news_package, fetch_ticker_news
+from v4.data.fetch_news import fetch_rss_news
 from v4.data.fetch_macro import fetch_macro_data
 from v4.intelligence.industry_scanner import run_industry_scan
 from v4.intelligence.event_engine import enrich_industries_with_events
@@ -147,18 +147,48 @@ def main():
             log(f"Price error: {e}")
         update_position_prices(positions, price_cache)
 
-    # Fetch ticker-specific news for each position
-    for position in positions:
-        ticker = position["ticker"]
-        try:
-            position["ticker_news"] = fetch_ticker_news(ticker, days=1)
-        except Exception as e:
-            position["ticker_news"] = []
+    # COST-OPTIMIZED: Skip per-ticker Claude calls entirely.
+    # Instead, fetch FREE RSS headlines and filter for holding mentions locally.
+    # Only make ONE Claude call if thesis-breaking news is found.
+    from v4.data.fetch_news import fetch_rss_news
+    rss_raw = fetch_rss_news(hours_back=8)
+    log(f"Afternoon RSS scan: {len(rss_raw)} headlines fetched (free, no Claude)")
 
-    # Afternoon news and macro
-    news_package = fetch_complete_news_package()
-    news = news_package.get("recent_news", [])
-    forward_catalysts = news_package.get("forward_catalysts", [])
+    # Filter for headlines mentioning any current holding ticker
+    holding_tickers = {p["ticker"] for p in positions}
+    CRYPTO_SKIP = {"BTC", "ETH", "XRP", "ZEC"}
+    stock_tickers = holding_tickers - CRYPTO_SKIP
+
+    relevant_headlines = []
+    for item in rss_raw:
+        headline = (item.get("headline", "") or "").upper()
+        summary = (item.get("summary", "") or "").upper()
+        text = headline + " " + summary
+        for tk in stock_tickers:
+            if tk in text:
+                item["matched_ticker"] = tk
+                relevant_headlines.append(item)
+                break
+
+    log(f"Afternoon: {len(relevant_headlines)} headlines mention current holdings")
+
+    # Also check for broad market-moving keywords
+    urgent_keywords = ["FED ", "FOMC", "RATE CUT", "RATE HIKE", "CPI ", "INFLATION",
+                        "CRASH", "SELLOFF", "SELL-OFF", "CIRCUIT BREAKER", "BLACK SWAN",
+                        "WAR ", "BOMB", "SANCTION", "TARIFF", "BAN "]
+    for item in rss_raw:
+        if item in relevant_headlines:
+            continue
+        text = ((item.get("headline", "") or "") + " " + (item.get("summary", "") or "")).upper()
+        if any(kw in text for kw in urgent_keywords):
+            item["matched_ticker"] = "MACRO"
+            relevant_headlines.append(item)
+
+    news = relevant_headlines
+    forward_catalysts = []
+    news_package = {"recent_news": news, "forward_catalysts": []}
+    for position in positions:
+        position["ticker_news"] = [h for h in relevant_headlines if h.get("matched_ticker") == position["ticker"]]
     macro = fetch_macro_data()
 
     # Run afternoon industry scan
