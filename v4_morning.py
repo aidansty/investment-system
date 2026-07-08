@@ -279,9 +279,113 @@ def main():
                         "days_until": (datetime.strptime(earn_date, "%Y-%m-%d").date() - today_dt).days if earn_date else 99,
                     })
 
+        # PHASE 2: Non-earnings catalysts from forward_catalysts and enriched news
+        # These cover: FDA decisions, index inclusions, product launches, M&A,
+        # contract wins, analyst upgrades, share buybacks, guidance raises,
+        # conference presentations, regulatory decisions, partnerships — everything
+        # that moves stock prices beyond just earnings.
+        try:
+            for fc in (forward_catalysts or []):
+                affected = fc.get("affected_holdings", []) or fc.get("tickers", [])
+                if not isinstance(affected, list):
+                    affected = []
+                fc_date = fc.get("date", "") or fc.get("event_date", "")
+                fc_event = fc.get("event", "") or fc.get("description", "")
+                fc_action = fc.get("action", "")
+
+                for tk in affected:
+                    # Check if this ticker has momentum data
+                    tk_momentum = None
+                    for s in stocks_with_momentum:
+                        if s["ticker"] == tk:
+                            tk_momentum = s
+                            break
+
+                    # Skip if already in catalyst_opportunities from earnings scan
+                    already_listed = any(c["ticker"] == tk for c in catalyst_opportunities)
+                    if already_listed:
+                        continue
+
+                    if tk_momentum:
+                        stock_industry = ""
+                        for ind_name, tickers in INDUSTRY_STOCK_LEADERS.items():
+                            if tk in tickers:
+                                stock_industry = ind_name
+                                break
+
+                        days_until = 30
+                        if fc_date:
+                            try:
+                                fc_dt = datetime.strptime(fc_date, "%Y-%m-%d").date()
+                                days_until = (fc_dt - today_dt).days
+                            except Exception:
+                                pass
+
+                        if 0 <= days_until <= 45:
+                            catalyst_opportunities.append({
+                                "ticker": tk,
+                                "industry": stock_industry,
+                                "earnings_date": fc_date,
+                                "eps_estimate": None,
+                                "excess_21d": tk_momentum["excess_21d"],
+                                "price": tk_momentum["price"],
+                                "has_news": True,
+                                "news_headlines": [fc_event[:100]],
+                                "catalyst_type": fc_action or "event",
+                                "days_until": days_until,
+                            })
+
+            # PHASE 3: News-driven catalysts — positive sentiment news affecting
+            # stocks with momentum, even without a specific future date
+            for n_item in (news or []):
+                sentiment = (n_item.get("sentiment", "") or "").lower()
+                if sentiment != "bullish":
+                    continue
+                affected = n_item.get("affected_tickers", [])
+                if not isinstance(affected, list):
+                    continue
+                for tk in affected:
+                    already_listed = any(c["ticker"] == tk for c in catalyst_opportunities)
+                    if already_listed:
+                        continue
+                    tk_momentum = None
+                    for s in stocks_with_momentum:
+                        if s["ticker"] == tk:
+                            tk_momentum = s
+                            break
+                    if tk_momentum and tk_momentum["excess_21d"] > 5:
+                        stock_industry = ""
+                        for ind_name, tickers in INDUSTRY_STOCK_LEADERS.items():
+                            if tk in tickers:
+                                stock_industry = ind_name
+                                break
+                        catalyst_opportunities.append({
+                            "ticker": tk,
+                            "industry": stock_industry,
+                            "earnings_date": "",
+                            "eps_estimate": None,
+                            "excess_21d": tk_momentum["excess_21d"],
+                            "price": tk_momentum["price"],
+                            "has_news": True,
+                            "news_headlines": [n_item.get("headline", "")[:100]],
+                            "catalyst_type": n_item.get("category", "news"),
+                            "days_until": 0,
+                        })
+        except Exception as e:
+            log(f"Catalyst scanner phase 2/3 error (non-fatal): {e}")
+
+        # Deduplicate by ticker, keep highest momentum entry
+        seen_tickers = set()
+        deduped = []
+        for c in catalyst_opportunities:
+            if c["ticker"] not in seen_tickers:
+                seen_tickers.add(c["ticker"])
+                deduped.append(c)
+        catalyst_opportunities = deduped
+
         catalyst_opportunities.sort(key=lambda x: (-x["excess_21d"], x["days_until"]))
-        catalyst_opportunities = catalyst_opportunities[:5]
-        log(f"Catalyst scanner: {len(catalyst_opportunities)} stocks with momentum + upcoming earnings in 30 days")
+        catalyst_opportunities = catalyst_opportunities[:8]
+        log(f"Catalyst scanner: {len(catalyst_opportunities)} total opportunities (earnings + events + news)")
         for c in catalyst_opportunities:
             log(f"  {c['ticker']}: earnings {c['earnings_date']} ({c['days_until']}d away), 21d excess +{c['excess_21d']}pp" + (f", news: {c['news_headlines'][0][:60]}" if c['news_headlines'] else ""))
     except Exception as e:
