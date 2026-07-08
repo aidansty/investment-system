@@ -75,20 +75,54 @@ RIPPLE_EFFECTS = {
 def tag_news_by_industry(news: list) -> dict:
     """
     Tag each news item with relevant industries.
+    Uses BOTH keyword matching AND affected_tickers from Claude-enriched news.
     Returns dict: {industry: [relevant_news_items]}
     """
+    from v4.config.settings import INDUSTRY_STOCK_LEADERS, INDUSTRY_ETF_MAP as _ETF_MAP
+
+    # Build reverse lookup: ticker -> industry
+    ticker_to_industry = {}
+    for industry, tickers in INDUSTRY_STOCK_LEADERS.items():
+        for t in tickers:
+            ticker_to_industry[t] = industry
+        etf_info = _ETF_MAP.get(industry, {})
+        etf = etf_info.get("etf", "") if isinstance(etf_info, dict) else ""
+        if etf:
+            ticker_to_industry[etf] = industry
+
     industry_news = {industry: [] for industry in INDUSTRY_ETF_MAP.keys()}
 
     for item in news:
+        matched_industries = set()
+
+        # Method 1: keyword matching (original)
         headline = item.get("headline", "").lower()
         summary = item.get("summary", "").lower()
         text = headline + " " + summary
-
         for industry, keywords in INDUSTRY_NEWS_KEYWORDS.items():
             for keyword in keywords:
                 if keyword.lower() in text:
-                    industry_news[industry].append(item)
-                    break  # Only add once per industry
+                    matched_industries.add(industry)
+                    break
+
+        # Method 2: affected_tickers from Claude-enriched news items
+        affected = item.get("affected_tickers", [])
+        if isinstance(affected, list):
+            for ticker in affected:
+                ind = ticker_to_industry.get(ticker)
+                if ind:
+                    matched_industries.add(ind)
+
+        # Method 3: portfolio_impact text mentioning industry names
+        impact = item.get("portfolio_impact", "")
+        if impact:
+            for industry in INDUSTRY_ETF_MAP.keys():
+                if industry.lower() in impact.lower():
+                    matched_industries.add(industry)
+
+        for industry in matched_industries:
+            if industry in industry_news:
+                industry_news[industry].append(item)
 
     return industry_news
 

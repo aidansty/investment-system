@@ -145,7 +145,27 @@ Relevant headlines:"""
         for ind in remaining[:6]:
             industries_block += f"- {ind['industry']} ({ind['etf']}): conviction {ind['conviction_score']}/100, excess return {ind['excess_63d']:+.1f}pp\n"
 
-    # Open positions block
+    # Build per-ticker recent news context so Claude references specific headlines per position
+    news_list = news if isinstance(news, list) else []
+    ticker_news_map = {}
+    for n_item in news_list:
+        affected = n_item.get("affected_tickers", [])
+        if isinstance(affected, list):
+            for t in affected:
+                if t not in ticker_news_map:
+                    ticker_news_map[t] = []
+                if len(ticker_news_map[t]) < 3:
+                    ticker_news_map[t].append(n_item.get("headline", ""))
+        headline_upper = n_item.get("headline", "").upper()
+        for p in positions:
+            ptk = p.get("ticker", "")
+            if ptk and len(ptk) >= 2 and ptk in headline_upper:
+                if ptk not in ticker_news_map:
+                    ticker_news_map[ptk] = []
+                if len(ticker_news_map[ptk]) < 3:
+                    ticker_news_map[ptk].append(n_item.get("headline", ""))
+
+    # Open positions block — now includes per-ticker news context
     positions_block = f"Open positions: {len(positions)}\n"
     for p in positions:
         entry = p.get("entry_price", 0)
@@ -153,12 +173,20 @@ Relevant headlines:"""
         pnl = ((current - entry) / entry * 100) if entry > 0 else 0
         stop = p.get("stop_price", 0)
         dist_stop = ((current - stop) / current * 100) if current > 0 and stop > 0 else 0
+        tk = p["ticker"]
+        tk_news = ticker_news_map.get(tk, [])
+        news_context = ""
+        if tk_news:
+            news_context = "Recent news for this ticker:\n" + "\n".join(f"  - {h}" for h in tk_news[:3])
+        else:
+            news_context = "No specific news found for this ticker today."
         positions_block += f"""
-TICKER: {p['ticker']}
+TICKER: {tk}
 Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pnl:+.1f}%
 Stop: ${stop:.2f} ({dist_stop:.1f}% away)
 Holding type: {p.get('holding_type', 'Not specified')}
 Thesis: {p.get('thesis', 'Not recorded')}
+{news_context}
 """
 
     earnings_block = chr(10).join(
