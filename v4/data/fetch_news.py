@@ -431,11 +431,10 @@ def fetch_complete_news_package() -> dict:
     # Step 1: RSS feeds (Yahoo Finance + CNBC)
     rss_news = fetch_rss_news(hours_back=20)
 
-    # Step 2: Critical events via web search (catches what RSS misses)
-    critical_events = fetch_critical_market_events()
-
-    # Combine RSS + critical events
-    combined = rss_news + critical_events
+    # Step 2: REMOVED — critical events web search merged into forward_catalysts
+    # to save 1 Claude + web search call (~$0.30-0.50 per run).
+    # Forward catalysts already searches for the same type of events.
+    combined = rss_news
 
     # Step 3: Filter for relevance
     relevant = filter_relevant_news(combined)
