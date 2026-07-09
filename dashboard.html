@@ -1454,9 +1454,14 @@ const newsList = document.getElementById('news-list');
 (BRIEFING_DATA.news || []).forEach(n => {
   const card = document.createElement('div');
   card.className = 'news-card';
+  const relBadge = {
+    'holding': '<span class="badge badge-amber" style="font-size:9px;padding:1px 6px;">YOUR HOLDING</span>',
+    'opportunity': '<span class="badge badge-green" style="font-size:9px;padding:1px 6px;">OPPORTUNITY</span>',
+    'macro': '<span class="badge badge-gray" style="font-size:9px;padding:1px 6px;">MACRO</span>',
+  }[n.relevance] || '';
   card.innerHTML = `
     <div class="news-header">
-      <div class="news-title">${n.headline || '—'}</div>
+      <div class="news-title">${n.headline || '—'} ${relBadge}</div>
       ${n.url ? '<a class="news-link" href="' + n.url + '" target="_blank" rel="noopener">Source ↗</a>' : ''}
     </div>
     <ul>${(n.bullets || []).map(b => '<li>' + b + '</li>').join('')}</ul>`;

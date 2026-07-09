@@ -86,37 +86,81 @@ def write_dashboard_data(
     recent_news = news_package.get("recent_news", [])
     forward_catalysts = news_package.get("forward_catalysts", [])
 
+    # News intelligence — ONLY show items that pass one of two tests:
+    # Test 1: Affects a current holding (say which one and what to do)
+    # Test 2: Creates a new investment opportunity (say what to buy)
+    # Everything else is filtered OUT — max 5 items
+    holding_tickers = {p.get("ticker", "") for p in positions} if positions else set()
+    crypto_skip = {"BTC", "ETH", "XRP", "ZEC"}
+    stock_holdings = holding_tickers - crypto_skip
+
     news_cards = []
-    for n in recent_news[:8]:
-        bullets = []
+    for n in recent_news[:15]:  # scan more, keep fewer
+        affected = n.get("affected_tickers", []) or n.get("tickers", [])
+        if not isinstance(affected, list):
+            affected = []
+        impact = n.get("portfolio_impact", "") or n.get("impact", "")
+        sentiment = n.get("sentiment", "")
         summary = n.get("summary", "")
+        headline = n.get("headline", "")
+
+        # Check if this news actually affects a current holding
+        affects_holding = any(tk in stock_holdings for tk in affected)
+        # Or check if headline mentions a holding ticker
+        if not affects_holding:
+            for tk in stock_holdings:
+                if tk and len(tk) >= 2 and tk in headline.upper():
+                    affects_holding = True
+                    if tk not in affected:
+                        affected.append(tk)
+                    break
+
+        # Determine relevance category
+        if affects_holding:
+            relevance = "holding"
+        elif sentiment == "bullish" and affected:
+            relevance = "opportunity"
+        elif any(kw in headline.upper() for kw in ["FED ", "FOMC", "CPI ", "RATE CUT", "RATE HIKE"]):
+            relevance = "macro"
+        else:
+            continue  # Skip — doesn't pass either test
+
+        # Build bullets — lead with WHY THIS MATTERS TO YOU
+        bullets = []
+        if relevance == "holding":
+            tickers_str = ", ".join([tk for tk in affected if tk in stock_holdings])
+            if impact:
+                bullets.append(f"Your holdings affected ({tickers_str}): {impact}")
+            else:
+                bullets.append(f"Affects your position in: {tickers_str}")
+        elif relevance == "opportunity":
+            if impact:
+                bullets.append(f"Potential opportunity: {impact}")
+            else:
+                bullets.append(f"Potential opportunity in: {', '.join(affected[:3])}")
+        elif relevance == "macro":
+            bullets.append(f"Market-wide impact — affects all positions")
+
+        # Add the summary as context
         if summary:
             for sentence in summary.replace(". ", ".|").split("|"):
                 s = sentence.strip()
                 if s and len(s) > 20:
                     bullets.append(s)
-        # Add portfolio impact as a bullet if present
-        impact = n.get("portfolio_impact", "") or n.get("impact", "")
-        if impact and impact not in bullets:
-            bullets.append(impact)
-        # Fallback: if still only 1 bullet, at least show the headline itself as context
-        if len(bullets) < 2:
-            headline = n.get("headline", "")
-            category = n.get("category", "")
-            if headline and headline not in bullets:
-                bullets.append(f"Filed under: {category}." if category else headline)
-        # Add affected tickers
-        affected = n.get("affected_tickers", []) or n.get("tickers", [])
-        if affected:
-            bullets.append(f"Affects: {', '.join(affected)}")
+                    break  # Just one context sentence, not the whole summary
+
         news_cards.append({
-            "headline": n.get("headline", ""),
+            "headline": headline,
             "url": n.get("url", ""),
             "source": n.get("source", ""),
-            "bullets": bullets[:5],
+            "bullets": bullets[:3],
             "affected_tickers": affected,
-            "sentiment": n.get("sentiment", ""),
+            "sentiment": sentiment,
+            "relevance": relevance,
         })
+
+        if len(news_cards) >= 5:
+            break
 
     # Position review from briefing — try multiple section name variants Claude might use
     sections = briefing.get("sections", {}) if briefing else {}
