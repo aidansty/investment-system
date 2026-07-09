@@ -57,20 +57,6 @@
       "entry_date": "2026-04-14"
     },
     {
-      "ticker": "CRWV",
-      "qty": 0.5,
-      "entry": 116.6,
-      "type": "Stock",
-      "term": "Medium-term",
-      "industry": "AI Infrastructure",
-      "summary": "CoreWeave is a specialized AI cloud provider that rents GPU compute infrastructure to AI companies for model training and inference. Unlike general cloud providers like AWS or Azure, CoreWeave is purpose-built for AI workloads, giving it a technical advantage and premium pricing for the fastest available GPU clusters.",
-      "catalyst": "CoreWeave recently IPO'd and the near-term catalyst is proving commercial traction \u2014 winning and renewing large contracts from AI labs and enterprises who need dedicated GPU compute. Any announcement of a major new customer or contract extension would be a positive signal.",
-      "why": "This is a medium-term position in the AI infrastructure layer, specifically the compute supply side. As AI model training and inference demand grows, CoreWeave is positioned to capture that spend from companies that need dedicated GPU access beyond what general cloud providers offer.",
-      "cost_basis": 58.3,
-      "what_to_do": "WATCH \u2014 Down 18% from entry. AI infrastructure thesis remains intact but no positive catalyst has emerged yet. Watch for any contract announcements or customer news as confirmation. If no catalyst emerges in the next 2-3 weeks, reassess allocation.",
-      "entry_date": "2026-05-01"
-    },
-    {
       "ticker": "NVDA",
       "qty": 0.97402,
       "entry": 205.33,
@@ -167,20 +153,6 @@
       "why": "Medium-term position in the semiconductor reshoring theme. Intel is the primary domestic chip manufacturer and benefits directly from government and commercial pressure to reduce dependence on Taiwan-based TSMC. The turnaround is still in progress but the Apple partnership validates the thesis.",
       "what_to_do": "WATCH \u2014 The Apple partnership announcement is a genuine positive catalyst but the position needs monitoring. Watch for any follow-up contract details or volume data confirming the partnership is translating to real revenue. If no further confirmation emerges in the next 2-3 weeks, reassess.",
       "entry_date": "2026-05-01"
-    },
-    {
-      "ticker": "SCO",
-      "qty": 3.0,
-      "entry": 33.06,
-      "type": "ETF",
-      "term": "Short-term",
-      "industry": "Oil & Gas",
-      "cost_basis": 99.18,
-      "summary": "SCO is the ProShares UltraShort Bloomberg Crude Oil ETF, a 2x inverse leveraged ETF designed to return twice the inverse daily performance of crude oil prices. When oil prices fall, SCO rises approximately 2x. When oil prices rise, SCO falls approximately 2x. This is a short-term directional bet on falling oil prices.",
-      "catalyst": "The US-Iran ceasefire agreement and potential reopening of the Strait of Hormuz is a direct catalyst \u2014 increased oil supply from Iran coming back to market puts downward pressure on crude prices, which benefits SCO. Oil prices have already fallen to 3-month lows on this news.",
-      "why": "Short-term position expressing a view that oil prices decline as the Iran supply returns to market and the geopolitical risk premium unwinds. Leveraged ETFs decay over time and are not suitable for long-term holding \u2014 this must have a defined short-term exit.",
-      "what_to_do": "WATCH \u2014 Time-sensitive leveraged ETF position. The Iran deal oil supply catalyst is playing out. Leveraged ETFs decay over time \u2014 max hold is 2-3 weeks from entry. Monitor oil price direction daily. Exit if oil reverses and starts climbing, or when the catalyst has fully played out.",
-      "entry_date": "2026-06-10"
     },
     {
       "ticker": "NOK",
