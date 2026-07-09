@@ -266,6 +266,8 @@ def main():
                         elif tk in n.get("headline", "").upper():
                             ticker_news.append(n.get("headline", ""))
 
+                    # Only include if the catalyst is genuinely significant
+                    # Earnings are inherently significant (can move stocks 5-15%)
                     catalyst_opportunities.append({
                         "ticker": tk,
                         "industry": stock_industry,
@@ -277,6 +279,7 @@ def main():
                         "news_headlines": ticker_news[:2],
                         "catalyst_type": "earnings",
                         "days_until": (datetime.strptime(earn_date, "%Y-%m-%d").date() - today_dt).days if earn_date else 99,
+                        "significance": "high",
                     })
 
         # PHASE 2: Non-earnings catalysts from forward_catalysts and enriched news
@@ -359,18 +362,26 @@ def main():
                             if tk in tickers:
                                 stock_industry = ind_name
                                 break
-                        catalyst_opportunities.append({
-                            "ticker": tk,
-                            "industry": stock_industry,
-                            "earnings_date": "",
-                            "eps_estimate": None,
-                            "excess_21d": tk_momentum["excess_21d"],
-                            "price": tk_momentum["price"],
-                            "has_news": True,
-                            "news_headlines": [n_item.get("headline", "")[:100]],
-                            "catalyst_type": n_item.get("category", "news"),
-                            "days_until": 0,
-                        })
+                        # Only include if the news is genuinely significant (not minor analyst notes)
+                        news_headline_upper = n_item.get("headline", "").upper()
+                        noise_words = ["PRICE TARGET", "MAINTAINS", "REITERATES", "INITIATES", "MINOR", "SLIGHT", "MODEST"]
+                        sig_words = ["EARNINGS", "FDA", "APPROV", "ACQUI", "MERGER", "CONTRACT", "LAUNCH", "UPGRADE",
+                                     "DOWNGRADE", "RECORD", "BEAT", "MISS", "GUIDANCE", "SPLIT", "BUYBACK", "INDEX"]
+                        is_sig_news = any(sw in news_headline_upper for sw in sig_words) and not any(nw in news_headline_upper for nw in noise_words)
+                        if is_sig_news:
+                            catalyst_opportunities.append({
+                                "ticker": tk,
+                                "industry": stock_industry,
+                                "earnings_date": "",
+                                "eps_estimate": None,
+                                "excess_21d": tk_momentum["excess_21d"],
+                                "price": tk_momentum["price"],
+                                "has_news": True,
+                                "news_headlines": [n_item.get("headline", "")[:100]],
+                                "catalyst_type": n_item.get("category", "news"),
+                                "days_until": 0,
+                                "significance": "high",
+                            })
         except Exception as e:
             log(f"Catalyst scanner phase 2/3 error (non-fatal): {e}")
 

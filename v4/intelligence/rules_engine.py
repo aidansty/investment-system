@@ -207,6 +207,12 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
     # "Is this position actively helping us reach our growth checkpoints?"
     # Dead capital in positions with no catalyst and no momentum should be
     # redeployed into higher-conviction opportunities.
+    #
+    # SIGNIFICANCE PRINCIPLE: Only genuinely material events trigger action changes.
+    # Minor analyst notes, small downgrades, generic negative commentary = noted as
+    # context but do NOT change the action. Only events that can move a stock 5%+
+    # (earnings miss, thesis break, major regulatory action, catalyst failure) trigger
+    # an actual exit or watch signal.
     CRYPTO_TICKERS = {"BTC", "ETH", "XRP", "ZEC", "BNB", "SOL", "DOGE"}
     if ticker not in CRYPTO_TICKERS and ticker != "SPY":
         has_forward_catalyst = bool(position.get("catalyst_date") or position.get("catalyst_type"))
@@ -245,7 +251,7 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
                 "exit_type": "checkpoint",
                 "urgency": "monitor",
                 "conviction": conviction,
-                "reason": f"CHECKPOINT WARNING: Position is DOWN {pct_change:+.1f}% with low conviction ({conviction}/100) and no catalyst ahead. If no catalyst emerges within the next week, exit and redeploy this capital into a position with a defined catalyst and growth path.",
+                "reason": f"CHECKPOINT WARNING: Position is DOWN {pct_change:+.1f}% with low conviction ({conviction}/100) and no catalyst ahead. If no significant catalyst (earnings, FDA, major contract, product launch) emerges within the next week, exit and redeploy this capital. Minor analyst notes or generic industry commentary do not count as catalysts.",
                 "pct_change": pct_change,
             }
         elif pct_change > 0 and pct_change < 3 and not has_forward_catalyst and conviction < 50:

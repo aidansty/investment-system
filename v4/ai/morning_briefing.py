@@ -336,6 +336,19 @@ TICKER — HOLD / WATCH / TRIM / EXIT / CLOSE
 
 MANDATORY: This position review must reflect information CURRENT as of today's date above — not generic evergreen reasoning that could apply on any day. Every position gets fresh eyes every single morning: check recent earnings results, check today's news for this ticker or its industry, check current momentum data. Do not reuse the same boilerplate reasoning across multiple days.
 
+SIGNIFICANCE FILTER — apply this to EVERY position:
+When evaluating whether news or events should change the action on a position, apply this test:
+"Is this significant enough to move the stock 5% or more?"
+
+If YES (earnings miss, FDA rejection, major downgrade, thesis-breaking event, loss of key customer, regulatory action):
+→ Change the action accordingly (EXIT, WATCH, TRIM) and explain why this is material.
+
+If NO (minor analyst note, small price target adjustment, generic industry commentary, routine news):
+→ Keep the action as HOLD and note the minor event in one sentence as context, explicitly stating:
+"Note: [brief description of minor event]. This is not significant enough to change the current action."
+
+Do NOT recommend exiting or trimming a position based on minor events that historically do not move stocks meaningfully. Protect the investor from unnecessary trades driven by noise.
+
 CRITICAL: If a position appears in the RECENT EARNINGS RESULTS section above, you already know whether that earnings report beat, missed, or was in-line. State the actual verdict and numbers directly — e.g. "MU reported June 25 and BEAT estimates with EPS of $X vs $Y expected, a Z% surprise." NEVER write phrases like "review the actual results" or "check what happened" — you have the data, use it.
 
 THESIS BREAK — flag as EXIT immediately if ANY confirmed:
