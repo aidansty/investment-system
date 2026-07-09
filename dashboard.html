@@ -167,6 +167,11 @@
         <div class="info-card-title">Market snapshot</div>
         <span class="badge" id="market-open-badge">—</span>
       </div>
+      <div id="briefing-checkpoint" style="background:rgba(93,202,165,0.06);border:0.5px solid rgba(93,202,165,0.15);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:13px;">
+        <span id="bc-current" style="font-weight:700;color:var(--text-primary);">—</span>
+        <span id="bc-next" style="color:var(--text-secondary);">—</span>
+        <span id="bc-gap" style="font-weight:600;color:var(--green);">—</span>
+      </div>
       <div class="vix-grid" id="vix-grid">
         <div><div class="vix-label">VIX</div><div class="vix-val" id="vix-val">—</div></div>
         <div><div class="vix-label">5d avg</div><div class="vix-val" id="vix-avg">—</div></div>
@@ -183,11 +188,11 @@
     <h2 class="section-title">Position review</h2>
     <div id="position-review" class="section-gap"></div>
 
-    <h2 class="section-title">Industries to watch</h2>
-    <div id="industry-opportunities"></div>
-
-    <h2 class="section-title" style="margin-top:32px;">Catalyst scanner</h2>
+    <h2 class="section-title">Catalyst scanner</h2>
     <p class="section-sub">Stocks with confirmed catalysts in the next 30 days — sorted by momentum and urgency</p>
+    <div id="capital-deployment" style="background:rgba(93,202,165,0.06);border:0.5px solid rgba(93,202,165,0.15);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--text-body);display:none;">
+      <b style="color:var(--green);">Capital deployment:</b> <span id="cd-text">—</span>
+    </div>
     <div id="catalyst-scanner"></div>
 
   </div>
@@ -621,6 +626,27 @@ async function fetchAndUpdatePrices() {
     rebuildAllocChart(updatedPositions, currentCash);
     updateDualScoreboard(updatedPositions, currentCash);
     updateGoalTracker(updatedPositions, currentCash);
+    // Update briefing tab checkpoint status line
+    (function() {
+      const cryptoSkip = new Set(['BTC','ETH','XRP','ZEC']);
+      let total = 0;
+      for (const p of updatedPositions) {
+        if (cryptoSkip.has(p.ticker)) continue;
+        total += (p.current_price || 0) * (p.qty || 0);
+      }
+      total += (currentCash || 0);
+      const cps = [6500,7000,7500,8000,9000,10000];
+      let nextCp = cps[cps.length-1];
+      for (const cp of cps) { if (total < cp) { nextCp = cp; break; } }
+      const gap = Math.max(0, nextCp - total);
+      const pct = total > 0 ? ((gap / total) * 100).toFixed(1) : '0';
+      const curEl = document.getElementById('bc-current');
+      const nextEl = document.getElementById('bc-next');
+      const gapEl = document.getElementById('bc-gap');
+      if (curEl) curEl.textContent = 'Portfolio: $' + total.toLocaleString('en-US', {maximumFractionDigits:0});
+      if (nextEl) nextEl.textContent = 'Next checkpoint: $' + nextCp.toLocaleString('en-US');
+      if (gapEl) gapEl.textContent = 'Gap: $' + gap.toLocaleString('en-US', {maximumFractionDigits:0}) + ' (+' + pct + '% needed)';
+    })();
     window._livePositions = updatedPositions;
     document.getElementById('last-run').textContent = 'Prices updated live · ' + new Date().toLocaleTimeString();
 
@@ -1473,7 +1499,10 @@ if (!BRIEFING_DATA.news || !BRIEFING_DATA.news.length) {
 
 // Position review
 const posReview = document.getElementById('position-review');
-(BRIEFING_DATA.position_review || []).forEach(p => {
+(BRIEFING_DATA.position_review || []).filter(p => {
+  const skip = ['SPY','BTC','ETH','XRP','ZEC'];
+  return !skip.includes(p.ticker);
+}).forEach(p => {
   const badgeClass = {
     'Hold': 'badge-hold', 'Watch': 'badge-watch', 'Buy More': 'badge-green',
     'Trim': 'badge-amber', 'Sell': 'badge-red', 'Reduce': 'badge-amber'
@@ -1496,31 +1525,6 @@ const posReview = document.getElementById('position-review');
 });
 if (!BRIEFING_DATA.position_review || !BRIEFING_DATA.position_review.length) {
   posReview.innerHTML = '<p class="hint">No position review yet.</p>';
-}
-
-// Industry opportunities
-const indOpps = document.getElementById('industry-opportunities');
-(BRIEFING_DATA.industry_opportunities || []).forEach(ind => {
-  const card = document.createElement('div');
-  card.className = 'candidate-card';
-  card.innerHTML = `
-    <div class="candidate-header">
-      <div>
-        <div class="candidate-title">${ind.industry}</div>
-        <div class="candidate-sub">${ind.term || ''} &middot; Recommended: <b style="color:var(--text-primary);">${ind.recommended_security || ind.etf || ''}</b> (${ind.recommended_type === 'stock' ? 'individual stock' : 'ETF'})</div>
-      </div>
-      <span class="badge badge-green">${ind.recommended_conviction || ind.conviction}/100</span>
-    </div>
-    <ul>${(ind.bullets || []).map(b => '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">' + b + '</li>').join('')}</ul>
-    ${ind.vehicle ? '<div style="font-size:13px;color:var(--text-body);margin-top:10px;"><b style="color:var(--text-primary);">Vehicle:</b> ' + ind.vehicle + '</div>' : ''}
-    ${ind.why_now ? '<div class="info-card-footer"><b style="color:var(--green);">Why buy now:</b> ' + ind.why_now + '</div>' : ''}
-    ${ind.recommended_type === 'etf' && ind.etf_reasoning ? '<div style="font-size:13px;color:var(--text-body);margin-top:10px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;"><b style="color:var(--text-primary);">Why the ETF over individual stocks:</b> ' + ind.etf_reasoning + '</div>' : ''}
-    ${ind.allocation_guidance ? '<div style="font-size:13px;color:var(--text-body);margin-top:10px;padding:10px;background:rgba(93,202,165,0.06);border:0.5px solid rgba(93,202,165,0.15);border-radius:8px;"><b style="color:var(--green);">Using your capital:</b> ' + ind.allocation_guidance + '</div>' : ''}
-    ${ind.stock_reasoning && ind.stock_reasoning.length ? '<div style="margin-top:10px;"><div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">' + (ind.recommended_type === 'stock' ? 'Stock leaders scanned in this industry' : 'Individual stocks considered (ETF still won)') + '</div>' + ind.stock_reasoning.map(function(s) { return '<div style="font-size:12.5px;color:var(--text-body);line-height:1.6;margin-bottom:6px;padding-left:10px;border-left:2px solid ' + (s.is_recommended ? 'var(--green)' : 'rgba(255,255,255,0.1)') + ';"><b style="color:' + (s.is_recommended ? 'var(--green)' : 'var(--text-primary)') + ';">' + s.ticker + ' (' + s.conviction + '/100)' + (s.is_recommended ? ' — RECOMMENDED' : '') + '</b><br>' + s.reason + '</div>'; }).join('') + '</div>' : ''}`;
-  indOpps.appendChild(card);
-});
-if (!BRIEFING_DATA.industry_opportunities || !BRIEFING_DATA.industry_opportunities.length) {
-  indOpps.innerHTML = '<p class="hint">No high-conviction opportunities today.</p>';
 }
 
 // ============================================================
@@ -1574,6 +1578,28 @@ catOpps.forEach(c => {
 });
 if (!catOpps.length) {
   catScan.innerHTML = '<p class="hint">No catalyst opportunities found today. The scanner checks for stocks with upcoming earnings, FDA decisions, index inclusions, product launches, and other price-moving events within 30 days.</p>';
+}
+// Capital deployment summary
+const cdEl = document.getElementById('capital-deployment');
+const cdText = document.getElementById('cd-text');
+if (cdEl && cdText && catOpps.length > 0) {
+  const topOpp = catOpps[0];
+  const cryptoSkipCD = new Set(['BTC','ETH','XRP','ZEC']);
+  let activeVal = 0;
+  (POSITIONS_CONFIG || []).forEach(p => {
+    if (cryptoSkipCD.has(p.ticker) || p.ticker === 'SPY') return;
+    activeVal += (p.current_price || 0) * (p.qty || 0);
+  });
+  const cashAvail = parseFloat(localStorage.getItem('user_cash') || '0');
+  const totalActive = activeVal + cashAvail;
+  let sizePct = 0.15;
+  if (topOpp.excess_21d > 15) sizePct = 0.25;
+  else if (topOpp.excess_21d > 8) sizePct = 0.20;
+  const recDollars = Math.round(totalActive * sizePct);
+  const catType = topOpp.catalyst_type || 'catalyst';
+  const daysLabel = topOpp.days_until === 0 ? 'confirmed today' : topOpp.days_until + ' days away';
+  cdText.innerHTML = 'Cash available: <b>$' + cashAvail.toLocaleString('en-US', {maximumFractionDigits:0}) + '</b> · Top opportunity: <b>' + topOpp.ticker + '</b> (' + catType + ', ' + daysLabel + ') · Recommended allocation: <b>$' + recDollars.toLocaleString('en-US') + '</b> (' + (sizePct*100).toFixed(0) + '% of active sleeve)' + (cashAvail < recDollars ? ' · <span style=color:var(--amber)>Cash short by $' + (recDollars - cashAvail).toLocaleString('en-US', {maximumFractionDigits:0}) + '</span>' : '');
+  cdEl.style.display = 'block';
 }
 
 // ============================================================

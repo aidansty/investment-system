@@ -70,16 +70,19 @@ def write_dashboard_data(
         vix_regime = macro.get("vix_regime", "Yellow")
         vix_trend = macro.get("vix_trend", "Flat")
         trend_explainer = {
-            "Falling": "VIX dropping means fear/volatility is decreasing — this is a bullish signal, not a warning sign.",
-            "Rising": "VIX climbing means fear/volatility is increasing — worth watching but not yet a red flag on its own.",
-            "Spiking": "VIX spiking sharply signals a sudden jump in market fear — often coincides with a selloff or shock event.",
-            "Flat": "VIX is stable relative to its 5-day average — no significant shift in market sentiment either direction.",
+            "Falling": "fear is decreasing (bullish for entries)",
+            "Rising": "fear is increasing (be more selective)",
+            "Spiking": "sharp fear spike (avoid new entries today)",
+            "Flat": "sentiment stable (no change in posture)",
         }.get(vix_trend, "")
+        action_summary = {
+            "Green": "Conditions support entering catalyst-driven positions at full conviction sizing. Deploy cash into top catalyst scanner opportunities.",
+            "Yellow": "Conditions are mixed. Only enter positions with confirmed catalysts and conviction above 75. Hold existing positions.",
+            "Red": "Defensive mode. No new entries until conditions stabilize. Monitor existing positions for thesis breaks and protect capital.",
+        }.get(vix_regime, "")
         market_bullets = [
-            f"VIX at {vix_val} is currently in the {vix_regime.lower()} range.",
-            f"5-day trend: {vix_trend}. {trend_explainer}",
-            f"Regime classification: {vix_regime} — {'favorable for new entries' if vix_regime == 'Green' else 'selective entries only, catalyst required' if vix_regime == 'Yellow' else 'defensive posture, no new entries'}.",
-            f"For this portfolio specifically: today's conditions {'support holding all current positions and considering new entries where conviction is high' if vix_regime == 'Green' else 'support holding current positions while being selective about new entries' if vix_regime == 'Yellow' else 'call for defensive positioning — avoid new entries until conditions stabilize'}.",
+            f"Regime: {vix_regime} ({vix_val} VIX, trend {vix_trend.lower()} — {trend_explainer}).",
+            action_summary,
         ]
 
     # News
