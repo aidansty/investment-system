@@ -74,8 +74,12 @@ def main():
     prices = fetch_etf_prices(lookback_days=90)
     from v4.config.settings import ALL_STOCKS
     try:
-        stock_prices = fetch_stock_prices(tickers=ALL_STOCKS, lookback_days=90)
-        log(f"Stock prices fetched: {len(stock_prices)} tickers")
+        stock_result = fetch_stock_prices(tickers=ALL_STOCKS, lookback_days=90)
+        if isinstance(stock_result, tuple):
+            stock_prices, volume_data = stock_result
+        else:
+            stock_prices, volume_data = stock_result, {}
+        log(f"Stock prices fetched: {len(stock_prices)} tickers, volume data for {len(volume_data)} tickers")
     except Exception as e:
         log(f"Stock price fetch error (non-fatal): {e}")
         stock_prices = {}
@@ -385,72 +389,57 @@ def main():
         except Exception as e:
             log(f"Catalyst scanner phase 2/3 error (non-fatal): {e}")
 
-        # PHASE 4: Pre-catalyst positioning — high-quality dated catalysts
-        # even WITHOUT existing momentum. These are earlier entries where the
-        # market hasn't priced in the event yet. Higher risk but higher reward
-        # if the catalyst plays out.
+        # PHASE 4: POST-CATALYST CONFIRMATION (replaces pre-catalyst guessing)
+        # Find stocks where a catalyst ALREADY happened and CONFIRMED with:
+        # - Day-1 return > 4% (catalyst delivered)
+        # - RVOL > 2.5x for mega-caps or > 1.5x for mid/small-caps
+        # This captures 2-3 week post-catalyst drift with high probability.
         try:
-            for fc in (forward_catalysts or []):
-                affected = fc.get("affected_holdings", []) or fc.get("tickers", [])
-                if not isinstance(affected, list):
-                    affected = []
-                fc_date = fc.get("date", "") or fc.get("event_date", "")
-                fc_event = fc.get("event", "") or fc.get("description", "")
-                fc_action = (fc.get("action", "") or "").upper()
-
-                # Only include Tier 1 catalyst types for pre-momentum entries
-                tier1_keywords = ["EARNINGS", "FDA", "PDUFA", "APPROVAL", "INDEX",
-                    "INCLUSION", "REBALANCE", "ACQUISITION", "MERGER", "BUYOUT",
-                    "CONTRACT", "LAUNCH", "SPLIT", "BUYBACK"]
-                is_tier1 = any(kw in fc_event.upper() for kw in tier1_keywords) or                            any(kw in fc_action for kw in ["BUY", "HOLD", "WATCH"])
-
-                if not is_tier1:
+            vol_data = volume_data if "volume_data" in dir() else {}
+            for ticker, price_list in prices.items():
+                if ticker == "SPY" or len(price_list) < 5:
                     continue
-
-                days_until = 99
-                if fc_date:
-                    try:
-                        fc_dt = datetime.strptime(fc_date, "%Y-%m-%d").date()
-                        days_until = (fc_dt - today_dt).days
-                    except Exception:
-                        continue
-
-                if days_until < 0 or days_until > 30:
+                already_listed = any(c["ticker"] == ticker for c in catalyst_opportunities)
+                if already_listed:
                     continue
-
-                for tk in affected:
-                    already_listed = any(c["ticker"] == tk for c in catalyst_opportunities)
-                    if already_listed:
-                        continue
-
-                    # Get price data if available (doesn't need to be momentum-positive)
-                    tk_price = 0
-                    tk_excess = 0
-                    if tk in prices and len(prices[tk]) >= 2:
-                        tk_price = round(prices[tk][-1], 2)
-                        if len(prices[tk]) >= 21 and len(spy_prices_cat) >= 21:
-                            stk_21d = (prices[tk][-1] / prices[tk][-21] - 1) * 100 if prices[tk][-21] > 0 else 0
-                            tk_excess = round(stk_21d - spy_21d, 1)
-
-                    stock_industry = ""
-                    for ind_name, tickers in INDUSTRY_STOCK_LEADERS.items():
-                        if tk in tickers:
-                            stock_industry = ind_name
-                            break
-
-                    catalyst_opportunities.append({
-                        "ticker": tk,
-                        "industry": stock_industry,
-                        "earnings_date": fc_date,
-                        "eps_estimate": None,
-                        "excess_21d": tk_excess,
-                        "price": tk_price,
-                        "has_news": True,
-                        "news_headlines": [fc_event[:100]],
-                        "catalyst_type": "pre-catalyst",
-                        "days_until": days_until,
-                    })
-                    log(f"  PRE-CATALYST: {tk} — {fc_event[:60]} in {days_until} days (no momentum required)")
+                day1_return = (price_list[-1] / price_list[-2] - 1) * 100 if price_list[-2] > 0 else 0
+                if day1_return < 4.0:
+                    continue
+                tk_vol = vol_data.get(ticker, {})
+                rvol = tk_vol.get("rvol", 0)
+                avg_vol = tk_vol.get("avg_50d", 0)
+                is_mega_cap = avg_vol > 10_000_000
+                required_rvol = 2.5 if is_mega_cap else 1.5
+                if rvol < required_rvol and avg_vol > 0:
+                    continue
+                if 0 < avg_vol < 500_000:
+                    continue
+                tk_excess = 0
+                if len(price_list) >= 21 and len(spy_prices_cat) >= 21:
+                    stk_21d = (price_list[-1] / price_list[-21] - 1) * 100 if price_list[-21] > 0 else 0
+                    tk_excess = round(stk_21d - spy_21d, 1)
+                stock_industry = ""
+                for ind_name, tickers_list in INDUSTRY_STOCK_LEADERS.items():
+                    if ticker in tickers_list:
+                        stock_industry = ind_name
+                        break
+                ticker_news = []
+                for n in news:
+                    affected = n.get("affected_tickers", [])
+                    if isinstance(affected, list) and ticker in affected:
+                        ticker_news.append(n.get("headline", ""))
+                    elif ticker in n.get("headline", "").upper():
+                        ticker_news.append(n.get("headline", ""))
+                cap_label = "mega-cap" if is_mega_cap else "mid/small-cap"
+                catalyst_opportunities.append({
+                    "ticker": ticker, "industry": stock_industry, "earnings_date": "",
+                    "eps_estimate": None, "excess_21d": tk_excess,
+                    "price": round(price_list[-1], 2), "has_news": len(ticker_news) > 0,
+                    "news_headlines": ticker_news[:2], "catalyst_type": "post-catalyst-confirmed",
+                    "days_until": 0, "day1_return": round(day1_return, 1),
+                    "rvol": rvol, "significance": "high",
+                })
+                log(f"  POST-CATALYST: {ticker} ({cap_label}) Day-1: +{day1_return:.1f}%, RVOL: {rvol:.1f}x" + (f", news: {ticker_news[0][:50]}" if ticker_news else ""))
         except Exception as e:
             log(f"Catalyst scanner phase 4 error (non-fatal): {e}")
 

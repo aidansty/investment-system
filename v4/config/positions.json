@@ -71,20 +71,6 @@
       "entry_date": "2026-04-14"
     },
     {
-      "ticker": "HUM",
-      "qty": 0.13991,
-      "entry": 357.37,
-      "type": "Stock",
-      "term": "Short-term",
-      "industry": "Managed Care",
-      "summary": "Humana is one of the largest Medicare Advantage insurers in the United States, managing healthcare coverage for millions of seniors. The company's profitability depends on accurately predicting how much its members will use healthcare services \u2014 when utilization runs higher than expected, earnings suffer, and when it runs lower, earnings beat expectations.",
-      "catalyst": "Q2 FY2026 earnings on July 29th. The report will reveal whether Medicare Advantage medical cost trends have stabilized after a difficult period of elevated utilization. If the benefit ratio improves and management reaffirms full-year guidance, the stock should respond positively.",
-      "why": "This is a short-term catalyst position entered specifically around the July 29 earnings event. The thesis is that managed care cost trends are normalizing after a difficult period, and Humana's earnings will confirm this. It is not intended to be held long-term beyond the earnings catalyst.",
-      "cost_basis": 50.0,
-      "what_to_do": "WATCH \u2014 Earnings on July 29. You need to decide before that date whether to hold through or exit. Review the managed care regulatory environment and any CMS reimbursement news before then. Do not hold into the binary earnings event without a clear thesis on the outcome.",
-      "entry_date": "2026-05-15"
-    },
-    {
       "ticker": "BTC",
       "qty": 0.04544048,
       "entry": 59767.28,
@@ -139,34 +125,6 @@
       "cost_basis": 295.75,
       "what_to_do": "Hold long-term. Down 4.2% from entry which is minimal. The regulatory thesis is developing favorably and the payment network is growing. No action needed unless regulatory conditions deteriorate significantly.",
       "entry_date": "2026-04-14"
-    },
-    {
-      "ticker": "INTC",
-      "qty": 1.0,
-      "entry": 137.26,
-      "type": "Stock",
-      "term": "Medium-term",
-      "industry": "Semiconductors",
-      "cost_basis": 137.26,
-      "summary": "Intel Corporation is a legacy semiconductor company undergoing a major turnaround, investing heavily in domestic chip manufacturing through its Intel Foundry Services division. A recent partnership with Apple on U.S.-based chip design announced by President Trump sent the stock up 10%, signaling renewed commercial momentum for a company that has struggled against TSMC and AMD for years.",
-      "catalyst": "The Apple chip partnership is the most immediate catalyst, creating potential for sustained momentum as the reshoring narrative strengthens. Intel's foundry business ramp and any new customer wins for its domestic manufacturing capacity would be additional positive catalysts.",
-      "why": "Medium-term position in the semiconductor reshoring theme. Intel is the primary domestic chip manufacturer and benefits directly from government and commercial pressure to reduce dependence on Taiwan-based TSMC. The turnaround is still in progress but the Apple partnership validates the thesis.",
-      "what_to_do": "WATCH \u2014 The Apple partnership announcement is a genuine positive catalyst but the position needs monitoring. Watch for any follow-up contract details or volume data confirming the partnership is translating to real revenue. If no further confirmation emerges in the next 2-3 weeks, reassess.",
-      "entry_date": "2026-05-01"
-    },
-    {
-      "ticker": "NOK",
-      "qty": 3.0,
-      "entry": 14.11,
-      "type": "Stock",
-      "term": "Medium-term",
-      "industry": "Networking",
-      "cost_basis": 42.33,
-      "summary": "Nokia is a Finnish telecommunications equipment company that manufactures network infrastructure including 5G equipment, fixed broadband, and IP routing systems. After a difficult period, Nokia has been winning 5G network contracts globally and is seen as a beneficiary of the push to replace Chinese telecom equipment from Huawei and ZTE in Western networks.",
-      "catalyst": "5G infrastructure buildout and the global push to replace Huawei equipment in Western telecom networks are the primary medium-term catalysts. Any major new contract wins or government-mandated Huawei replacement programs would be positive catalysts for Nokia.",
-      "why": "Medium-term position in the 5G networking infrastructure theme and the Western telecom equipment reshoring narrative. Nokia is one of only two Western companies (alongside Ericsson) capable of supplying large-scale 5G network infrastructure, giving it a structural advantage as governments push to remove Chinese equipment.",
-      "what_to_do": "Hold. Position is up 1.44% and the thesis is intact. Nokia continues to win 5G contracts and the Huawei replacement narrative strengthens over time. No immediate action needed \u2014 this is a patient medium-term hold waiting for the 5G infrastructure buildout to accelerate.",
-      "entry_date": "2026-05-01"
     }
   ],
   "total_cost_basis": 9446.68

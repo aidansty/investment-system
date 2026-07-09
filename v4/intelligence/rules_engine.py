@@ -12,7 +12,7 @@ MIN_CONVICTION_FULL_ENTRY = 65
 MIN_CONVICTION_REDUCED_ENTRY = 75
 MIN_CONVICTION_HOLD = 40
 MIN_REGIME_SCORE = 40
-MAX_ACTIVE_POSITIONS = 4
+MIN_POSITION_DOLLARS = 400  # Minimum $ per position — naturally limits count based on capital
 THESIS_BREAK_DAYS = 10
 MIN_CASH_RESERVE_PCT = 0.12
 MAX_CASH_RESERVE_PCT = 0.18
@@ -99,19 +99,18 @@ def evaluate_entry(opportunity, positions, macro, regime_score, portfolio_value,
     if conviction < MIN_CONVICTION_FULL_ENTRY and conviction < MIN_CONVICTION_REDUCED_ENTRY:
         return {"action": "no_entry", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": f"Conviction {conviction}/100 below minimum {MIN_CONVICTION_FULL_ENTRY}.", "size_pct": 0}
 
-    if len(active_positions) >= MAX_ACTIVE_POSITIONS:
-        return {"action": "no_entry", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": f"At maximum {MAX_ACTIVE_POSITIONS} active positions.", "size_pct": 0}
+    # Check minimum position size — naturally limits position count based on capital
+    if conviction >= 85: size_pct = 0.25
+    elif conviction >= 75: size_pct = 0.20
+    elif conviction >= 65: size_pct = 0.15
+    else: size_pct = 0.10
+    position_dollars = portfolio_value * size_pct if portfolio_value else 0
+    if position_dollars < MIN_POSITION_DOLLARS and cash_balance < MIN_POSITION_DOLLARS:
+        return {"action": "no_entry", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": f"Insufficient capital: position would be ${position_dollars:.0f} (minimum ${MIN_POSITION_DOLLARS}). Available cash: ${cash_balance:.0f}.", "size_pct": 0}
 
     if conviction >= MIN_CONVICTION_FULL_ENTRY:
-        # Conviction-based sizing proven by backtest
-        if conviction >= 85: size_pct = 0.25
-        elif conviction >= 75: size_pct = 0.20
-        elif conviction >= 65: size_pct = 0.15
-        else: size_pct = 0.10
-
         if has_catalyst:
-            pass  # use size_pct as calculated above
-            return {"action": "enter_full", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": f"All entry conditions met. Conviction {conviction}/100, Layer 1 qualified, regime {regime_score}/100 ({regime_label(regime_score)}), catalyst confirmed.", "size_pct": size_pct, "entry_type": "full"}
+            return {"action": "enter_full", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": f"All entry conditions met. Conviction {conviction}/100, Layer 1 qualified, regime {regime_score}/100 ({regime_label(regime_score)}), catalyst confirmed. Position size: ${position_dollars:.0f} ({size_pct:.0%} of active sleeve).", "size_pct": size_pct, "entry_type": "full", "position_dollars": round(position_dollars)}
         elif conviction >= MIN_CONVICTION_REDUCED_ENTRY:
             return {"action": "enter_reduced", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": f"Conviction {conviction}/100 — all signals green but no confirmed catalyst. Reduced 3-5% entry. Full size when catalyst confirms.", "size_pct": 0.04, "entry_type": "reduced"}
         else:

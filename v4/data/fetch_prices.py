@@ -115,6 +115,7 @@ def fetch_stock_prices(tickers: list, lookback_days: int = 90) -> dict:
     period = period_map.get(lookback_days, "4mo")
 
     results = {}
+    volume_data = {}
     skipped_too_short = []
     # Batch in groups of 50 to avoid rate limits
     batch_size = 50
@@ -131,11 +132,22 @@ def fetch_stock_prices(tickers: list, lookback_days: int = 90) -> dict:
             if data.empty:
                 continue
             close = data["Close"] if "Close" in data.columns else data
+            vol = data["Volume"] if "Volume" in data.columns else None
             for ticker in batch:
                 if ticker in close.columns:
                     series = close[ticker].dropna()
                     if len(series) >= 63:
                         results[ticker] = series.tolist()
+                        if vol is not None and ticker in vol.columns:
+                            vol_series = vol[ticker].dropna()
+                            if len(vol_series) >= 50:
+                                avg_50d_vol = float(vol_series.tail(50).mean())
+                                last_vol = float(vol_series.iloc[-1])
+                                volume_data[ticker] = {
+                                    "avg_50d": round(avg_50d_vol),
+                                    "last_day": round(last_vol),
+                                    "rvol": round(last_vol / avg_50d_vol, 2) if avg_50d_vol > 0 else 0,
+                                }
                     elif len(series) >= 30:
                         skipped_too_short.append(ticker)
         except Exception as e:
@@ -145,4 +157,4 @@ def fetch_stock_prices(tickers: list, lookback_days: int = 90) -> dict:
         time.sleep(0.5)
 
     log(f"Stock prices fetched: {len(results)}/{len(tickers)}")
-    return results
+    return results, volume_data
