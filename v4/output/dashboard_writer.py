@@ -158,6 +158,25 @@ def write_dashboard_data(
             pr["avg_surprise"] = quant.get("avg_earnings_surprise_pct")
             pr["analyst_target"] = quant.get("analyst_price_target")
 
+    # Override position review actions with rules engine signals (the actual decisions)
+    # This ensures the dashboard matches what Telegram tells the user
+    re = rules_output or {}
+    exit_signals = re.get("exit_signals", [])
+    for sig in exit_signals:
+        sig_ticker = sig.get("ticker", "")
+        sig_action = sig.get("action", "")
+        sig_reason = sig.get("reason", "")
+        for pr in position_review:
+            if pr.get("ticker") == sig_ticker:
+                if sig_action == "exit":
+                    pr["action"] = "Exit"
+                    pr["bullets"] = [sig_reason[:200]]
+                elif sig_action == "watch":
+                    pr["action"] = "Watch"
+                    if sig_reason:
+                        pr["bullets"] = [sig_reason[:200]]
+                break
+
     # Industry opportunities — uses the actual Layer 2 scanner output directly
     # (recommended_security, recommended_type, recommended_conviction, stock_leaders)
     # rather than recreating vehicle-selection logic that the scanner already did.
