@@ -125,6 +125,38 @@
       "cost_basis": 295.75,
       "what_to_do": "Hold long-term. Down 4.2% from entry which is minimal. The regulatory thesis is developing favorably and the payment network is growing. No action needed unless regulatory conditions deteriorate significantly.",
       "entry_date": "2026-04-14"
+    },
+    {
+      "ticker": "INTC",
+      "name": "Intel",
+      "type": "Stock",
+      "term": "Medium-term",
+      "entry_price": 137.18,
+      "entry_date": "2026-05-01",
+      "qty": 1,
+      "industry": "Semiconductors",
+      "holding_type": "medium_term",
+      "thesis": "Apple partnership catalyst",
+      "what_to_do": "",
+      "catalyst": "",
+      "summary": "Intel Corporation",
+      "why": "Apple partnership announcement"
+    },
+    {
+      "ticker": "NOK",
+      "name": "Nokia",
+      "type": "Stock",
+      "term": "Medium-term",
+      "entry_price": 14.24,
+      "entry_date": "2026-05-01",
+      "qty": 3,
+      "industry": "Networking",
+      "holding_type": "medium_term",
+      "thesis": "5G infrastructure",
+      "what_to_do": "",
+      "catalyst": "",
+      "summary": "Nokia Corporation",
+      "why": "5G network buildout thesis"
     }
   ],
   "total_cost_basis": 9446.68

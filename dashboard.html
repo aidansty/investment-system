@@ -1625,9 +1625,18 @@ const moveRow = document.getElementById('notable-moves');
 });
 
 const aftPos = document.getElementById('afternoon-positions');
-(BRIEFING_DATA.afternoon_positions || []).forEach(p => {
-  // Skip broken/incomplete entries — no real ticker or no content to show
-  if (!p.ticker || p.ticker === '-' || p.ticker.includes('*') || (!p.bullets || !p.bullets.length)) return;
+const aftPosData = (BRIEFING_DATA.afternoon_positions || []).filter(p => {
+  if (!p.ticker || p.ticker === '-' || p.ticker.includes('*')) return false;
+  // Only show positions with actual urgent developments — not "no new developments" boilerplate
+  const hasRealContent = p.bullets && p.bullets.length && !p.bullets.every(b =>
+    b.toLowerCase().includes('no new developments') || b.toLowerCase().includes('intact hold') || b.toLowerCase().includes('could not be parsed')
+  );
+  return hasRealContent;
+});
+if (!aftPosData.length) {
+  aftPos.innerHTML = '<p class="hint" style="padding:20px;">All positions stable — no urgent developments today. The afternoon monitor only alerts when thesis-breaking events or significant opportunities are detected.</p>';
+}
+aftPosData.forEach(p => {
   const badgeClass = { 'Hold': 'badge-hold', 'Watch': 'badge-watch', 'Buy More': 'badge-green', 'Buy more': 'badge-green', 'Trim': 'badge-amber', 'Sell': 'badge-red', 'Close': 'badge-red', 'Exit': 'badge-red', 'Reduce': 'badge-amber' }[p.action] || 'badge-gray';
   const reasonColor = { 'Hold': '#94A3B8', 'Watch': 'var(--amber)', 'Buy More': 'var(--green)', 'Trim': 'var(--amber)', 'Sell': 'var(--red)', 'Close': 'var(--red)', 'Exit': 'var(--red)' }[p.action] || '#aeada5';
   const card = document.createElement('div');

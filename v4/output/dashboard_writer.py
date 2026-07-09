@@ -165,8 +165,11 @@ def write_dashboard_data(
             tickers_str = ", ".join([tk for tk in affected if tk in stock_holdings])
             if impact:
                 bullets.append(f"Your holdings affected ({tickers_str}): {impact}")
+            elif summary:
+                # Use the news summary to explain HOW it affects the position
+                bullets.append(f"Affects {tickers_str}: {summary[:200]}")
             else:
-                bullets.append(f"Affects your position in: {tickers_str}")
+                bullets.append(f"Affects your position in: {tickers_str} — check details for specific impact")
         elif relevance == "opportunity":
             if impact:
                 bullets.append(f"Potential opportunity: {impact}")
@@ -318,24 +321,54 @@ def write_dashboard_data(
             pr["avg_surprise"] = quant.get("avg_earnings_surprise_pct")
             pr["analyst_target"] = quant.get("analyst_price_target")
 
-    # Override position review actions with rules engine signals (the actual decisions)
-    # This ensures the dashboard matches what Telegram tells the user
+    # Override ALL position data with rules engine signals (the actual decisions)
+    # This ensures dashboard matches Telegram AND replaces stale static text everywhere
     re = rules_output or {}
     exit_signals = re.get("exit_signals", [])
+    # Build a lookup of rules engine decisions for every position
+    rules_decisions = {}
     for sig in exit_signals:
-        sig_ticker = sig.get("ticker", "")
-        sig_action = sig.get("action", "")
-        sig_reason = sig.get("reason", "")
-        for pr in position_review:
-            if pr.get("ticker") == sig_ticker:
-                if sig_action == "exit":
-                    pr["action"] = "Exit"
-                    pr["bullets"] = [sig_reason[:200]]
-                elif sig_action == "watch":
-                    pr["action"] = "Watch"
-                    if sig_reason:
-                        pr["bullets"] = [sig_reason[:200]]
-                break
+        rules_decisions[sig.get("ticker", "")] = sig
+
+    for pr in position_review:
+        ticker = pr.get("ticker", "")
+        sig = rules_decisions.get(ticker)
+        if sig:
+            sig_action = sig.get("action", "")
+            sig_reason = sig.get("reason", "")
+            if sig_action == "exit":
+                pr["action"] = "Exit"
+                pr["bullets"] = [sig_reason[:250]]
+                pr["what_to_do"] = sig_reason[:250]
+                pr["catalyst"] = "No forward catalyst identified"
+                pr["why"] = sig_reason[:250]
+            elif sig_action == "watch":
+                pr["action"] = "Watch"
+                pr["bullets"] = [sig_reason[:250]]
+                pr["what_to_do"] = sig_reason[:250]
+            elif sig_action == "hold":
+                pr["action"] = "Hold"
+                if sig_reason:
+                    pr["bullets"] = [sig_reason[:250]]
+                    pr["what_to_do"] = sig_reason[:250]
+
+    # Also update the portfolio positions what_to_do to match rules engine
+    # This fixes the card face vs expanded detail mismatch
+    for pp in portfolio_positions:
+        ticker = pp.get("ticker", "")
+        sig = rules_decisions.get(ticker)
+        if sig:
+            sig_action = sig.get("action", "")
+            sig_reason = sig.get("reason", "")
+            if sig_action == "exit":
+                pp["what_to_do"] = sig_reason[:250]
+                pp["catalyst"] = "No forward catalyst"
+                pp["why"] = sig_reason[:250]
+            elif sig_action == "watch":
+                pp["what_to_do"] = sig_reason[:250]
+            elif sig_action == "hold":
+                if sig_reason:
+                    pp["what_to_do"] = sig_reason[:250]
 
     # Industry opportunities — uses the actual Layer 2 scanner output directly
     # (recommended_security, recommended_type, recommended_conviction, stock_leaders)
