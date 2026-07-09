@@ -115,15 +115,46 @@ def write_dashboard_data(
                         affected.append(tk)
                     break
 
-        # Determine relevance category
+        # Determine relevance category AND significance
+        # Only include items significant enough to actually move a stock 5%+
+        # Filter out noise: minor analyst notes, small partnerships, generic outlook pieces
+        headline_upper = headline.upper()
+        noise_keywords = ["PRICE TARGET", "ANALYST NOTE", "OUTLOOK", "MAINTAINS RATING",
+                          "REITERATES", "INITIATES COVERAGE", "MINOR", "SLIGHT",
+                          "MODEST", "STABLE", "STEADY", "UNCHANGED"]
+        is_noise = any(kw in headline_upper for kw in noise_keywords) and not any(
+            kw in headline_upper for kw in ["UPGRADE", "DOWNGRADE", "DOUBLE", "CUT", "RAISE", "BEAT", "MISS"]
+        )
+        if is_noise:
+            continue  # Not significant enough to act on
+
+        # Significance keywords — events that typically move stocks 5%+
+        high_significance = ["EARNINGS", "FDA", "APPROV", "REJECT", "ACQUI", "MERGER",
+                             "BUYOUT", "CONTRACT WIN", "RECORD REVENUE", "GUIDANCE RAISE",
+                             "GUIDANCE CUT", "INDEX INCLUSION", "ADDED TO", "REMOVED FROM",
+                             "STOCK SPLIT", "BUYBACK", "BEAT ESTIMATE", "MISS ESTIMATE",
+                             "DOWNGRADE", "UPGRADE", "HALT", "CRASH", "SURGE", "PLUNGE",
+                             "LAUNCH", "BREAKTHROUGH", "SANCTION", "TARIFF", "BAN ",
+                             "INVESTIGATION", "FRAUD", "RECALL", "LAWSUIT"]
+        is_significant = any(kw in headline_upper for kw in high_significance)
+        # Also significant if the summary/impact mentions strong directional language
+        impact_upper = (impact or "").upper()
+        if not is_significant and impact_upper:
+            is_significant = any(kw in impact_upper for kw in ["STRONG", "MAJOR", "SIGNIFICANT", "CRITICAL", "DIRECTLY AFFECT", "THESIS"])
+
         if affects_holding:
-            relevance = "holding"
-        elif sentiment == "bullish" and affected:
+            # For holdings: only show if genuinely significant — not minor noise
+            if is_significant or is_noise == False:
+                relevance = "holding"
+            else:
+                continue
+        elif sentiment == "bullish" and affected and is_significant:
+            # For opportunities: MUST be significant — no minor positive fluff
             relevance = "opportunity"
-        elif any(kw in headline.upper() for kw in ["FED ", "FOMC", "CPI ", "RATE CUT", "RATE HIKE"]):
+        elif any(kw in headline_upper for kw in ["FED ", "FOMC", "CPI ", "RATE CUT", "RATE HIKE"]):
             relevance = "macro"
         else:
-            continue  # Skip — doesn't pass either test
+            continue  # Not significant enough to warrant your attention
 
         # Build bullets — lead with WHY THIS MATTERS TO YOU
         bullets = []
