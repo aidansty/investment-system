@@ -289,169 +289,77 @@ def build_and_send_afternoon_telegram(
     rules_output: dict = None,
 ) -> None:
     """
-    Send afternoon portfolio update via Telegram.
-    Message 1: What changed + rules engine exit signals + positions needing attention
-    Message 2: Entry signals + new opportunities + close watch
+    Afternoon Telegram — ONLY sends when something urgent affects a holding
+    OR a significant positive opportunity emerges. Silent otherwise.
     """
     sections = update.get("sections", {}) if update else {}
-    re = rules_output or {}
-    aft_exit_signals = re.get("exit_signals", [])
-    aft_entry_signals = re.get("entry_signals", [])
-    kill_criteria = re.get("kill_criteria", {})
+    re_data = rules_output or {}
+    exit_signals = re_data.get("exit_signals", [])
+    kill_criteria = re_data.get("kill_criteria", {})
 
-    msg1 = []
-    msg1.append(f"<b>📈 Afternoon Update — {today}</b>")
-    msg1.append("")
+    urgent_items = []
 
-    # What changed
-    what_changed = (
-        sections.get("What Changed Since Morning") or
-        sections.get("What Changed") or
-        sections.get("Portfolio Review") or ""
-    )
-    # Fallback: re-parse from raw text
-    if not what_changed:
-        import re as re_mod
-        raw = update.get("raw_text", "") if update else ""
-        match = re_mod.search(r"What Changed.*?\n(.*?)(?=##|$)", raw, re_mod.DOTALL | re_mod.IGNORECASE)
-        if match:
-            what_changed = match.group(1).strip()
-    if what_changed:
-        msg1.append("<b>What Changed Today</b>")
-        sentences = [s.strip() for s in what_changed.replace("\n", " ").split(".") if len(s.strip()) > 15]
-        for s in sentences[:3]:
-            msg1.append(f"• {s}.")
-        msg1.append("")
-
-    # Notable moves intentionally excluded from Telegram — dashboard only
-
-    # Kill criteria alert
+    # 1. Kill criteria
     if kill_criteria.get("triggered"):
-        msg1.append("🚨 <b>KILL CRITERIA TRIGGERED</b>")
-        for alert in kill_criteria.get("alerts", []):
-            msg1.append(f"  {alert.get('message', '')[:150]}")
-        msg1.append("")
+        alerts = kill_criteria.get("alerts", [])
+        urgent_items.append("\U0001f6a8 <b>KILL CRITERIA TRIGGERED</b>\n" + "\n".join(f"  {a.get('message', '')[:150]}" for a in alerts))
 
-    # Rules engine exit signals (fast exits — immediate action)
-    fast_exits = [s for s in aft_exit_signals if s.get("exit_type") == "fast" and s.get("action") == "exit"]
-    if fast_exits:
-        msg1.append("<b>🚨 Immediate Exit Signals</b>")
-        for sig in fast_exits:
-            msg1.append(f"  🔴 <b>{sig.get('ticker','')}</b> — {sig.get('urgency','').upper()}")
-            msg1.append(f"     {sig.get('reason','')[:120]}")
-        msg1.append("")
+    # 2. Exit signals (thesis breaks, catalyst failures, checkpoint reviews)
+    for sig in exit_signals:
+        if sig.get("action") == "exit":
+            ticker = sig.get("ticker", "")
+            reason = sig.get("reason", "")[:200]
+            exit_type = sig.get("exit_type", "")
+            emoji = "\U0001f6a8" if exit_type in ("fast", "catalyst_failed") else "\U0001f534"
+            urgent_items.append(f"{emoji} <b>{ticker} — EXIT</b>\n  {reason}")
 
-    # Position updates — only show positions where something changed or action needed
-    position_review = (
-        sections.get("Portfolio Actions Before Close") or
-        sections.get("Open Position Review") or
-        sections.get("Portfolio Actions") or
-        sections.get("Portfolio Review") or ""
-    )
-    if positions and position_review:
-        flagged = []
-        for p in positions:
-            ticker = p.get("ticker", "")
-            entry = p.get("entry", 0) or p.get("entry_price", 0) or 0
-            current = p.get("current_price", 0) or 0
-            pnl = round((current - entry) / entry * 100, 1) if entry > 0 else 0
-            pnl_str = f"{pnl:+.1f}%"
+    # 3. Thesis-breaking news in What Changed
+    what_changed = sections.get("What Changed Since Morning") or sections.get("What Changed") or ""
+    if what_changed:
+        thesis_keywords = ["thesis break", "thesis is break", "exit", "close position",
+                           "breaking news", "crash", "plunge", "halt", "warning",
+                           "downgrade", "miss", "cut guidance", "fraud", "investigate",
+                           "bomb", "war", "sanction", "tariff", "ban"]
+        if any(kw in what_changed.lower() for kw in thesis_keywords):
+            sentences = [s.strip() for s in what_changed.replace("\n", " ").split(".") if len(s.strip()) > 15]
+            if sentences:
+                urgent_items.append("<b>What Changed Today</b>\n" + "\n".join(f"  \u2022 {s}." for s in sentences[:4]))
 
-            # Determine if Claude flagged this position with an action
-            action = None
-            reason = None
-            for line in position_review.split(chr(10)):
-                if ticker in line:
-                    upper = line.upper()
-                    if "EXIT" in upper or "SELL" in upper or "CLOSE" in upper:
-                        action = "CLOSE"
-                        reason = line.strip()[:120]
-                    elif "BUY" in upper or "ADD" in upper:
-                        action = "BUY MORE"
-                        reason = line.strip()[:120]
-                    elif "TRIM" in upper or "REDUCE" in upper:
-                        action = "TRIM"
-                        reason = line.strip()[:120]
-                    elif "WATCH" in upper or "MONITOR" in upper:
-                        action = "WATCH"
-                        reason = line.strip()[:120]
-                    elif "HOLD" in upper:
-                        action = "HOLD"
-                        reason = line.strip()[:120]
-                    break
+    # 4. Urgent watch signals
+    for sig in exit_signals:
+        if sig.get("action") == "watch" and sig.get("urgency") == "next_open":
+            urgent_items.append(f"\u26a0\ufe0f <b>{sig.get('ticker', '')} — WATCH (urgent)</b>\n  {sig.get('reason', '')[:150]}")
 
-            if action:
-                emoji = {"CLOSE": "🔴", "TRIM": "🟠", "BUY MORE": "🟢", "WATCH": "🟡"}.get(action, "⚪")
-                flagged.append(f"{emoji} <b>{ticker}</b> {pnl_str} — {action}")
-                # Extract 2-3 sentences from the review block as bullets
-                ticker_block = ""
-                in_block = False
-                for line in position_review.split(chr(10)):
-                    if ticker in line:
-                        in_block = True
-                    if in_block and line.strip():
-                        ticker_block += " " + line.strip()
-                    if in_block and len(ticker_block) > 20 and line.strip() == "":
-                        break
-                sentences = [s.strip() for s in ticker_block.replace(chr(10)," ").split(".") if len(s.strip()) > 20]
-                for s in sentences[:3]:
-                    flagged.append(f"   • {s}.")
+    # 5. Positive opportunity alerts — significant bullish catalysts during the day
+    if sections:
+        candidates_text = sections.get("New or Strengthened Candidates") or sections.get("New Opportunities") or ""
+        if candidates_text:
+            opp_keywords = ["fda approv", "beat estimate", "beat expectations", "raised guidance",
+                            "upgrade", "contract win", "contract award", "acquisition",
+                            "index inclusion", "added to", "stock split", "buyback",
+                            "record revenue", "record earnings", "blowout", "surge"]
+            if any(kw in candidates_text.lower() for kw in opp_keywords):
+                sentences = [s.strip() for s in candidates_text.replace("\n", " ").split(".") if len(s.strip()) > 15]
+                if sentences:
+                    urgent_items.append("\U0001f4b0 <b>New Opportunity Detected</b>\n" + "\n".join(f"  \u2022 {s}." for s in sentences[:4]))
 
-        if flagged:
-            msg1.append("<b>Positions Needing Attention</b>")
-            msg1.extend(flagged)
-        else:
-            msg1.append("<b>Positions</b>")
-            msg1.append("• No position changes warranted — hold everything into close.")
+    # 6. Entry signals from rules engine
+    entry_signals = re_data.get("entry_signals", [])
+    for sig in entry_signals:
+        ticker = sig.get("ticker", "")
+        conviction = sig.get("conviction", 0)
+        reason = sig.get("reason", "")[:150]
+        size_pct = sig.get("size_pct", 0)
+        urgent_items.append(f"\U0001f4b0 <b>{ticker} — ENTRY SIGNAL ({conviction}/100)</b>\n  Size: {size_pct:.0%} of active sleeve\n  {reason}")
 
-    msg1.append("")
-    msg1.append("→ Full update on dashboard")
+    # Only send if something genuinely important happened
+    if not urgent_items:
+        log("Afternoon Telegram: no urgent developments or opportunities — skipping send")
+        return
 
-    msg2 = []
+    msg = [f"<b>\U0001f4ca Afternoon Alert — {today}</b>", ""]
+    msg.extend(urgent_items)
 
-    # Rules engine entry signals (highest priority — these are the real actionable signals)
-    if aft_entry_signals:
-        msg2.append("<b>🎯 Entry Signals (Rules Engine)</b>")
-        for sig in aft_entry_signals[:2]:
-            size_pct = sig.get("size_pct", 0)
-            entry_type = sig.get("entry_type", "full")
-            type_label = "REDUCED" if entry_type == "reduced" else "FULL"
-            msg2.append(f"  📈 <b>{sig.get('ticker','')}</b> — {type_label} ENTRY {size_pct:.0%}")
-            msg2.append(f"     {sig.get('reason','')[:120]}")
-        msg2.append("")
+    send_telegram("\n".join(msg))
+    log(f"Afternoon Telegram: alert sent ({len(urgent_items)} items)")
 
-    # Claude's actual written analysis of new/strengthened candidates
-    candidates_text = sections.get("New or Strengthened Candidates", "")
-    if candidates_text and "no new" not in candidates_text.lower() and "nothing changed" not in candidates_text.lower():
-        msg2.append("<b>🏭 New or Strengthened Opportunities</b>")
-        # Split into blocks by industry name lines (all caps or contains "—")
-        lines = [l.strip() for l in candidates_text.split(chr(10)) if l.strip()]
-        sentences_shown = 0
-        for line in lines:
-            if sentences_shown >= 8:
-                break
-            if line.startswith("#"):
-                continue
-            msg2.append(f"• {line[:150]}")
-            sentences_shown += 1
-        msg2.append("")
-    elif not aft_entry_signals:
-        msg2.append("<b>🏭 Opportunities</b>")
-        msg2.append("• No new or strengthened candidates since this morning.")
-        msg2.append("")
-
-    close_watch = sections.get("Market Close Watch", "")
-    if close_watch and "no urgent" not in close_watch.lower():
-        msg2.append(f"<b>⏰ Before Close</b>")
-        msg2.append(close_watch.strip()[:300])
-        msg2.append("")
-
-    msg2.append("→ Full analysis on dashboard")
-
-    send_telegram("\n".join(msg1))
-    if len(msg2) > 3:
-        import time
-        time.sleep(1)
-        send_telegram("\n".join(msg2))
-
-    log("Afternoon Telegram: messages sent")
