@@ -1072,15 +1072,7 @@ function renderMgmtPositions() {
   });
 }
 
-function removePosition(ticker) {
-  const result = document.getElementById('add-position-result');
-  if (result) {
-    result.style.display = 'block';
-    result.style.background = 'rgba(226,80,79,0.1)';
-    result.style.color = '#e2504f';
-    result.innerHTML = '<b>' + ticker + ' staged for removal.</b> To make permanent: export positions.json below, remove the ' + ticker + ' entry, then push to GitHub.';
-  }
-}
+// duplicate removePosition removed
 
 function setGHToken() {
   const existing = localStorage.getItem('gh_pat') || '';
@@ -1102,15 +1094,7 @@ function trimPosition(ticker) {
   }
 }
 
-function removePosition(ticker) {
-  const result = document.getElementById('add-position-result');
-  if (result) {
-    result.style.display = 'block';
-    result.style.background = 'rgba(226,80,79,0.1)';
-    result.style.color = '#e2504f';
-    result.innerHTML = '<b>' + ticker + ' staged for removal.</b> Export positions.json below, remove the ' + ticker + ' entry, then push to GitHub to make permanent.';
-  }
-}
+// duplicate removePosition removed
 
 function trimPosition(ticker) {
   const result = document.getElementById('add-position-result');
@@ -1210,14 +1194,7 @@ function trimPosition(ticker) {
   result.style.color = '#EF9F27';
   result.innerHTML = '<b>' + ticker + ' trim noted.</b> After selling in Webull, update qty in positions.json and push to GitHub.';
 }
-function removePosition(ticker) {
-  const result = document.getElementById('add-position-result');
-  if (!result) return;
-  result.style.display = 'block';
-  result.style.background = 'rgba(226,80,79,0.1)';
-  result.style.color = '#e2504f';
-  result.innerHTML = '<b>' + ticker + ' staged for removal.</b> Export positions.json below, remove the ' + ticker + ' entry, then push to GitHub.';
-}
+// removePosition duplicate removed — async version above handles everything
 function trimPosition(ticker) {
   const result = document.getElementById('add-position-result');
   if (!result) return;
