@@ -162,6 +162,88 @@ def write_dashboard_data(
         if len(news_cards) >= 5:
             break
 
+    # Also scan forward catalysts for items affecting holdings or creating opportunities
+    for fc in (news_package.get("forward_catalysts", []) if news_package else []):
+        if len(news_cards) >= 7:
+            break
+        affected = fc.get("affected_holdings", []) or fc.get("tickers", [])
+        if not isinstance(affected, list):
+            affected = []
+        event = fc.get("event", "") or fc.get("description", "")
+        fc_date = fc.get("date", "") or fc.get("event_date", "")
+        action_tag = fc.get("action", "")
+
+        affects_holding = any(tk in stock_holdings for tk in affected)
+        if not affects_holding and not affected:
+            continue
+
+        # Skip if already covered by a news item with the same ticker
+        already_covered = any(
+            any(tk in (nc.get("affected_tickers", []) or []) for tk in affected)
+            for nc in news_cards
+        )
+        if already_covered:
+            continue
+
+        bullets = []
+        if affects_holding:
+            tickers_str = ", ".join([tk for tk in affected if tk in stock_holdings])
+            bullets.append(f"Your holdings affected ({tickers_str}): {event[:150]}")
+            if action_tag:
+                bullets.append(f"Recommended action: {action_tag}")
+            relevance = "holding"
+        else:
+            bullets.append(f"Upcoming catalyst: {event[:150]}")
+            if fc_date:
+                bullets.append(f"Date: {fc_date}")
+            relevance = "opportunity"
+
+        news_cards.append({
+            "headline": event[:80] if event else "Upcoming catalyst",
+            "url": "",
+            "source": "Forward catalyst scanner",
+            "bullets": bullets[:3],
+            "affected_tickers": affected,
+            "sentiment": "bullish" if action_tag in ("Buy", "Hold") else "",
+            "relevance": relevance,
+        })
+
+    # Also add recent earnings results that affect holdings
+    re_results = briefing.get("recent_earnings_results", {}) if briefing else {}
+    if not re_results and rules_output:
+        re_results = rules_output.get("recent_earnings_results", {})
+    for ticker, result in (re_results or {}).items():
+        if len(news_cards) >= 7:
+            break
+        if ticker not in stock_holdings:
+            continue
+        already_covered = any(ticker in (nc.get("affected_tickers", []) or []) for nc in news_cards)
+        if already_covered:
+            continue
+        verdict = result.get("verdict", "")
+        eps_actual = result.get("eps_actual")
+        eps_estimate = result.get("eps_estimate")
+        eps_surprise = result.get("eps_surprise_pct", 0)
+        report_date = result.get("report_date", "")
+        bullets = [
+            f"Earnings reported {report_date}: {verdict} — EPS actual {eps_actual} vs estimate {eps_estimate} ({eps_surprise:+.1f}% surprise)",
+        ]
+        if verdict == "BEAT":
+            bullets.append(f"Action: This confirms the thesis — hold or add to position if conviction is high")
+        elif verdict == "MISS":
+            bullets.append(f"Action: Thesis weakened — review whether to reduce or exit this position")
+        else:
+            bullets.append(f"Action: In-line result — no change in thesis, continue holding")
+        news_cards.append({
+            "headline": f"{ticker} earnings: {verdict}",
+            "url": "",
+            "source": "Earnings results",
+            "bullets": bullets,
+            "affected_tickers": [ticker],
+            "sentiment": "bullish" if verdict == "BEAT" else "bearish" if verdict == "MISS" else "neutral",
+            "relevance": "holding",
+        })
+
     # Position review from briefing — try multiple section name variants Claude might use
     sections = briefing.get("sections", {}) if briefing else {}
     pos_review_text = (
