@@ -111,15 +111,18 @@ def score_stock_leaders(prices: dict, industry: str, spy_prices: list) -> list:
             else:
                 combined = exc_63d
 
-            # Convert to conviction score
-            if combined >= 25: conv = 95
-            elif combined >= 18: conv = 88
-            elif combined >= 12: conv = 82
-            elif combined >= 8: conv = 77
-            elif combined >= 5: conv = 72
-            elif combined >= 2: conv = 65
-            elif combined >= 0: conv = 55
-            else: conv = max(0, int(40 + combined * 2))
+            # Momentum-only score capped at 50 — this only represents the momentum
+            # component of conviction. Full conviction requires catalyst data from
+            # calculate_conviction_score() where catalyst quality has 35% weight.
+            # A stock with perfect momentum but no catalyst should NEVER score above 50.
+            if combined >= 25: conv = 50
+            elif combined >= 18: conv = 45
+            elif combined >= 12: conv = 42
+            elif combined >= 8: conv = 38
+            elif combined >= 5: conv = 35
+            elif combined >= 2: conv = 30
+            elif combined >= 0: conv = 25
+            else: conv = max(0, int(15 + combined * 2))
 
             scored.append({
                 "ticker": ticker,
