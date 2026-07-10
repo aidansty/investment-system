@@ -1103,7 +1103,20 @@ async function editPositionQty(ticker, currentQty) {
 
 async function syncPositionsFromGitHub() {
   try {
-    const res = await fetch('https://raw.githubusercontent.com/aidansty/investment-system/main/v4/config/positions.json?t=' + Date.now());
+    const token = localStorage.getItem('gh_pat') || localStorage.getItem('ghp_token');
+    let res;
+    if (token) {
+      res = await fetch('https://api.github.com/repos/aidansty/investment-system/contents/v4/config/positions.json', {
+        headers: { 'Authorization': 'token ' + token }
+      });
+      if (res.ok) {
+        const apiData = await res.json();
+        const decoded = JSON.parse(atob(apiData.content));
+        res = { ok: true, json: async () => decoded };
+      }
+    } else {
+      res = await fetch('https://raw.githubusercontent.com/aidansty/investment-system/main/v4/config/positions.json?t=' + Date.now());
+    }
     if (!res.ok) return;
     const data = await res.json();
     const positions = data.positions || [];
