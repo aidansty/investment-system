@@ -610,6 +610,8 @@ def main():
 
     # Step 9 — Send Telegram (2 messages)
     try:
+        # Add catalyst_opportunities to rules_output so Telegram can access them
+        rules_output["catalyst_opportunities"] = catalyst_opportunities
         build_and_send_morning_telegram(
             macro=macro,
             industry_results=industry_results,
