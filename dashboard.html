@@ -1048,6 +1048,59 @@ function updateGoalTracker(positions, cashBalance) {
 // ============================================================
 // POSITION MANAGEMENT UI
 // ============================================================
+async function editPositionQty(ticker, currentQty) {
+  const newQty = prompt('Edit quantity for ' + ticker + '\nCurrent: ' + currentQty + '\nEnter new quantity:', currentQty);
+  if (newQty === null || newQty === '') return;
+  const qty = parseFloat(newQty);
+  if (isNaN(qty) || qty < 0) { alert('Invalid quantity'); return; }
+
+  const token = localStorage.getItem('ghp_token');
+  if (!token) { alert('Set your GitHub token first (button below)'); return; }
+
+  const result = document.getElementById('add-position-result');
+  try {
+    // Fetch current positions.json
+    const getRes = await fetch('https://api.github.com/repos/aidansty/investment-system/contents/v4/config/positions.json', {
+      headers: { 'Authorization': 'token ' + token }
+    });
+    const getData = await getRes.json();
+    const content64 = getData.content;
+    const sha = getData.sha;
+    const decoded = JSON.parse(atob(content64));
+
+    // Update quantity
+    let found = false;
+    for (const p of decoded.positions) {
+      if (p.ticker === ticker) {
+        p.qty = qty;
+        found = true;
+        break;
+      }
+    }
+    if (!found) { alert(ticker + ' not found in positions.json'); return; }
+
+    // Push back
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(decoded, null, 2))));
+    const putRes = await fetch('https://api.github.com/repos/aidansty/investment-system/contents/v4/config/positions.json', {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Update ' + ticker + ' qty to ' + qty, content: encoded, sha: sha })
+    });
+    if (putRes.ok) {
+      if (result) { result.style.display='block'; result.style.background='rgba(93,202,165,0.1)'; result.style.color='#5DCAA5'; result.textContent=ticker + ' quantity updated to ' + qty + '. Reload page to see changes.'; }
+      // Update local data too
+      const localPos = (POSITIONS_CONFIG || []).find(function(lp) { return lp.ticker === ticker; });
+      if (localPos) localPos.qty = qty;
+      renderMgmtPositions();
+    } else {
+      const err = await putRes.json();
+      if (result) { result.style.display='block'; result.style.background='rgba(226,80,79,0.1)'; result.style.color='#e2504f'; result.textContent='Error: ' + (err.message || 'unknown'); }
+    }
+  } catch(e) {
+    if (result) { result.style.display='block'; result.style.background='rgba(226,80,79,0.1)'; result.style.color='#e2504f'; result.textContent='Error: ' + e.message; }
+  }
+}
+
 function renderMgmtPositions() {
   const list = document.getElementById('mgmt-positions-list');
   if (!list) return;
@@ -1085,13 +1138,13 @@ function renderMgmtPositions() {
     closeBtn.textContent = 'Close';
     closeBtn.style.cssText = 'margin-top:4px;margin-right:4px;background:rgba(226,80,79,0.12);color:#e2504f;border:0.5px solid rgba(226,80,79,0.2);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:inherit;';
     closeBtn.onclick = function() { removePosition(p.ticker); };
-    const trimBtn = document.createElement('button');
-    trimBtn.textContent = 'Trim';
-    trimBtn.style.cssText = 'margin-top:4px;background:rgba(239,159,39,0.1);color:#EF9F27;border:0.5px solid rgba(239,159,39,0.2);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:inherit;';
-    trimBtn.onclick = function() { trimPosition(p.ticker); };
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'Edit Qty';
+    editBtn.style.cssText = 'margin-top:4px;margin-right:4px;background:rgba(93,202,165,0.1);color:#5DCAA5;border:0.5px solid rgba(93,202,165,0.2);border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:inherit;';
+    editBtn.onclick = function() { editPositionQty(p.ticker, p.qty); };
     right.appendChild(pctEl);
     right.appendChild(closeBtn);
-    right.appendChild(trimBtn);
+    right.appendChild(editBtn);
     div.appendChild(left);
     div.appendChild(right);
     list.appendChild(div);
@@ -1505,11 +1558,11 @@ const posReview = document.getElementById('position-review');
 }).forEach(p => {
   const badgeClass = {
     'Hold': 'badge-hold', 'Watch': 'badge-watch', 'Buy More': 'badge-green',
-    'Trim': 'badge-amber', 'Sell': 'badge-red', 'Reduce': 'badge-amber'
+    'Trim': 'badge-amber', 'Sell': 'badge-red', 'Close': 'badge-red', 'Exit': 'badge-red', 'Reduce': 'badge-amber'
   }[p.action] || 'badge-gray';
   const reasonColor = {
     'Hold': '#94A3B8', 'Watch': 'var(--amber)', 'Buy More': 'var(--green)',
-    'Trim': 'var(--amber)', 'Sell': 'var(--red)', 'Reduce': 'var(--amber)'
+    'Trim': 'var(--amber)', 'Sell': 'var(--red)', 'Close': 'var(--red)', 'Exit': 'var(--red)', 'Reduce': 'var(--amber)'
   }[p.action] || '#aeada5';
   const card = document.createElement('div');
   card.className = 'info-card';
