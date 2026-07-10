@@ -1139,8 +1139,11 @@ async function syncPositionsFromGitHub() {
       // Remove positions that no longer exist
       const activeTickers = new Set(positions.map(p => p.ticker));
       BRIEFING_DATA.positions = (BRIEFING_DATA.positions || []).filter(p => activeTickers.has(p.ticker));
-      // Add NEW positions that exist in positions.json but not yet in BRIEFING_DATA
+      // Check if positions changed — if so, update BRIEFING_DATA and reload once
       const existingTickers = new Set((BRIEFING_DATA.positions || []).map(p => p.ticker));
+      const githubTickers = new Set(positions.map(p => p.ticker));
+      let changed = false;
+      // Add new positions
       for (const p of positions) {
         if (!existingTickers.has(p.ticker)) {
           BRIEFING_DATA.positions.push({
@@ -1156,8 +1159,21 @@ async function syncPositionsFromGitHub() {
             what_to_do: '',
             industry: p.industry || '',
           });
+          changed = true;
         }
       }
+      // Remove closed positions
+      const beforeLen = BRIEFING_DATA.positions.length;
+      BRIEFING_DATA.positions = BRIEFING_DATA.positions.filter(p => githubTickers.has(p.ticker));
+      if (BRIEFING_DATA.positions.length !== beforeLen) changed = true;
+
+      // If positions changed and we haven't reloaded yet this session, reload to re-render portfolio
+      if (changed && !sessionStorage.getItem('pos_synced')) {
+        sessionStorage.setItem('pos_synced', '1');
+        window.location.reload();
+        return;
+      }
+      sessionStorage.removeItem('pos_synced');
     }
     renderMgmtPositions();
     console.log('Positions synced from GitHub:', positions.map(p => p.ticker));
