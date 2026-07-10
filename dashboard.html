@@ -1054,7 +1054,7 @@ async function editPositionQty(ticker, currentQty) {
   const qty = parseFloat(newQty);
   if (isNaN(qty) || qty < 0) { alert('Invalid quantity'); return; }
 
-  const token = localStorage.getItem('ghp_token');
+  const token = localStorage.getItem('gh_pat') || localStorage.getItem('ghp_token');
   if (!token) { alert('Set your GitHub token first (button below)'); return; }
 
   const result = document.getElementById('add-position-result');
