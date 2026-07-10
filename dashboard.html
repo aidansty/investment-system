@@ -1177,6 +1177,8 @@ async function syncPositionsFromGitHub() {
     }
     renderMgmtPositions();
     console.log('Positions synced from GitHub:', positions.map(p => p.ticker));
+    // Store in sessionStorage so the next reload picks up the latest before rendering
+    sessionStorage.setItem('synced_positions', JSON.stringify(positions));
   } catch(e) {
     console.log('Position sync error:', e);
   }
@@ -1451,7 +1453,35 @@ const posList = document.getElementById('pos-list');
 const TERM_ORDER = ['Long-term', 'Medium-term', 'Short-term'];
 const termGroups = { 'Long-term': [], 'Medium-term': [], 'Short-term': [] };
 
-POSITIONS_CONFIG.forEach((p, i) => {
+// Check for synced positions from GitHub (overrides stale dashboard_data.js)
+const _syncedRaw = sessionStorage.getItem('synced_positions');
+let _renderPositions = POSITIONS_CONFIG;
+if (_syncedRaw) {
+  try {
+    const _synced = JSON.parse(_syncedRaw);
+    if (_synced.length > 0) {
+      _renderPositions = _synced.map(sp => {
+        const existing = POSITIONS_CONFIG.find(p => p.ticker === sp.ticker);
+        return existing ? { ...existing, qty: sp.qty, entry_price: sp.entry_price || sp.entry || existing.entry_price }
+          : {
+            ticker: sp.ticker, term: sp.term || 'Medium-term', type: sp.type || 'Stock',
+            entry_price: sp.entry_price || sp.entry || 0, current_price: sp.entry_price || sp.entry || 0,
+            qty: sp.qty || 0, balance: (sp.entry_price || 0) * (sp.qty || 0),
+            pct_change: 0, dollar_change: 0, what_to_do: '', summary: sp.summary || sp.ticker,
+            catalyst: sp.catalyst || '', why: sp.why || '', industry: sp.industry || '',
+          };
+      });
+      ENTRY_PRICES = {};
+      POSITION_META = {};
+      _renderPositions.forEach(p => {
+        ENTRY_PRICES[p.ticker] = p.entry_price || p.entry || 0;
+        POSITION_META[p.ticker] = { term: p.term || '', type: p.type || '' };
+      });
+    }
+  } catch(e) { console.log('Synced positions parse error:', e); }
+}
+
+_renderPositions.forEach((p, i) => {
   const term = POSITION_META[p.ticker]?.term || p.term || 'Medium-term';
   if (!termGroups[term]) termGroups[term] = [];
   termGroups[term].push({ p, i });
