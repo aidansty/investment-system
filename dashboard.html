@@ -1185,25 +1185,62 @@ function trimPosition(ticker) {
   }
 }
 
-document.getElementById('add-position-btn')?.addEventListener('click', () => {
+document.getElementById('add-position-btn')?.addEventListener('click', async () => {
   const ticker = document.getElementById('new-ticker')?.value?.trim()?.toUpperCase();
   const entry = parseFloat(document.getElementById('new-entry')?.value);
   const qty = parseFloat(document.getElementById('new-qty')?.value);
-  const term = document.getElementById('new-term')?.value;
-  const type = document.getElementById('new-type')?.value;
-  const industry = document.getElementById('new-industry')?.value?.trim();
-  const date = document.getElementById('new-date')?.value;
-  const summary = document.getElementById('new-summary')?.value?.trim();
+  const term = document.getElementById('new-term')?.value || 'Medium-term';
+  const type = document.getElementById('new-type')?.value || 'Stock';
+  const industry = document.getElementById('new-industry')?.value?.trim() || '';
+  const date = document.getElementById('new-date')?.value || new Date().toISOString().slice(0,10);
+  const summary = document.getElementById('new-summary')?.value?.trim() || '';
   const result = document.getElementById('add-position-result');
   if (!ticker || !entry || !qty) {
     if (result) { result.style.display='block'; result.style.background='rgba(226,80,79,0.1)'; result.style.color='#e2504f'; result.textContent='Ticker, entry price, and quantity are required.'; }
     return;
   }
-  ENTRY_PRICES[ticker] = entry;
-  POSITION_META[ticker] = { term, type };
-  if (result) { result.style.display='block'; result.style.background='rgba(93,202,165,0.1)'; result.style.color='#5DCAA5'; result.textContent=`${ticker} staged. Export positions.json below and push to GitHub to make permanent.`; }
-  ['new-ticker','new-entry','new-qty','new-industry','new-date','new-summary'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  renderMgmtPositions();
+  const token = localStorage.getItem('gh_pat') || localStorage.getItem('ghp_token');
+  if (!token) {
+    if (result) { result.style.display='block'; result.style.background='rgba(226,80,79,0.1)'; result.style.color='#e2504f'; result.textContent='Set your GitHub token first.'; }
+    return;
+  }
+  if (result) { result.style.display='block'; result.style.background='rgba(239,159,39,0.1)'; result.style.color='#EF9F27'; result.textContent='Adding ' + ticker + '...'; }
+  try {
+    const getRes = await fetch('https://api.github.com/repos/aidansty/investment-system/contents/v4/config/positions.json', {
+      headers: { 'Authorization': 'token ' + token }
+    });
+    const getData = await getRes.json();
+    const decoded = JSON.parse(atob(getData.content));
+    const sha = getData.sha;
+    if (decoded.positions.some(p => p.ticker === ticker)) {
+      if (result) { result.style.display='block'; result.style.background='rgba(226,80,79,0.1)'; result.style.color='#e2504f'; result.textContent=ticker + ' already exists in positions.'; }
+      return;
+    }
+    decoded.positions.push({
+      ticker: ticker, name: ticker, type: type, term: term,
+      entry_price: entry, entry_date: date, qty: qty,
+      industry: industry, holding_type: term.toLowerCase().replace('-','_'),
+      thesis: summary, what_to_do: '', catalyst: '', summary: summary, why: ''
+    });
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(decoded, null, 2))));
+    const putRes = await fetch('https://api.github.com/repos/aidansty/investment-system/contents/v4/config/positions.json', {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Add position: ' + ticker, content: encoded, sha: sha })
+    });
+    if (putRes.ok) {
+      if (result) { result.style.display='block'; result.style.background='rgba(93,202,165,0.1)'; result.style.color='#5DCAA5'; result.textContent=ticker + ' added successfully. Reload to see changes.'; }
+      ENTRY_PRICES[ticker] = entry;
+      POSITION_META[ticker] = { term, type };
+      ['new-ticker','new-entry','new-qty','new-industry','new-date','new-summary'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      renderMgmtPositions();
+    } else {
+      const err = await putRes.json();
+      if (result) { result.style.display='block'; result.style.background='rgba(226,80,79,0.1)'; result.style.color='#e2504f'; result.textContent='Error: ' + (err.message || 'unknown'); }
+    }
+  } catch(e) {
+    if (result) { result.style.display='block'; result.style.background='rgba(226,80,79,0.1)'; result.style.color='#e2504f'; result.textContent='Error: ' + e.message; }
+  }
 });
 
 async function removePosition(ticker) {
