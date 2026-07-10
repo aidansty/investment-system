@@ -1173,7 +1173,7 @@ function renderMgmtPositions() {
   const list = document.getElementById('mgmt-positions-list');
   if (!list) return;
   list.innerHTML = '';
-  const positions = POSITIONS_CONFIG || [];
+  const positions = window.POSITIONS_CONFIG || POSITIONS_CONFIG || [];
   positions.forEach(function(p) {
     const entry = ENTRY_PRICES[p.ticker] || p.entry_price || 0;
     const livePos = (window._livePositions || []).find(function(lp) { return lp.ticker === p.ticker; });
