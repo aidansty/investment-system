@@ -1553,9 +1553,9 @@ TERM_ORDER.forEach(term => {
       <div class="pos-detail-label">Catalyst</div>
       <div class="pos-detail-text">${p.catalyst || '—'}</div>
       <div class="pos-detail-label">Why ${termLabel.toLowerCase()}</div>
-      <div class="pos-detail-text">${p.why || '—'}</div>
+      <div class="pos-detail-text">${reviewData?.bullets?.[0] || p.why || '—'}</div>
       <div class="pos-detail-label" style="margin-top:12px;">What to do</div>
-      <div class="pos-what-to-do">${reviewData?.bullets?.slice(1).join('<br><br>') || reviewData?.reasoning || whatToDo || "See morning briefing for today's recommendation."}</div>`;
+      <div class="pos-what-to-do">${whatToDo || reviewData?.bullets?.join('<br><br>') || "See morning briefing for today's recommendation."}</div>`;
 
     card.appendChild(toggleBtn);
     card.appendChild(detailDiv);
@@ -1704,7 +1704,7 @@ if (!BRIEFING_DATA.news || !BRIEFING_DATA.news.length) {
 // Position review
 const posReview = document.getElementById('position-review');
 (BRIEFING_DATA.position_review || []).filter(p => {
-  const skip = ['SPY','BTC','ETH','XRP','ZEC'];
+  const skip = ['SPY','BTC','ETH','XRP','ZEC','SOL'];
   return !skip.includes(p.ticker);
 }).forEach(p => {
   const badgeClass = {
@@ -1794,7 +1794,7 @@ if (cdEl && cdText && catOpps.length > 0) {
     if (cryptoSkipCD.has(p.ticker) || p.ticker === 'SPY') return;
     activeVal += (p.current_price || 0) * (p.qty || 0);
   });
-  const cashAvail = parseFloat(localStorage.getItem('user_cash') || '0');
+  const cashAvail = parseFloat(BRIEFING_DATA?.cash || 0);
   const totalActive = activeVal + cashAvail;
   let sizePct = 0.15;
   if (topOpp.excess_21d > 15) sizePct = 0.25;

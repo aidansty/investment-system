@@ -94,7 +94,7 @@ def write_dashboard_data(
     # Test 2: Creates a new investment opportunity (say what to buy)
     # Everything else is filtered OUT — max 5 items
     holding_tickers = {p.get("ticker", "") for p in positions} if positions else set()
-    crypto_skip = {"BTC", "ETH", "XRP", "ZEC"}
+    crypto_skip = {"BTC", "ETH", "XRP", "ZEC", "SOL", "BNB", "DOGE"}
     stock_holdings = holding_tickers - crypto_skip
 
     news_cards = []
@@ -163,13 +163,15 @@ def write_dashboard_data(
         bullets = []
         if relevance == "holding":
             tickers_str = ", ".join([tk for tk in affected if tk in stock_holdings])
-            if impact:
-                bullets.append(f"Your holdings affected ({tickers_str}): {impact}")
-            elif summary:
-                # Use the news summary to explain HOW it affects the position
-                bullets.append(f"Affects {tickers_str}: {summary[:200]}")
+            # Always include: which holdings, the action, AND what the news actually is
+            action_text = impact if impact else ""
+            if action_text:
+                bullets.append(f"Holdings affected ({tickers_str}): {action_text}")
             else:
-                bullets.append(f"Affects your position in: {tickers_str} — check details for specific impact")
+                bullets.append(f"Holdings affected: {tickers_str}")
+            # Always add the actual news content as a second bullet
+            if summary:
+                bullets.append(summary[:250])
         elif relevance == "opportunity":
             if impact:
                 bullets.append(f"Potential opportunity: {impact}")
