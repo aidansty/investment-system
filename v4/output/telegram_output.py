@@ -14,270 +14,202 @@ def build_and_send_morning_telegram(
     rules_output: dict = None,
 ) -> None:
     """
-    Send two Telegram messages every morning.
-    Message 1: Regime score + news + catalysts
-    Message 2: Industries + rules engine signals + position actions
+    Morning Telegram — two concise, actionable messages.
+    Message 1: Market regime (short) + actionable news + coming up
+    Message 2: Catalyst scanner + position alerts + entry/exit signals
     """
     sections = briefing.get("sections", {}) if briefing else {}
     vix = macro.get("vix", 0)
     vix_regime = macro.get("vix_regime", "Yellow")
     vix_trend = macro.get("vix_trend", "Flat")
-    vix_avg = macro.get("vix_5d_avg", 0)
-    top_industries = industry_results.get("top_industries", []) if industry_results else []
-    high_conviction = industry_results.get("high_conviction", []) if industry_results else []
     recent_news = news_package.get("recent_news", []) if news_package else []
 
-    # Use composite regime score from rules engine
-    re = rules_output or {}
-    regime_score = re.get("regime_score", 0)
-    regime = re.get("regime", vix_regime)
-    regime_emoji = "🟢" if regime == "Green" else "🔴" if regime == "Red" else "🟡"
-    kill_criteria = re.get("kill_criteria", {})
-    entry_signals = re.get("entry_signals", [])
-    exit_signals = re.get("exit_signals", [])
+    re_data = rules_output or {}
+    regime_score = re_data.get("regime_score", 0)
+    regime = re_data.get("regime", vix_regime)
+    regime_emoji = "\U0001f7e2" if regime == "Green" else "\U0001f534" if regime == "Red" else "\U0001f7e1"
+    kill_criteria = re_data.get("kill_criteria", {})
+    entry_signals = re_data.get("entry_signals", [])
+    exit_signals = re_data.get("exit_signals", [])
 
-    # ─── MESSAGE 1: Market Regime + News + Catalysts ───────────────────────
+    # ─── MESSAGE 1: Regime + News + Coming Up ─────────────────────────────
 
     msg1 = []
-    msg1.append(f"<b>📊 Morning Briefing — {today}</b>")
+    msg1.append(f"<b>\U0001f4ca Morning Briefing — {today}</b>")
     msg1.append("")
 
-    # Kill criteria alert first if triggered
+    # Kill criteria alert
     if kill_criteria.get("triggered"):
-        msg1.append("🚨 <b>KILL CRITERIA TRIGGERED</b>")
+        msg1.append("\U0001f6a8 <b>KILL CRITERIA TRIGGERED</b>")
         for alert in kill_criteria.get("alerts", []):
             msg1.append(f"  {alert.get('message', '')[:150]}")
         msg1.append("")
 
-    # Composite regime score
-    msg1.append(f"<b>{regime_emoji} Market Regime — {regime} ({regime_score}/100)</b>")
-    market_overview = sections.get("Market Snapshot Explanation", sections.get("Market Overview", ""))
-    if market_overview:
-        sentences = [s.strip().lstrip("- ") for s in market_overview.split(chr(10)) if len(s.strip()) > 20]
-        for s in sentences[:3]:
-            msg1.append(f"  • {s}")
-    else:
-        trend_word = "falling" if vix_trend == "Falling" else "rising" if vix_trend in ("Rising", "Spiking") else "flat"
-        msg1.append(f"  • VIX at {vix} ({vix_regime}), {trend_word} from {vix_avg} five-day average.")
+    # Market regime — SHORT (1 line + 1-2 sentences max)
+    trend_meaning = {"Falling": "fear decreasing (bullish)", "Rising": "fear increasing (cautious)", "Spiking": "sharp fear spike (defensive)", "Flat": "stable sentiment"}.get(vix_trend, "")
+    action_summary = {"Green": "Favorable for entering catalyst-driven positions at full size.", "Yellow": "Mixed conditions. Only enter with confirmed catalysts above 75 conviction.", "Red": "Defensive. No new entries until conditions stabilize."}.get(regime, "")
+    msg1.append(f"<b>{regime_emoji} {regime} ({regime_score}/100)</b> — VIX {vix}, trend {vix_trend.lower()}")
+    msg1.append(f"  {trend_meaning}. {action_summary}")
     msg1.append("")
 
-    # Key news labeled by how it affects you
+    # Key news — ONLY real, significant news affecting holdings or creating opportunities
+    # Filter out generic market commentary
     current_tickers = {p.get("ticker", "") for p in positions}
-    if recent_news:
-        msg1.append("<b>📰 Key News &amp; Events</b>")
-        for n in recent_news[:5]:
+    crypto_skip = {"BTC", "ETH", "XRP", "ZEC", "SOL", "BNB"}
+    stock_tickers = current_tickers - crypto_skip
+    sig_keywords = ["EARNINGS", "FDA", "APPROV", "ACQUI", "MERGER", "CONTRACT", "LAUNCH",
+                    "UPGRADE", "DOWNGRADE", "RECORD", "BEAT", "MISS", "GUIDANCE", "SPLIT",
+                    "BUYBACK", "INDEX", "INCLUSION", "HALT", "CRASH", "SURGE"]
+    noise_keywords = ["IF YOU INVESTED", "MEME COIN", "TRUMP", "WHAT WOULD", "PRICE TARGET",
+                      "MAINTAINS RATING", "REITERATES", "INITIATES COVERAGE"]
+
+    shown_news = []
+    for n in recent_news[:10]:
+        headline = n.get("headline", "")
+        headline_upper = headline.upper()
+        if any(nw in headline_upper for nw in noise_keywords):
+            continue
+        affected = n.get("affected_tickers", []) or []
+        impact = n.get("portfolio_impact", "")
+        summary = n.get("summary", "")
+        sentiment = n.get("sentiment", "").lower()
+
+        affects_holding = any(tk in stock_tickers for tk in affected) or any(tk in headline_upper for tk in stock_tickers if len(tk) >= 2)
+        is_significant = any(sk in headline_upper for sk in sig_keywords)
+
+        if affects_holding or (is_significant and affected):
+            shown_news.append(n)
+        if len(shown_news) >= 4:
+            break
+
+    if shown_news:
+        msg1.append("<b>\U0001f4f0 Actionable Intelligence</b>")
+        for n in shown_news:
             headline = n.get("headline", "")
+            affected = n.get("affected_tickers", []) or []
+            impact = n.get("portfolio_impact", "")
             summary = n.get("summary", "")
-            portfolio_impact = n.get("portfolio_impact", "")
-            affected = n.get("affected_tickers", [])
-            sentiment = n.get("sentiment", "").lower()
-            if not headline:
-                continue
-            held = [t for t in affected if t in current_tickers]
-            not_held = [t for t in affected if t not in current_tickers]
+            held = [t for t in affected if t in stock_tickers]
             if held:
-                sentiment_word = "📈 Bullish" if sentiment == "bullish" else "📉 Bearish" if sentiment == "bearish" else "⚪ Neutral"
-                label = f"{sentiment_word} for your {', '.join(held[:3])}"
-            elif not_held:
-                label = f"💡 Potential opportunity — {', '.join(not_held[:3])}"
+                label = f"Affects {', '.join(held[:3])}"
+            elif affected:
+                label = f"Opportunity: {', '.join(affected[:3])}"
             else:
-                label = "🌐 Market-wide"
-            msg1.append(f"<b>{headline[:75]}</b>")
+                label = "Market-wide"
+            msg1.append(f"\u2022 <b>{headline[:70]}</b>")
             msg1.append(f"  {label}")
-            if portfolio_impact:
-                msg1.append(f"  {portfolio_impact[:150]}")
+            if impact:
+                msg1.append(f"  {impact[:120]}")
             elif summary:
-                sentences = [s.strip() for s in summary.split(".") if len(s.strip()) > 15]
-                if sentences:
-                    msg1.append(f"  {sentences[0][:150]}.")
+                first_sentence = summary.split(".")[0].strip()
+                if len(first_sentence) > 15:
+                    msg1.append(f"  {first_sentence[:120]}.")
         msg1.append("")
 
-    # Forward catalysts
+    # Coming up — keep as is, this works well
     if forward_catalysts:
-        msg1.append("<b>📅 Coming Up</b>")
+        msg1.append("<b>\U0001f4c5 Coming Up</b>")
         sorted_cats = sorted(forward_catalysts, key=lambda c: c.get("date", "9999"))
         for cat in sorted_cats[:4]:
             date = cat.get("date", "")
             event = cat.get("event", "")
-            action = cat.get("action", "Hold")
             holdings = cat.get("affected_holdings", [])
-            action_emoji = "🟢" if action in ("Buy", "Buy More") else "🔴" if action in ("Sell", "Trim") else "⚪"
-            holdings_str = f" → {', '.join(holdings)}" if holdings else ""
-            msg1.append(f"{action_emoji} [{date}] {event[:60]}{holdings_str}")
+            holdings_str = f" \u2192 {', '.join(holdings)}" if holdings else ""
+            msg1.append(f"  [{date}] {event[:60]}{holdings_str}")
         msg1.append("")
 
-    msg1.append("→ Full briefing on dashboard")
+    msg1.append("\u2192 Full briefing on dashboard")
+    send_telegram("\n".join(msg1))
 
-    # ─── MESSAGE 2: Industries + Positions + Action Items ───────────────────
+    # ─── MESSAGE 2: Catalyst Scanner + Positions + Signals ─────────────────
 
     msg2 = []
-    msg2.append(f"<b>💼 Portfolio Update — {today}</b>")
+    msg2.append(f"<b>\U0001f4bc Portfolio Update — {today}</b>")
     msg2.append("")
 
-    # Top industries with conviction
-    if top_industries:
-        msg2.append(f"<b>🏭 Top Industries ({len(high_conviction)} high conviction)</b>")
-        for ind in top_industries[:4]:
-            score = ind.get("conviction_score", 0)
-            name = ind["industry"]
-            etf = ind["etf"]
-            excess = ind.get("excess_63d", 0)
-            ripple = ind.get("ripple_benefits", [])
-            news_count = ind.get("news_count", 0)
-            rel_news = ind.get("relevant_news", [])
-            msg2.append(f"<b>{name} ({etf})</b> — Conviction {score}/100")
-            if excess > 0:
-                msg2.append(f"  • Outperforming S&P 500 by {excess:.1f}% over the last 3 months.")
-            if ripple:
-                ripple_clean = [r.replace("_", " ") for r in ripple[:2]]
-                msg2.append(f"  • Tailwinds from: {', '.join(ripple_clean)}.")
-            if news_count >= 2:
-                msg2.append(f"  • {news_count} news stories confirming this direction today.")
-            if rel_news:
-                headline = rel_news[0].get("headline", "")
-                if headline:
-                    msg2.append(f"  • {headline[:90]}")
+    # Catalyst scanner results (replaces top industries)
+    catalyst_opps = re_data.get("catalyst_opportunities", [])
+    if not catalyst_opps:
+        # Try getting from briefing context
+        catalyst_opps = briefing.get("catalyst_opportunities", []) if briefing else []
+    if catalyst_opps:
+        msg2.append(f"<b>\U0001f50e Catalyst Scanner ({len(catalyst_opps)} found)</b>")
+        for c in catalyst_opps[:4]:
+            cat_type = c.get("catalyst_type", "catalyst")
+            days = c.get("days_until", 0)
+            days_text = "today" if days == 0 else f"in {days} days"
+            excess = c.get("excess_21d", 0)
+            price = c.get("price", 0)
+            msg2.append(f"  \U0001f4c8 <b>{c.get('ticker','')}</b> — {cat_type} {days_text}")
+            msg2.append(f"    21d momentum: +{excess}pp vs SPY | Price: ${price}")
+            if c.get("news_headlines"):
+                msg2.append(f"    {c['news_headlines'][0][:80]}")
+        msg2.append("")
+    else:
+        msg2.append("<b>\U0001f50e Catalyst Scanner</b>")
+        msg2.append("  No qualifying catalyst opportunities found today.")
         msg2.append("")
 
-    if positions:
-        msg2.append("<b>Position Review</b>")
-        for p in positions:
-            ticker = p.get("ticker", "")
-            entry = p.get("entry", 0) or p.get("entry_price", 0) or 0
-            current = p.get("current_price", 0) or 0
-            stop = p.get("stop_price", 0) or 0
-            pnl = round((current - entry) / entry * 100, 1) if entry > 0 else 0
-            dist_stop = round((current - stop) / current * 100, 1) if current > 0 and stop > 0 else None
-            pnl_str = f"{pnl:+.1f}%"
-            pnl_emoji = "🟢" if pnl >= 0 else "🔴"
-
-            # Determine action and reason from briefing — try multiple section name variants
-            pos_review = (
-                sections.get("Open Position Review") or
-                sections.get("Position Review") or
-                sections.get("Portfolio Review") or ""
-            )
-            action = "HOLD"
-            reason = "Thesis intact, no material changes today."
-
-            if ticker in pos_review:
-                # Extract the line for this ticker
-                for line in pos_review.split("\n"):
-                    if ticker in line:
-                        if "EXIT" in line.upper():
-                            action = "EXIT"
-                        elif "REDUCE" in line.upper() or "TRIM" in line.upper():
-                            action = "TRIM"
-                        elif "WATCH" in line.upper():
-                            action = "WATCH"
-                        break
-
-            # Only surface positions requiring attention — skip clean HOLDs
-            if action == "HOLD":
-                continue
-
-            action_emoji = {"EXIT": "🔴", "TRIM": "🟠", "WATCH": "🟡", "REVIEW": "🟡"}.get(action, "🟢")
-            msg2.append(f"{action_emoji} <b>{ticker}</b> {pnl_str} — {action}")
-            ticker_block = ""
-            in_block = False
-            for line in pos_review.split(chr(10)):
-                if ticker in line:
-                    in_block = True
-                if in_block and line.strip():
-                    ticker_block += " " + line.strip()
-                if in_block and len(ticker_block) > 20 and line.strip() == "":
-                    break
-            sentences = [s.strip() for s in ticker_block.replace(chr(10), " ").split(".") if len(s.strip()) > 20]
-            bullets = sentences[:3] if sentences else [reason]
-            for b in bullets:
-                msg2.append(f"   • {b}.")
-
+    # Position alerts — only WATCH, EXIT, TRIM (skip clean HOLDs)
+    # Use rules engine signals directly instead of parsing Claude text
+    watch_exits = [s for s in exit_signals if s.get("action") in ("exit", "watch")]
+    if watch_exits:
+        msg2.append("<b>\U0001f4cb Position Alerts</b>")
+        for sig in watch_exits:
+            action = sig.get("action", "").upper()
+            ticker = sig.get("ticker", "")
+            reason = sig.get("reason", "")[:120]
+            emoji = "\U0001f534" if action == "EXIT" else "\U0001f7e1"
+            msg2.append(f"  {emoji} <b>{ticker}</b> — {action}")
+            msg2.append(f"    {reason}")
         msg2.append("")
 
-    # Explicit action items
-    action_items = _build_action_items(positions, forward_catalysts)
+    # Action items — specific, not generic
+    action_items = []
+    for cat in (forward_catalysts or []):
+        affected = cat.get("affected_holdings", [])
+        held = [t for t in affected if t in stock_tickers]
+        if held and cat.get("date"):
+            event = cat.get("event", "")
+            action = cat.get("action", "")
+            for tk in held:
+                pos = next((p for p in positions if p.get("ticker") == tk), None)
+                if pos:
+                    pnl = round(((pos.get("current_price", 0) or 0) - (pos.get("entry_price", 0) or pos.get("entry", 0) or 0)) / max((pos.get("entry_price", 0) or pos.get("entry", 0) or 1), 1) * 100, 1)
+                    action_items.append(f"  \u23f0 <b>{tk}</b> ({pnl:+.1f}%): {event[:60]} on {cat.get('date','')}")
     if action_items:
-        msg2.append("<b>⚡ Action Items Today</b>")
-        for item in action_items:
+        msg2.append("<b>\u26a1 Upcoming for Your Holdings</b>")
+        for item in action_items[:4]:
             msg2.append(item)
         msg2.append("")
 
-    # Rules engine entry signals
+    # Entry signals — keep as is
     if entry_signals:
-        msg2.append("<b>🎯 Entry Signals (Rules Engine)</b>")
+        msg2.append("<b>\U0001f3af Entry Signals</b>")
         for sig in entry_signals[:3]:
             size_pct = sig.get("size_pct", 0)
             entry_type = sig.get("entry_type", "full")
-            size_label = f"{size_pct:.0%}" if size_pct else ""
             type_label = "REDUCED" if entry_type == "reduced" else "FULL"
-            msg2.append(f"  📈 <b>{sig.get('ticker','')}</b> — {type_label} ENTRY {size_label}")
-            msg2.append(f"     {sig.get('reason','')[:120]}")
+            msg2.append(f"  \U0001f4c8 <b>{sig.get('ticker','')}</b> — {type_label} ENTRY {size_pct:.0%}")
+            msg2.append(f"    {sig.get('reason','')[:120]}")
         msg2.append("")
 
-    # Rules engine exit signals
+    # Exit signals — keep as is
     exits_triggered = [s for s in exit_signals if s.get("action") == "exit"]
     if exits_triggered:
-        msg2.append("<b>🚨 Exit Signals (Rules Engine)</b>")
+        msg2.append("<b>\U0001f6a8 Exit Signals</b>")
         for sig in exits_triggered:
-            urgency = sig.get("urgency", "")
-            urgency_label = "IMMEDIATE" if urgency == "immediate" else "NEXT OPEN" if urgency == "next_open" else "TODAY"
-            msg2.append(f"  🔴 <b>{sig.get('ticker','')}</b> — EXIT {urgency_label}")
-            msg2.append(f"     {sig.get('reason','')[:120]}")
+            msg2.append(f"  \U0001f534 <b>{sig.get('ticker','')}</b> — EXIT")
+            msg2.append(f"    {sig.get('reason','')[:120]}")
         msg2.append("")
 
-    # Tax awareness flags
-    tax_warnings = []
-    for sig in exit_signals:
-        tax = sig.get("tax_awareness", {})
-        if tax.get("urgency") in ("high", "medium") and sig.get("action") != "exit":
-            tax_warnings.append(f"  💰 <b>{sig.get('ticker','')}</b>: {tax.get('tax_recommendation','')[:100]}")
-    if tax_warnings:
-        msg2.append("<b>💰 Tax Awareness</b>")
-        msg2.extend(tax_warnings[:3])
-        msg2.append("")
-
-    msg2.append("→ Full analysis on dashboard")
-
-    # Send both messages
-    send_telegram("\n".join(msg1))
-    import time
-    time.sleep(1)
+    msg2.append("\u2192 Full analysis on dashboard")
     send_telegram("\n".join(msg2))
+    log(f"Morning Telegram: 2 messages sent")
 
-    log("Morning Telegram: 2 messages sent")
 
+# _build_action_items removed — action items built inline in morning telegram
 
-def _build_action_items(positions: list, forward_catalysts: list) -> list:
-    """
-    Generate specific action items based on position state and upcoming catalysts.
-    Only fires when there is a specific data-driven reason.
-    """
-    items = []
-
-    for p in positions:
-        ticker = p.get("ticker", "")
-        entry = p.get("entry_price", 0) or 0
-        current = p.get("current_price", 0) or 0
-        stop = p.get("stop_price", 0) or 0
-        pnl = round((current - entry) / entry * 100, 1) if entry > 0 else 0
-        dist_stop = round((current - stop) / current * 100, 1) if current > 0 and stop > 0 else None
-
-        # Check for upcoming earnings within 10 days
-        upcoming_earnings = [
-            c for c in forward_catalysts
-            if ticker in c.get("affected_holdings", [])
-            and c.get("category", "") == "earnings"
-        ]
-        if upcoming_earnings:
-            cat = upcoming_earnings[0]
-            items.append(f"⏰ {ticker}: earnings {cat.get('date', 'soon')} — review setup: check guidance, analyst expectations, and risk/reward before deciding hold/trim/exit")
-
-        # Stop proximity warning
-        # No hardcoded stop alerts — Claude's analysis drives all action recommendations
-
-        # No hardcoded loss thresholds — Claude drives all recommendations
-
-    return items
 
 
 def build_and_send_afternoon_telegram(
