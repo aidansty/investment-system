@@ -143,22 +143,6 @@
       "why": "Apple partnership announcement"
     },
     {
-      "ticker": "NOK",
-      "name": "Nokia",
-      "type": "Stock",
-      "term": "Medium-term",
-      "entry_price": 14.24,
-      "entry_date": "2026-05-01",
-      "qty": 3,
-      "industry": "Networking",
-      "holding_type": "medium_term",
-      "thesis": "5G infrastructure",
-      "what_to_do": "",
-      "catalyst": "",
-      "summary": "Nokia Corporation",
-      "why": "5G network buildout thesis"
-    },
-    {
       "ticker": "SOL",
       "name": "SOL",
       "type": "Crypto",
