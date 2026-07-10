@@ -352,23 +352,9 @@ def write_dashboard_data(
                     pr["bullets"] = [sig_reason[:250]]
                     pr["what_to_do"] = sig_reason[:250]
 
-    # Also update the portfolio positions what_to_do to match rules engine
-    # This fixes the card face vs expanded detail mismatch
-    for pp in portfolio_positions:
-        ticker = pp.get("ticker", "")
-        sig = rules_decisions.get(ticker)
-        if sig:
-            sig_action = sig.get("action", "")
-            sig_reason = sig.get("reason", "")
-            if sig_action == "exit":
-                pp["what_to_do"] = sig_reason[:250]
-                pp["catalyst"] = "No forward catalyst"
-                pp["why"] = sig_reason[:250]
-            elif sig_action == "watch":
-                pp["what_to_do"] = sig_reason[:250]
-            elif sig_action == "hold":
-                if sig_reason:
-                    pp["what_to_do"] = sig_reason[:250]
+    # portfolio_positions override happens later, after portfolio_positions is built
+    # Store rules_decisions so we can use it below
+    _rules_decisions = rules_decisions
 
     # Industry opportunities — uses the actual Layer 2 scanner output directly
     # (recommended_security, recommended_type, recommended_conviction, stock_leaders)
@@ -621,6 +607,25 @@ def write_dashboard_data(
             "industry": p.get("industry", p.get("ticker", "")),
             "cost_basis": p.get("cost_basis", 0),
         })
+
+    # Override portfolio positions what_to_do with rules engine decisions
+    # This fixes the card face vs expanded detail mismatch
+    _rd = _rules_decisions if "_rules_decisions" in dir() else {}
+    for pp in portfolio_positions:
+        ticker = pp.get("ticker", "")
+        sig = _rd.get(ticker)
+        if sig:
+            sig_action = sig.get("action", "")
+            sig_reason = sig.get("reason", "")
+            if sig_action == "exit":
+                pp["what_to_do"] = sig_reason[:250]
+                pp["catalyst"] = "No forward catalyst"
+                pp["why"] = sig_reason[:250]
+            elif sig_action == "watch":
+                pp["what_to_do"] = sig_reason[:250]
+            elif sig_action == "hold":
+                if sig_reason:
+                    pp["what_to_do"] = sig_reason[:250]
 
     # Performance history — placeholder until real history is tracked
     perf_dates = []
