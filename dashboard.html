@@ -1763,7 +1763,7 @@ catOpps.forEach(c => {
     bullets += '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">Current price: $' + c.price + '</li>';
   }
   if (c.eps_estimate) {
-    bullets += '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">EPS estimate: ' + c.eps_estimate + '</li>';
+    bullets += '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">Expected earnings/share: $' + c.eps_estimate + ' (stock rises if actual beats this)</li>';
   }
   if (c.news_headlines && c.news_headlines.length) {
     c.news_headlines.forEach(h => {

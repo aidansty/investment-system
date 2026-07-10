@@ -636,6 +636,7 @@ def main():
             briefing=briefing,
             run_type="morning",
             today=str(today),
+            cash=cash_balance,
             cost_basis=cost_basis,
             intraday=intraday_data,
             rules_output=rules_output,
