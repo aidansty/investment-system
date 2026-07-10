@@ -952,7 +952,7 @@ function updateGoalTracker(positions, cashBalance) {
     const qty = p.qty || 0;
     stockEtfValue += current * qty;
   }
-  stockEtfValue += (cashBalance || 0);
+  // Cash NOT included in goal tracker — only actual invested capital counts toward checkpoints
 
   // Dynamic checkpoints that extend forever as you grow
   function generateCheckpoints(currentValue) {
@@ -1794,7 +1794,7 @@ if (cdEl && cdText && catOpps.length > 0) {
     if (cryptoSkipCD.has(p.ticker) || p.ticker === 'SPY') return;
     activeVal += (p.current_price || 0) * (p.qty || 0);
   });
-  const cashAvail = parseFloat(BRIEFING_DATA?.cash || 0);
+  const cashAvail = parseFloat(localStorage.getItem('investment_desk_cash') || BRIEFING_DATA?.cash || 0);
   const totalActive = activeVal + cashAvail;
   let sizePct = 0.15;
   if (topOpp.excess_21d > 15) sizePct = 0.25;
