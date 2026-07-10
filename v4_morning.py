@@ -443,6 +443,78 @@ def main():
         except Exception as e:
             log(f"Catalyst scanner phase 4 error (non-fatal): {e}")
 
+        # PHASE 5: Strong catalyst, no momentum required
+        # Stocks with confirmed Tier 1 catalysts (FDA, major earnings, index inclusion,
+        # M&A, major contract) get evaluated even without existing momentum.
+        # The catalyst alone can be the reason to enter.
+        try:
+            tier1_keywords = ["EARNINGS", "FDA", "PDUFA", "APPROV", "INDEX", "INCLUSION",
+                "REBALANCE", "ACQUISITION", "MERGER", "BUYOUT", "CONTRACT WIN",
+                "STOCK SPLIT", "BUYBACK", "RECORD REVENUE", "GUIDANCE RAISE"]
+            for fc in (forward_catalysts or []):
+                affected = fc.get("affected_holdings", []) or fc.get("tickers", [])
+                if not isinstance(affected, list):
+                    affected = []
+                fc_event = fc.get("event", "") or fc.get("description", "")
+                fc_date = fc.get("date", "") or fc.get("event_date", "")
+
+                is_tier1 = any(kw in fc_event.upper() for kw in tier1_keywords)
+                if not is_tier1:
+                    continue
+
+                days_until = 99
+                if fc_date:
+                    try:
+                        fc_dt = datetime.strptime(fc_date, "%Y-%m-%d").date()
+                        days_until = (fc_dt - today_dt).days
+                    except Exception:
+                        continue
+                if days_until < 0 or days_until > 30:
+                    continue
+
+                for tk in affected:
+                    already_listed = any(c["ticker"] == tk for c in catalyst_opportunities)
+                    if already_listed:
+                        continue
+
+                    # Get price if available — momentum NOT required
+                    tk_price = 0
+                    tk_excess = 0
+                    if tk in prices and len(prices[tk]) >= 2:
+                        tk_price = round(prices[tk][-1], 2)
+                        if len(prices[tk]) >= 21 and len(spy_prices_cat) >= 21:
+                            stk_21d = (prices[tk][-1] / prices[tk][-21] - 1) * 100 if prices[tk][-21] > 0 else 0
+                            tk_excess = round(stk_21d - spy_21d, 1)
+
+                    # Filter out micro-caps using volume data
+                    vol_info = volume_data.get(tk, {}) if "volume_data" in dir() else {}
+                    avg_vol = vol_info.get("avg_50d", 0)
+                    if 0 < avg_vol < 500_000:
+                        continue
+
+                    stock_industry = ""
+                    for ind_name, tickers_list in INDUSTRY_STOCK_LEADERS.items():
+                        if tk in tickers_list:
+                            stock_industry = ind_name
+                            break
+
+                    catalyst_opportunities.append({
+                        "ticker": tk,
+                        "industry": stock_industry,
+                        "earnings_date": fc_date,
+                        "eps_estimate": None,
+                        "excess_21d": tk_excess,
+                        "price": tk_price,
+                        "has_news": True,
+                        "news_headlines": [fc_event[:100]],
+                        "catalyst_type": "strong-catalyst",
+                        "days_until": days_until,
+                        "significance": "high",
+                    })
+                    log(f"  STRONG CATALYST (no momentum required): {tk} — {fc_event[:60]} in {days_until} days")
+        except Exception as e:
+            log(f"Catalyst scanner phase 5 error (non-fatal): {e}")
+
         # Deduplicate by ticker, keep highest momentum entry
         seen_tickers = set()
         deduped = []
