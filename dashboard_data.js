@@ -10,11 +10,11 @@ window.BRIEFING_DATA = {
   "vix_trend": "Flat",
   "vix_regime": "Green",
   "market_bullets": [
-    "**VIX at 16.9 sits comfortably below the 20 threshold**, meaning options markets are not pricing in near-term shock risk \u2014 this is a low-fear environment that historically supports holding existing equity positions without defensive hedging.",
-    "**The VIX trend is flat**, which signals that sentiment has stabilized rather than improving sharply or deteriorating \u2014 there is no momentum in either direction on fear, consistent with a digestion phase in markets rather than a breakout or breakdown.",
-    "**A Green regime at 65/100 means conditions are favorable for holding quality positions** but do not yet represent the high-conviction environment where aggressive new capital deployment is warranted \u2014 65 is solidly green but not euphoric.",
+    "**VIX at 16.9 sits comfortably below the 20 threshold**, meaning options markets are not pricing in near-term shock risk — this is a low-fear environment that historically supports holding existing equity positions without defensive hedging.",
+    "**The VIX trend is flat**, which signals that sentiment has stabilized rather than improving sharply or deteriorating — there is no momentum in either direction on fear, consistent with a digestion phase in markets rather than a breakout or breakdown.",
+    "**A Green regime at 65/100 means conditions are favorable for holding quality positions** but do not yet represent the high-conviction environment where aggressive new capital deployment is warranted — 65 is solidly green but not euphoric.",
     "**For this specific portfolio today**, the Green regime supports holding SPY, NVDA, AMD, BTC, ETH, and other intact-thesis positions, while the rules engine's zero qualifying entries correctly prevents forced deployment into setups that haven't fully developed.",
-    "**No economic events are scheduled today**, removing the possibility of a macro data surprise \u2014 this is a session driven by positioning, news flow, and technical factors rather than fundamental data revision."
+    "**No economic events are scheduled today**, removing the possibility of a macro data surprise — this is a session driven by positioning, news flow, and technical factors rather than fundamental data revision."
   ],
   "positions": [
     {
@@ -28,7 +28,7 @@ window.BRIEFING_DATA = {
       "pct_change": 13.99,
       "dollar_change": 583.43,
       "summary": "SPY tracks the S&P 500 index, giving you diversified exposure to the 500 largest U.S. companies across every major sector. It is the most widely held ETF in the world and serves as the benchmark everything else in your portfolio is measured against. When you hold SPY, you are essentially holding a slice of the entire U.S. economy.",
-      "catalyst": "SPY has no single catalyst \u00c3\u00a2\u00c2\u0080\u00c2\u0094 it moves with the overall market. Key drivers right now include Fed rate decisions, inflation data (next CPI report July 14), and corporate earnings season beginning in mid-July. A dovish shift from the Fed or strong earnings results would push SPY higher.",
+      "catalyst": "SPY has no single catalyst Ã¢ÂÂ it moves with the overall market. Key drivers right now include Fed rate decisions, inflation data (next CPI report July 14), and corporate earnings season beginning in mid-July. A dovish shift from the Fed or strong earnings results would push SPY higher.",
       "why": "This is a long-term core holding designed to anchor the portfolio with stable, compounding returns over many years. When no higher-conviction opportunity exists for your cash, SPY is where uninvested capital belongs rather than sitting idle.",
       "what_to_do": "SPY is a permanent hold.",
       "industry": "Broad Market ETF",
@@ -44,10 +44,10 @@ window.BRIEFING_DATA = {
       "balance": 245.91,
       "pct_change": 65.49,
       "dollar_change": 97.31,
-      "summary": "Micron Technology manufactures DRAM and NAND memory chips \u00c3\u00a2\u00c2\u0080\u00c2\u0094 the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one of the primary beneficiaries of that demand surge.",
+      "summary": "Micron Technology manufactures DRAM and NAND memory chips Ã¢ÂÂ the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one of the primary beneficiaries of that demand surge.",
       "catalyst": "Earnings just reported June 25. Review results and forward guidance carefully.",
-      "why": "This was entered as a medium-term position around the AI memory demand supercycle. It has returned over 100% from entry, which is exceptional. The pre-earnings exit rule in your framework exists precisely for situations like this \u00c3\u00a2\u00c2\u0080\u00c2\u0094 massive gains before a binary event.",
-      "what_to_do": "WATCH \u00c3\u00a2\u00c2\u0080\u00c2\u0094 Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cu",
+      "why": "This was entered as a medium-term position around the AI memory demand supercycle. It has returned over 100% from entry, which is exceptional. The pre-earnings exit rule in your framework exists precisely for situations like this Ã¢ÂÂ massive gains before a binary event.",
+      "what_to_do": "WATCH Ã¢ÂÂ Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cu",
       "industry": "Semiconductors",
       "cost_basis": 148.59
     },
@@ -62,7 +62,7 @@ window.BRIEFING_DATA = {
       "pct_change": 20.49,
       "dollar_change": 54.03,
       "summary": "Advanced Micro Devices makes CPUs and GPUs that compete directly with Intel and NVIDIA. In the AI race, AMD's MI300 and MI450 GPU series are taking meaningful market share from NVIDIA in data center AI workloads, making AMD one of the clearest ways to play the AI buildout without paying NVIDIA's premium valuation.",
-      "catalyst": "Q2 FY2026 earnings on August 4th, where AMD guided approximately $11.2 billion in revenue \u00c3\u00a2\u00c2\u0080\u00c2\u0094 up 46% year over year. The key question is whether AI GPU demand is as strong as expected and whether AMD is successfully converting design wins into shipped revenue against NVIDIA.",
+      "catalyst": "Q2 FY2026 earnings on August 4th, where AMD guided approximately $11.2 billion in revenue Ã¢ÂÂ up 46% year over year. The key question is whether AI GPU demand is as strong as expected and whether AMD is successfully converting design wins into shipped revenue against NVIDIA.",
       "why": "This is a medium-term conviction position built around a multi-quarter thesis that AMD gains meaningful GPU market share in the AI data center market. It is not a trade around a single quarter but a thesis that plays out over 6-18 months as AI infrastructure investment accelerates.",
       "what_to_do": "All hold conditions met. Conviction 50/100.",
       "industry": "Semiconductors",
@@ -80,8 +80,8 @@ window.BRIEFING_DATA = {
       "dollar_change": -40.84,
       "summary": "SpaceX is the dominant commercial rocket company in the world, operating Falcon 9, Starship, and the Starlink satellite internet constellation with over 7,000 satellites in orbit. It recently completed its IPO and is now publicly traded, giving investors access to what may be the most important infrastructure company of the next century.",
       "catalyst": "No forward catalyst",
-      "why": "CHECKPOINT REVIEW: Position is DOWN -17.2% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
-      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -17.2% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
+      "why": "CHECKPOINT REVIEW: Position is DOWN -17.2% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
+      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -17.2% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
       "industry": "Aerospace & Space",
       "cost_basis": 236.98
     },
@@ -95,10 +95,10 @@ window.BRIEFING_DATA = {
       "balance": 202.78,
       "pct_change": -1.24,
       "dollar_change": -2.55,
-      "summary": "NVIDIA is the dominant supplier of GPUs for artificial intelligence \u00c3\u00a2\u00c2\u0080\u00c2\u0094 its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrastructure, they are overwhelmingly buying NVIDIA GPUs. This gives NVIDIA extraordinary pricing power and demand visibility.",
-      "catalyst": "Q2 FY2027 earnings on August 26th, where NVIDIA guided approximately $91 billion in revenue. This report is the single most important data release for the entire AI infrastructure trade \u00c3\u00a2\u00c2\u0080\u00c2\u0094 it will either confirm or question whether the massive capital spending on AI hardware is sustainable.",
+      "summary": "NVIDIA is the dominant supplier of GPUs for artificial intelligence Ã¢ÂÂ its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrastructure, they are overwhelmingly buying NVIDIA GPUs. This gives NVIDIA extraordinary pricing power and demand visibility.",
+      "catalyst": "Q2 FY2027 earnings on August 26th, where NVIDIA guided approximately $91 billion in revenue. This report is the single most important data release for the entire AI infrastructure trade Ã¢ÂÂ it will either confirm or question whether the massive capital spending on AI hardware is sustainable.",
       "why": "This is a long-term core holding in the AI infrastructure buildout. NVIDIA's position is genuinely dominant and defensible in a way that is rare in technology. The company is held for years, not quarters, as AI becomes the defining technology investment of this decade.",
-      "what_to_do": "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings \u00c3\u00a2\u00c2\u0080\u00c2\u0094 it is a position to hold through the AI infrast",
+      "what_to_do": "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings Ã¢ÂÂ it is a position to hold through the AI infrast",
       "industry": "AI Infrastructure",
       "cost_basis": 200
     },
@@ -164,8 +164,8 @@ window.BRIEFING_DATA = {
       "pct_change": -5.93,
       "dollar_change": -17.54,
       "summary": "XRP is a cryptocurrency designed specifically for cross-border payment settlement, enabling financial institutions to transfer value between currencies in seconds at a fraction of the cost of traditional wire transfers. Ripple, the company behind XRP, has partnered with hundreds of banks and payment providers globally to use XRP as a bridge currency.",
-      "catalyst": "The primary catalyst is ongoing regulatory clarity \u00c3\u00a2\u00c2\u0080\u00c2\u0094 the SEC lawsuit against Ripple reached a partial resolution in 2023 and XRP is increasingly viewed as compliant with U.S. securities law. Continued expansion of Ripple's payment network and any new institutional partnership announcements would be positive catalysts.",
-      "why": "This is a long-term position in the digital payment infrastructure thesis \u00c3\u00a2\u00c2\u0080\u00c2\u0094 specifically that cross-border payments will increasingly move to blockchain rails for speed, cost, and transparency reasons, and XRP is one of the primary beneficiaries of that shift.",
+      "catalyst": "The primary catalyst is ongoing regulatory clarity Ã¢ÂÂ the SEC lawsuit against Ripple reached a partial resolution in 2023 and XRP is increasingly viewed as compliant with U.S. securities law. Continued expansion of Ripple's payment network and any new institutional partnership announcements would be positive catalysts.",
+      "why": "This is a long-term position in the digital payment infrastructure thesis Ã¢ÂÂ specifically that cross-border payments will increasingly move to blockchain rails for speed, cost, and transparency reasons, and XRP is one of the primary beneficiaries of that shift.",
       "what_to_do": "XRP is a permanent hold.",
       "industry": "Cryptocurrency",
       "cost_basis": 295.75
@@ -182,26 +182,9 @@ window.BRIEFING_DATA = {
       "dollar_change": -24.64,
       "summary": "Intel Corporation",
       "catalyst": "No forward catalyst",
-      "why": "CHECKPOINT REVIEW: Position is DOWN -18.0% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
-      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -18.0% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
+      "why": "CHECKPOINT REVIEW: Position is DOWN -18.0% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
+      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -18.0% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
       "industry": "Semiconductors",
-      "cost_basis": 0
-    },
-    {
-      "ticker": "NOK",
-      "type": "Stock",
-      "term": "Medium-term",
-      "qty": 3,
-      "entry_price": 14.24,
-      "current_price": 12.9,
-      "balance": 38.7,
-      "pct_change": -9.41,
-      "dollar_change": -4.02,
-      "summary": "Nokia Corporation",
-      "catalyst": "No forward catalyst",
-      "why": "CHECKPOINT REVIEW: Position is DOWN -9.4% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
-      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -9.4% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
-      "industry": "Networking",
       "cost_basis": 0
     },
     {
@@ -397,7 +380,7 @@ window.BRIEFING_DATA = {
       ],
       "reasoning": "Hold. No action needed. This position is up 12.9% and serves its purpose as the portfolio foundation. Only reassess if the investment thesis for a specific higher-conviction opportunity justifies reallocating this capital.",
       "summary": "SPY tracks the S&P 500 index, giving you diversified exposure to the 500 largest U.S. companies across every major sector. It is the most widely held ETF in the world and serves as the benchmark everything else in your portfolio is measured against. When you hold SPY, you are essentially holding a slice of the entire U.S. economy.",
-      "catalyst": "SPY has no single catalyst \u00c3\u00a2\u00c2\u0080\u00c2\u0094 it moves with the overall market. Key drivers right now include Fed rate decisions, inflation data (next CPI report July 14), and corporate earnings season beginning in mid-July. A dovish shift from the Fed or strong earnings results would push SPY higher.",
+      "catalyst": "SPY has no single catalyst Ã¢ÂÂ it moves with the overall market. Key drivers right now include Fed rate decisions, inflation data (next CPI report July 14), and corporate earnings season beginning in mid-July. A dovish shift from the Fed or strong earnings results would push SPY higher.",
       "why": "This is a long-term core holding designed to anchor the portfolio with stable, compounding returns over many years. When no higher-conviction opportunity exists for your cash, SPY is where uninvested capital belongs rather than sitting idle.",
       "what_to_do": "SPY is a permanent hold.",
       "industry": "Broad Market ETF",
@@ -410,13 +393,13 @@ window.BRIEFING_DATA = {
       "current_price": 991.64,
       "pct_change": 65.49,
       "bullets": [
-        "WATCH \u00c3\u00a2\u00c2\u0080\u00c2\u0094 Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cu"
+        "WATCH Ã¢ÂÂ Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cu"
       ],
-      "reasoning": "WATCH \u00c3\u00a2\u00c2\u0080\u00c2\u0094 Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cut, exit and reallocate.",
-      "summary": "Micron Technology manufactures DRAM and NAND memory chips \u00c3\u00a2\u00c2\u0080\u00c2\u0094 the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one of the primary beneficiaries of that demand surge.",
+      "reasoning": "WATCH Ã¢ÂÂ Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cut, exit and reallocate.",
+      "summary": "Micron Technology manufactures DRAM and NAND memory chips Ã¢ÂÂ the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one of the primary beneficiaries of that demand surge.",
       "catalyst": "Earnings just reported June 25. Review results and forward guidance carefully.",
-      "why": "This was entered as a medium-term position around the AI memory demand supercycle. It has returned over 100% from entry, which is exceptional. The pre-earnings exit rule in your framework exists precisely for situations like this \u00c3\u00a2\u00c2\u0080\u00c2\u0094 massive gains before a binary event.",
-      "what_to_do": "WATCH \u00c3\u00a2\u00c2\u0080\u00c2\u0094 Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cu",
+      "why": "This was entered as a medium-term position around the AI memory demand supercycle. It has returned over 100% from entry, which is exceptional. The pre-earnings exit rule in your framework exists precisely for situations like this Ã¢ÂÂ massive gains before a binary event.",
+      "what_to_do": "WATCH Ã¢ÂÂ Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cu",
       "industry": "Semiconductors",
       "term": "Medium-term"
     },
@@ -431,7 +414,7 @@ window.BRIEFING_DATA = {
       ],
       "reasoning": "Hold. AMD is up 18.4% but the thesis is intact and nothing negative has emerged. The only reason to trim or exit would be a negative AMD-specific event, sector weakness, or a deteriorating macro environment for growth stocks. Without that, let the position continue to develop toward the August 4 earnings catalyst.",
       "summary": "Advanced Micro Devices makes CPUs and GPUs that compete directly with Intel and NVIDIA. In the AI race, AMD's MI300 and MI450 GPU series are taking meaningful market share from NVIDIA in data center AI workloads, making AMD one of the clearest ways to play the AI buildout without paying NVIDIA's premium valuation.",
-      "catalyst": "Q2 FY2026 earnings on August 4th, where AMD guided approximately $11.2 billion in revenue \u00c3\u00a2\u00c2\u0080\u00c2\u0094 up 46% year over year. The key question is whether AI GPU demand is as strong as expected and whether AMD is successfully converting design wins into shipped revenue against NVIDIA.",
+      "catalyst": "Q2 FY2026 earnings on August 4th, where AMD guided approximately $11.2 billion in revenue Ã¢ÂÂ up 46% year over year. The key question is whether AI GPU demand is as strong as expected and whether AMD is successfully converting design wins into shipped revenue against NVIDIA.",
       "why": "This is a medium-term conviction position built around a multi-quarter thesis that AMD gains meaningful GPU market share in the AI data center market. It is not a trade around a single quarter but a thesis that plays out over 6-18 months as AI infrastructure investment accelerates.",
       "what_to_do": "All hold conditions met. Conviction 50/100.",
       "industry": "Semiconductors",
@@ -444,13 +427,13 @@ window.BRIEFING_DATA = {
       "current_price": 152.16,
       "pct_change": -17.23,
       "bullets": [
-        "CHECKPOINT REVIEW: Position is DOWN -17.2% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth."
+        "CHECKPOINT REVIEW: Position is DOWN -17.2% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth."
       ],
       "reasoning": "Hold through the index inclusion dates. The Russell 1000 and Nasdaq-100 inclusion through early July is the immediate catalyst. After index inclusion is complete, reassess the position size and whether to add more or hold at current allocation.",
       "summary": "SpaceX is the dominant commercial rocket company in the world, operating Falcon 9, Starship, and the Starlink satellite internet constellation with over 7,000 satellites in orbit. It recently completed its IPO and is now publicly traded, giving investors access to what may be the most important infrastructure company of the next century.",
       "catalyst": "No forward catalyst identified",
-      "why": "CHECKPOINT REVIEW: Position is DOWN -17.2% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
-      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -17.2% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
+      "why": "CHECKPOINT REVIEW: Position is DOWN -17.2% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
+      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -17.2% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
       "industry": "Aerospace & Space",
       "term": "Long-term"
     },
@@ -461,13 +444,13 @@ window.BRIEFING_DATA = {
       "current_price": 202.78,
       "pct_change": -1.24,
       "bullets": [
-        "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings \u00c3\u00a2\u00c2\u0080\u00c2\u0094 it is a position to hold through the AI infrast"
+        "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings Ã¢ÂÂ it is a position to hold through the AI infrast"
       ],
-      "reasoning": "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings \u00c3\u00a2\u00c2\u0080\u00c2\u0094 it is a position to hold through the AI infrastructure buildout cycle.",
-      "summary": "NVIDIA is the dominant supplier of GPUs for artificial intelligence \u00c3\u00a2\u00c2\u0080\u00c2\u0094 its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrastructure, they are overwhelmingly buying NVIDIA GPUs. This gives NVIDIA extraordinary pricing power and demand visibility.",
-      "catalyst": "Q2 FY2027 earnings on August 26th, where NVIDIA guided approximately $91 billion in revenue. This report is the single most important data release for the entire AI infrastructure trade \u00c3\u00a2\u00c2\u0080\u00c2\u0094 it will either confirm or question whether the massive capital spending on AI hardware is sustainable.",
+      "reasoning": "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings Ã¢ÂÂ it is a position to hold through the AI infrastructure buildout cycle.",
+      "summary": "NVIDIA is the dominant supplier of GPUs for artificial intelligence Ã¢ÂÂ its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrastructure, they are overwhelmingly buying NVIDIA GPUs. This gives NVIDIA extraordinary pricing power and demand visibility.",
+      "catalyst": "Q2 FY2027 earnings on August 26th, where NVIDIA guided approximately $91 billion in revenue. This report is the single most important data release for the entire AI infrastructure trade Ã¢ÂÂ it will either confirm or question whether the massive capital spending on AI hardware is sustainable.",
       "why": "This is a long-term core holding in the AI infrastructure buildout. NVIDIA's position is genuinely dominant and defensible in a way that is rare in technology. The company is held for years, not quarters, as AI becomes the defining technology investment of this decade.",
-      "what_to_do": "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings \u00c3\u00a2\u00c2\u0080\u00c2\u0094 it is a position to hold through the AI infrast",
+      "what_to_do": "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings Ã¢ÂÂ it is a position to hold through the AI infrast",
       "industry": "AI Infrastructure",
       "term": "Long-term"
     },
@@ -480,7 +463,7 @@ window.BRIEFING_DATA = {
       "bullets": [
         "BTC is a permanent hold."
       ],
-      "reasoning": "Hold long-term. Up 7% from entry. No action needed. Only reassess if the macro thesis for Bitcoin changes materially \u00c3\u00a2\u00c2\u0080\u00c2\u0094 such as adverse regulatory action or a fundamental change in institutional adoption trends.",
+      "reasoning": "Hold long-term. Up 7% from entry. No action needed. Only reassess if the macro thesis for Bitcoin changes materially Ã¢ÂÂ such as adverse regulatory action or a fundamental change in institutional adoption trends.",
       "summary": "Bitcoin is the original and largest cryptocurrency by market capitalization, widely held as a digital store of value and inflation hedge. It operates on a decentralized network with a fixed supply of 21 million coins, making it increasingly scarce as institutional and retail adoption grows. Bitcoin is now held in corporate treasuries and ETFs by major financial institutions.",
       "catalyst": "No specific near-term company catalyst exists. Bitcoin's price is driven by macro liquidity conditions, institutional adoption flows, regulatory clarity, and broader risk appetite. A more dovish Fed stance or continued institutional ETF inflows would be positive catalysts.",
       "why": "This is a long-term structural allocation, not a trade. Bitcoin is held as a store of value and inflation hedge that is uncorrelated with traditional stock market movements. It is intended to be held through volatility rather than traded around short-term price swings.",
@@ -516,8 +499,8 @@ window.BRIEFING_DATA = {
       ],
       "reasoning": "Hold long-term. Down 4.2% from entry which is minimal. The regulatory thesis is developing favorably and the payment network is growing. No action needed unless regulatory conditions deteriorate significantly.",
       "summary": "XRP is a cryptocurrency designed specifically for cross-border payment settlement, enabling financial institutions to transfer value between currencies in seconds at a fraction of the cost of traditional wire transfers. Ripple, the company behind XRP, has partnered with hundreds of banks and payment providers globally to use XRP as a bridge currency.",
-      "catalyst": "The primary catalyst is ongoing regulatory clarity \u00c3\u00a2\u00c2\u0080\u00c2\u0094 the SEC lawsuit against Ripple reached a partial resolution in 2023 and XRP is increasingly viewed as compliant with U.S. securities law. Continued expansion of Ripple's payment network and any new institutional partnership announcements would be positive catalysts.",
-      "why": "This is a long-term position in the digital payment infrastructure thesis \u00c3\u00a2\u00c2\u0080\u00c2\u0094 specifically that cross-border payments will increasingly move to blockchain rails for speed, cost, and transparency reasons, and XRP is one of the primary beneficiaries of that shift.",
+      "catalyst": "The primary catalyst is ongoing regulatory clarity Ã¢ÂÂ the SEC lawsuit against Ripple reached a partial resolution in 2023 and XRP is increasingly viewed as compliant with U.S. securities law. Continued expansion of Ripple's payment network and any new institutional partnership announcements would be positive catalysts.",
+      "why": "This is a long-term position in the digital payment infrastructure thesis Ã¢ÂÂ specifically that cross-border payments will increasingly move to blockchain rails for speed, cost, and transparency reasons, and XRP is one of the primary beneficiaries of that shift.",
       "what_to_do": "XRP is a permanent hold.",
       "industry": "Cryptocurrency",
       "term": "Long-term"
@@ -546,31 +529,14 @@ window.BRIEFING_DATA = {
       "current_price": 112.54,
       "pct_change": -17.96,
       "bullets": [
-        "CHECKPOINT REVIEW: Position is DOWN -18.0% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth."
+        "CHECKPOINT REVIEW: Position is DOWN -18.0% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth."
       ],
-      "reasoning": "Hold \u2014 thesis intact.",
+      "reasoning": "Hold — thesis intact.",
       "summary": "Intel Corporation",
       "catalyst": "No forward catalyst identified",
-      "why": "CHECKPOINT REVIEW: Position is DOWN -18.0% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
-      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -18.0% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
+      "why": "CHECKPOINT REVIEW: Position is DOWN -18.0% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
+      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -18.0% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
       "industry": "Semiconductors",
-      "term": "Medium-term"
-    },
-    {
-      "ticker": "NOK",
-      "action": "Exit",
-      "entry_price": 14.24,
-      "current_price": 12.9,
-      "pct_change": -9.41,
-      "bullets": [
-        "CHECKPOINT REVIEW: Position is DOWN -9.4% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth."
-      ],
-      "reasoning": "Hold \u2014 thesis intact.",
-      "summary": "Nokia Corporation",
-      "catalyst": "No forward catalyst identified",
-      "why": "CHECKPOINT REVIEW: Position is DOWN -9.4% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
-      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -9.4% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
-      "industry": "Networking",
       "term": "Medium-term"
     },
     {
@@ -578,11 +544,11 @@ window.BRIEFING_DATA = {
       "action": "Hold",
       "entry_price": 82.06,
       "current_price": 0,
-      "pct_change": -100.0,
+      "pct_change": -100,
       "bullets": [
         "All hold conditions met. Conviction 50/100."
       ],
-      "reasoning": "Hold \u2014 thesis intact.",
+      "reasoning": "Hold — thesis intact.",
       "summary": "",
       "catalyst": "",
       "why": "",
@@ -594,12 +560,12 @@ window.BRIEFING_DATA = {
   "industry_opportunities": [
     {
       "industry": "Biotech",
-      "allocation_guidance": "Conviction 54.0/100 is below the 75 entry threshold \u2014 this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
+      "allocation_guidance": "Conviction 54.0/100 is below the 75 entry threshold — this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
       "etf": "IBB",
-      "conviction": 54.0,
+      "conviction": 54,
       "recommended_security": "IBB",
       "recommended_type": "etf",
-      "recommended_conviction": 54.0,
+      "recommended_conviction": 54,
       "stock_leaders": [
         {
           "ticker": "MRNA",
@@ -631,38 +597,38 @@ window.BRIEFING_DATA = {
           "ticker": "MRNA",
           "conviction": 50,
           "is_recommended": false,
-          "reason": "MRNA is showing a sharp 21-day breakout (+58.1pp vs SPY) \u2014 momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+38.5pp)."
+          "reason": "MRNA is showing a sharp 21-day breakout (+58.1pp vs SPY) — momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+38.5pp)."
         },
         {
           "ticker": "ILMN",
           "conviction": 50,
           "is_recommended": false,
-          "reason": "ILMN is showing a sharp 21-day breakout (+18.8pp vs SPY) \u2014 momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+45.8pp)."
+          "reason": "ILMN is showing a sharp 21-day breakout (+18.8pp vs SPY) — momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+45.8pp)."
         },
         {
           "ticker": "RARE",
           "conviction": 50,
           "is_recommended": false,
-          "reason": "RARE is showing a sharp 21-day breakout (+49.6pp vs SPY) \u2014 momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+33.9pp)."
+          "reason": "RARE is showing a sharp 21-day breakout (+49.6pp vs SPY) — momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+33.9pp)."
         }
       ],
-      "etf_reasoning": "IBB scored 54.0/100 on its own 63-day momentum vs SPY (+3.8pp). The strongest individual stock scanned inside this industry only reached 50/100 \u2014 not enough edge over the ETF to justify single-stock concentration risk right now.",
+      "etf_reasoning": "IBB scored 54.0/100 on its own 63-day momentum vs SPY (+3.8pp). The strongest individual stock scanned inside this industry only reached 50/100 — not enough edge over the ETF to justify single-stock concentration risk right now.",
       "term": "Medium-term",
       "bullets": [
         "IBB is outperforming SPY by +3.8 percentage points over the last 63 trading days.",
-        "Abivax $920 million cash haul lets it prepare for solo U.S. launch instead of relying on a buyer, CEO tells CNBC \u2014 Its latest fundraising round provides the French biotech with enough cash to finance operations through 2029."
+        "Abivax $920 million cash haul lets it prepare for solo U.S. launch instead of relying on a buyer, CEO tells CNBC — Its latest fundraising round provides the French biotech with enough cash to finance operations through 2029."
       ],
-      "vehicle": "IBB ETF \u2014 no individual stock in this industry scored meaningfully higher than the ETF itself (54.0/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
+      "vehicle": "IBB ETF — no individual stock in this industry scored meaningfully higher than the ETF itself (54.0/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
       "stocks": [
         "MRNA",
         "ILMN",
         "RARE"
       ],
-      "why_now": "Event score of 60/100 \u2014 moderate near-term catalyst activity supporting the thesis. Current macro regime (low VIX, risk-on) is directly favorable for this type of sector exposure."
+      "why_now": "Event score of 60/100 — moderate near-term catalyst activity supporting the thesis. Current macro regime (low VIX, risk-on) is directly favorable for this type of sector exposure."
     },
     {
       "industry": "Pharmaceuticals",
-      "allocation_guidance": "Conviction 51/100 is below the 75 entry threshold \u2014 this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
+      "allocation_guidance": "Conviction 51/100 is below the 75 entry threshold — this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
       "etf": "XPH",
       "conviction": 51,
       "recommended_security": "XPH",
@@ -705,22 +671,22 @@ window.BRIEFING_DATA = {
           "ticker": "NVO",
           "conviction": 42,
           "is_recommended": false,
-          "reason": "NVO is outperforming SPY on both timeframes \u2014 +19.7pp over 63 days and +13.6pp over 21 days \u2014 sustained, not a one-week spike."
+          "reason": "NVO is outperforming SPY on both timeframes — +19.7pp over 63 days and +13.6pp over 21 days — sustained, not a one-week spike."
         },
         {
           "ticker": "LLY",
           "conviction": 38,
           "is_recommended": false,
-          "reason": "LLY is outperforming SPY on both timeframes \u2014 +16.8pp over 63 days and +4.1pp over 21 days \u2014 sustained, not a one-week spike."
+          "reason": "LLY is outperforming SPY on both timeframes — +16.8pp over 63 days and +4.1pp over 21 days — sustained, not a one-week spike."
         }
       ],
-      "etf_reasoning": "XPH scored 51/100 on its own 63-day momentum vs SPY (+13.0pp). The strongest individual stock scanned inside this industry only reached 50/100 \u2014 not enough edge over the ETF to justify single-stock concentration risk right now.",
+      "etf_reasoning": "XPH scored 51/100 on its own 63-day momentum vs SPY (+13.0pp). The strongest individual stock scanned inside this industry only reached 50/100 — not enough edge over the ETF to justify single-stock concentration risk right now.",
       "term": "Medium-term",
       "bullets": [
         "XPH is outperforming SPY by +13.0 percentage points over the last 63 trading days.",
-        "\u26a0\ufe0f No confirmed catalyst or news driver identified \u2014 this is a momentum-only signal. Momentum alone is not sufficient reason to invest; treat as a watch item until a specific catalyst emerges."
+        "⚠️ No confirmed catalyst or news driver identified — this is a momentum-only signal. Momentum alone is not sufficient reason to invest; treat as a watch item until a specific catalyst emerges."
       ],
-      "vehicle": "XPH ETF \u2014 no individual stock in this industry scored meaningfully higher than the ETF itself (51/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
+      "vehicle": "XPH ETF — no individual stock in this industry scored meaningfully higher than the ETF itself (51/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
       "stocks": [
         "OGN",
         "NVO",
@@ -730,7 +696,7 @@ window.BRIEFING_DATA = {
     },
     {
       "industry": "Cybersecurity",
-      "allocation_guidance": "Conviction 51/100 is below the 75 entry threshold \u2014 this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
+      "allocation_guidance": "Conviction 51/100 is below the 75 entry threshold — this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
       "etf": "CIBR",
       "conviction": 51,
       "recommended_security": "CIBR",
@@ -767,43 +733,43 @@ window.BRIEFING_DATA = {
           "ticker": "CRWD",
           "conviction": 50,
           "is_recommended": false,
-          "reason": "CRWD is showing a sharp 21-day breakout (+20.8pp vs SPY) \u2014 momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+90.2pp)."
+          "reason": "CRWD is showing a sharp 21-day breakout (+20.8pp vs SPY) — momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+90.2pp)."
         },
         {
           "ticker": "PANW",
           "conviction": 50,
           "is_recommended": false,
-          "reason": "PANW is showing a sharp 21-day breakout (+27.6pp vs SPY) \u2014 momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+91.8pp)."
+          "reason": "PANW is showing a sharp 21-day breakout (+27.6pp vs SPY) — momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+91.8pp)."
         },
         {
           "ticker": "FTNT",
           "conviction": 50,
           "is_recommended": false,
-          "reason": "FTNT is showing a sharp 21-day breakout (+16.1pp vs SPY) \u2014 momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+92.1pp)."
+          "reason": "FTNT is showing a sharp 21-day breakout (+16.1pp vs SPY) — momentum just turned strong even though the 63-day trend hasn't fully confirmed yet (+92.1pp)."
         }
       ],
-      "etf_reasoning": "CIBR scored 51/100 on its own 63-day momentum vs SPY (+38.7pp). The strongest individual stock scanned inside this industry only reached 50/100 \u2014 not enough edge over the ETF to justify single-stock concentration risk right now.",
+      "etf_reasoning": "CIBR scored 51/100 on its own 63-day momentum vs SPY (+38.7pp). The strongest individual stock scanned inside this industry only reached 50/100 — not enough edge over the ETF to justify single-stock concentration risk right now.",
       "term": "Medium-term",
       "bullets": [
         "CIBR is outperforming SPY by +38.7 percentage points over the last 63 trading days.",
         "Ripple tailwinds flowing in from related sectors: defense_spending_increase."
       ],
-      "vehicle": "CIBR ETF \u2014 no individual stock in this industry scored meaningfully higher than the ETF itself (51/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
+      "vehicle": "CIBR ETF — no individual stock in this industry scored meaningfully higher than the ETF itself (51/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
       "stocks": [
         "CRWD",
         "PANW",
         "FTNT"
       ],
-      "why_now": "This industry has outrun SPY by 38.7pp over 63 days \u2014 that is not noise, it is sustained institutional buying. Event score of 50/100 \u2014 moderate near-term catalyst activity supporting the thesis. Positive spillover effects from: defense_spending_increase are amplifying sector momentum. Current macro regime (low VIX, risk-on) is directly favorable for this type of sector exposure."
+      "why_now": "This industry has outrun SPY by 38.7pp over 63 days — that is not noise, it is sustained institutional buying. Event score of 50/100 — moderate near-term catalyst activity supporting the thesis. Positive spillover effects from: defense_spending_increase are amplifying sector momentum. Current macro regime (low VIX, risk-on) is directly favorable for this type of sector exposure."
     },
     {
       "industry": "Semiconductors",
-      "allocation_guidance": "Conviction 50.0/100 is below the 75 entry threshold \u2014 this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
+      "allocation_guidance": "Conviction 50.0/100 is below the 75 entry threshold — this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
       "etf": "SOXX",
-      "conviction": 50.0,
+      "conviction": 50,
       "recommended_security": "SOXX",
       "recommended_type": "etf",
-      "recommended_conviction": 50.0,
+      "recommended_conviction": 50,
       "stock_leaders": [
         {
           "ticker": "AMD",
@@ -835,35 +801,35 @@ window.BRIEFING_DATA = {
           "ticker": "AMD",
           "conviction": 50,
           "is_recommended": false,
-          "reason": "AMD is outperforming SPY on both timeframes \u2014 +120.2pp over 63 days and +12.7pp over 21 days \u2014 sustained, not a one-week spike."
+          "reason": "AMD is outperforming SPY on both timeframes — +120.2pp over 63 days and +12.7pp over 21 days — sustained, not a one-week spike."
         },
         {
           "ticker": "MU",
           "conviction": 50,
           "is_recommended": false,
-          "reason": "MU is outperforming SPY on both timeframes \u2014 +124.5pp over 63 days and +3.7pp over 21 days \u2014 sustained, not a one-week spike."
+          "reason": "MU is outperforming SPY on both timeframes — +124.5pp over 63 days and +3.7pp over 21 days — sustained, not a one-week spike."
         },
         {
           "ticker": "INTC",
           "conviction": 50,
           "is_recommended": false,
-          "reason": "INTC is outperforming SPY on both timeframes \u2014 +71.5pp over 63 days and +2.0pp over 21 days \u2014 sustained, not a one-week spike."
+          "reason": "INTC is outperforming SPY on both timeframes — +71.5pp over 63 days and +2.0pp over 21 days — sustained, not a one-week spike."
         }
       ],
-      "etf_reasoning": "SOXX scored 50.0/100 on its own 63-day momentum vs SPY (+42.9pp). The strongest individual stock scanned inside this industry only reached 50/100 \u2014 not enough edge over the ETF to justify single-stock concentration risk right now.",
+      "etf_reasoning": "SOXX scored 50.0/100 on its own 63-day momentum vs SPY (+42.9pp). The strongest individual stock scanned inside this industry only reached 50/100 — not enough edge over the ETF to justify single-stock concentration risk right now.",
       "term": "Medium-term",
       "bullets": [
         "SOXX is outperforming SPY by +42.9 percentage points over the last 63 trading days.",
-        "Inside NATO's extraordinary 48 hours that revealed Trump's grip on global diplomacy \u2014 Steve Sedgwick goes behind the scenes of NATO's dramatic 48 hours, where Trump's changing tone reshaped diplomacy and left allies guessing.",
+        "Inside NATO's extraordinary 48 hours that revealed Trump's grip on global diplomacy — Steve Sedgwick goes behind the scenes of NATO's dramatic 48 hours, where Trump's changing tone reshaped diplomacy and left allies guessing.",
         "Ripple tailwinds flowing in from related sectors: defense_spending_increase."
       ],
-      "vehicle": "SOXX ETF \u2014 no individual stock in this industry scored meaningfully higher than the ETF itself (50.0/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
+      "vehicle": "SOXX ETF — no individual stock in this industry scored meaningfully higher than the ETF itself (50.0/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
       "stocks": [
         "AMD",
         "MU",
         "INTC"
       ],
-      "why_now": "This industry has outrun SPY by 42.9pp over 63 days \u2014 that is not noise, it is sustained institutional buying. Event catalyst score of 80/100 indicates multiple confirmed near-term catalysts that could drive further upside. Positive spillover effects from: defense_spending_increase are amplifying sector momentum. Current macro regime (low VIX, risk-on) is directly favorable for this type of sector exposure."
+      "why_now": "This industry has outrun SPY by 42.9pp over 63 days — that is not noise, it is sustained institutional buying. Event catalyst score of 80/100 indicates multiple confirmed near-term catalysts that could drive further upside. Positive spillover effects from: defense_spending_increase are amplifying sector momentum. Current macro regime (low VIX, risk-on) is directly favorable for this type of sector exposure."
     }
   ],
   "what_changed": [],
@@ -929,7 +895,7 @@ window.BRIEFING_DATA = {
       "industry": "Cybersecurity",
       "earnings_date": "2026-08-03",
       "eps_estimate": 1.8195,
-      "excess_21d": 43.0,
+      "excess_21d": 43,
       "price": 159.39,
       "has_news": false,
       "news_headlines": [],
@@ -943,7 +909,7 @@ window.BRIEFING_DATA = {
       "earnings_date": "2026-08-03",
       "eps_estimate": 1.8684,
       "excess_21d": 26.4,
-      "price": 582.0,
+      "price": 582,
       "has_news": false,
       "news_headlines": [],
       "catalyst_type": "earnings",
@@ -1000,7 +966,7 @@ window.BRIEFING_DATA = {
         "ticker": "MU",
         "exit_type": null,
         "urgency": "monitor",
-        "reason": "WATCH \u00c3\u00a2\u00c2\u0080\u00c2\u0094 Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cut, exit and reallocate.",
+        "reason": "WATCH Ã¢ÂÂ Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cut, exit and reallocate.",
         "pct_change": 65.49,
         "tax_awareness": {
           "ticker": "MU",
@@ -1032,7 +998,7 @@ window.BRIEFING_DATA = {
         "exit_type": "checkpoint",
         "urgency": "next_open",
         "conviction": 50,
-        "reason": "CHECKPOINT REVIEW: Position is DOWN -17.2% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
+        "reason": "CHECKPOINT REVIEW: Position is DOWN -17.2% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
         "pct_change": -17.23,
         "tax_awareness": {
           "ticker": "SPCX",
@@ -1048,7 +1014,7 @@ window.BRIEFING_DATA = {
         "ticker": "NVDA",
         "exit_type": null,
         "urgency": "monitor",
-        "reason": "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings \u00c3\u00a2\u00c2\u0080\u00c2\u0094 it is a position to hold through the AI infrastructure buildout cycle.",
+        "reason": "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings Ã¢ÂÂ it is a position to hold through the AI infrastructure buildout cycle.",
         "pct_change": -1.24,
         "tax_awareness": {
           "ticker": "NVDA",
@@ -1089,7 +1055,7 @@ window.BRIEFING_DATA = {
         "exit_type": "checkpoint",
         "urgency": "next_open",
         "conviction": 50,
-        "reason": "CHECKPOINT REVIEW: Position is DOWN -18.0% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
+        "reason": "CHECKPOINT REVIEW: Position is DOWN -18.0% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
         "pct_change": -17.96,
         "tax_awareness": {
           "ticker": "INTC",
@@ -1106,7 +1072,7 @@ window.BRIEFING_DATA = {
         "exit_type": "checkpoint",
         "urgency": "next_open",
         "conviction": 50,
-        "reason": "CHECKPOINT REVIEW: Position is DOWN -9.4% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint \u2014 redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
+        "reason": "CHECKPOINT REVIEW: Position is DOWN -9.4% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
         "pct_change": -9.41,
         "tax_awareness": {
           "ticker": "NOK",
@@ -1122,7 +1088,7 @@ window.BRIEFING_DATA = {
         "ticker": "SOL",
         "exit_type": null,
         "reason": "All hold conditions met. Conviction 50/100.",
-        "pct_change": -100.0
+        "pct_change": -100
       }
     ],
     "entry_signals": [],
@@ -1131,7 +1097,7 @@ window.BRIEFING_DATA = {
       "max_allowed_pct": 0.2,
       "over_limit": true,
       "regime": "Green",
-      "warning": "\u26a0\ufe0f Crypto 41.0% exceeds 20% limit in Green regime."
+      "warning": "⚠️ Crypto 41.0% exceeds 20% limit in Green regime."
     },
     "kill_criteria": {
       "triggered": false,
