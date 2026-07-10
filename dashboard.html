@@ -1111,7 +1111,7 @@ async function syncPositionsFromGitHub() {
       });
       if (res.ok) {
         const apiData = await res.json();
-        const decoded = JSON.parse(atob(apiData.content));
+        const decoded = JSON.parse(atob(apiData.content.replace(/\n/g, '')));
         res = { ok: true, json: async () => decoded };
       }
     } else {
