@@ -1087,7 +1087,7 @@ async function editPositionQty(ticker, currentQty) {
       body: JSON.stringify({ message: 'Update ' + ticker + ' qty to ' + qty, content: encoded, sha: sha })
     });
     if (putRes.ok) {
-      if (result) { result.style.display='block'; result.style.background='rgba(93,202,165,0.1)'; result.style.color='#5DCAA5'; result.textContent=ticker + ' quantity updated to ' + qty + '. Reload page to see changes.'; }
+      if (result) { result.style.display='block'; result.style.background='rgba(93,202,165,0.1)'; result.style.color='#5DCAA5'; result.textContent=ticker + ' quantity updated to ' + qty + '.'; await syncPositionsFromGitHub(); }
       // Update local data too
       const localPos = (POSITIONS_CONFIG || []).find(function(lp) { return lp.ticker === ticker; });
       if (localPos) localPos.qty = qty;
@@ -1100,6 +1100,42 @@ async function editPositionQty(ticker, currentQty) {
     if (result) { result.style.display='block'; result.style.background='rgba(226,80,79,0.1)'; result.style.color='#e2504f'; result.textContent='Error: ' + e.message; }
   }
 }
+
+async function syncPositionsFromGitHub() {
+  try {
+    const res = await fetch('https://raw.githubusercontent.com/aidansty/investment-system/main/v4/config/positions.json?t=' + Date.now());
+    if (!res.ok) return;
+    const data = await res.json();
+    const positions = data.positions || [];
+    // Update POSITIONS_CONFIG with latest from GitHub
+    window.POSITIONS_CONFIG = positions;
+    // Update ENTRY_PRICES
+    positions.forEach(p => {
+      ENTRY_PRICES[p.ticker] = p.entry_price || p.entry || 0;
+      POSITION_META[p.ticker] = { term: p.term || '', type: p.type || '' };
+    });
+    // Update BRIEFING_DATA positions
+    if (window.BRIEFING_DATA) {
+      for (const bp of (BRIEFING_DATA.positions || [])) {
+        const fresh = positions.find(p => p.ticker === bp.ticker);
+        if (fresh) {
+          bp.qty = fresh.qty;
+          bp.entry_price = fresh.entry_price || fresh.entry || bp.entry_price;
+        }
+      }
+      // Remove positions that no longer exist
+      const activeTickers = new Set(positions.map(p => p.ticker));
+      BRIEFING_DATA.positions = (BRIEFING_DATA.positions || []).filter(p => activeTickers.has(p.ticker));
+    }
+    renderMgmtPositions();
+    console.log('Positions synced from GitHub:', positions.map(p => p.ticker));
+  } catch(e) {
+    console.log('Position sync error:', e);
+  }
+}
+
+// Sync on page load to always have latest data
+syncPositionsFromGitHub();
 
 function renderMgmtPositions() {
   const list = document.getElementById('mgmt-positions-list');
@@ -1229,7 +1265,7 @@ document.getElementById('add-position-btn')?.addEventListener('click', async () 
       body: JSON.stringify({ message: 'Add position: ' + ticker, content: encoded, sha: sha })
     });
     if (putRes.ok) {
-      if (result) { result.style.display='block'; result.style.background='rgba(93,202,165,0.1)'; result.style.color='#5DCAA5'; result.textContent=ticker + ' added successfully. Reload to see changes.'; }
+      if (result) { result.style.display='block'; result.style.background='rgba(93,202,165,0.1)'; result.style.color='#5DCAA5'; result.textContent=ticker + ' added successfully.'; await syncPositionsFromGitHub(); }
       ENTRY_PRICES[ticker] = entry;
       POSITION_META[ticker] = { term, type };
       ['new-ticker','new-entry','new-qty','new-industry','new-date','new-summary'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
