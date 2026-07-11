@@ -1816,46 +1816,69 @@ const moveRow = document.getElementById('notable-moves');
   moveRow.appendChild(div);
 });
 
-const aftPos = document.getElementById('afternoon-positions');
-const aftPosData = (BRIEFING_DATA.afternoon_positions || []).filter(p => {
-  if (!p.ticker || p.ticker === '-' || p.ticker.includes('*')) return false;
-  // Only show positions with actual urgent developments — not "no new developments" boilerplate
-  const hasRealContent = p.bullets && p.bullets.length && !p.bullets.every(b =>
-    b.toLowerCase().includes('no new developments') || b.toLowerCase().includes('intact hold') || b.toLowerCase().includes('could not be parsed')
-  );
-  return hasRealContent;
-});
-if (!aftPosData.length) {
-  aftPos.innerHTML = '<p class="hint" style="padding:20px;">All positions stable — no urgent developments today. The afternoon monitor only alerts when thesis-breaking events or significant opportunities are detected.</p>';
-}
-aftPosData.forEach(p => {
-  const badgeClass = { 'Hold': 'badge-hold', 'Watch': 'badge-watch', 'Buy More': 'badge-green', 'Buy more': 'badge-green', 'Trim': 'badge-amber', 'Sell': 'badge-red', 'Close': 'badge-red', 'Exit': 'badge-red', 'Reduce': 'badge-amber' }[p.action] || 'badge-gray';
-  const reasonColor = { 'Hold': '#94A3B8', 'Watch': 'var(--amber)', 'Buy More': 'var(--green)', 'Trim': 'var(--amber)', 'Sell': 'var(--red)', 'Close': 'var(--red)', 'Exit': 'var(--red)' }[p.action] || '#aeada5';
-  const card = document.createElement('div');
-  card.className = 'info-card';
-  card.style.marginBottom = '12px';
-  card.innerHTML = `
-    <div class="row-space"><div class="info-card-title" style="margin:0;">${p.ticker}</div><span class="badge ${badgeClass}">${p.action}</span></div>
-    <ul style="margin-top:8px;">${(p.bullets || []).map(b => '<li>' + b + '</li>').join('')}</ul>
-    ${p.reasoning ? '<div class="info-card-footer"><b style="color:' + reasonColor + '">Why ' + p.action.toLowerCase() + ':</b> ' + p.reasoning + '</div>' : ''}`;
-  aftPos.appendChild(card);
-});
+// ── AFTERNOON TAB — Simplified alert-based rendering ──
+const aftAlerts = document.getElementById('aft-alerts');
+if (aftAlerts) {
+  const alerts = [];
+  const whatChanged = BRIEFING_DATA.what_changed || [];
+  const aftPositions = BRIEFING_DATA.afternoon_positions || [];
 
-const aftCand = document.getElementById('afternoon-candidates');
-(BRIEFING_DATA.afternoon_candidates || []).forEach(ind => {
-  const card = document.createElement('div');
-  card.className = 'candidate-card';
-  card.innerHTML = `
-    <div class="candidate-header">
-      <div><div class="candidate-title">${ind.industry}</div><div class="candidate-sub">${ind.term || ''}</div></div>
-      <span class="badge badge-green">${ind.conviction}/100</span>
-    </div>
-    <ul>${(ind.bullets || []).map(b => '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">' + b + '</li>').join('')}</ul>
-    ${ind.why_now ? '<div class="info-card-footer"><b style="color:var(--green);">Why buy now:</b> ' + ind.why_now + '</div>' : ''}`;
-  aftCand.appendChild(card);
-});
-if (!BRIEFING_DATA.afternoon_candidates || !BRIEFING_DATA.afternoon_candidates.length) {
-  aftCand.innerHTML = '<p class="hint">No new candidates emerged since this morning.</p>';
+  // Real content from What Changed (skip boilerplate/errors)
+  const realChanges = (Array.isArray(whatChanged) ? whatChanged : [whatChanged]).filter(w => {
+    const text = (w || '').toLowerCase();
+    return text.length > 20 && !text.includes('unavailable') && !text.includes('could not be parsed');
+  });
+  if (realChanges.length > 0) {
+    alerts.push('<div class="info-card" style="margin-bottom:12px;"><div class="info-card-title">What Changed Today</div><ul>' +
+      realChanges.map(w => '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">' + w + '</li>').join('') + '</ul></div>');
+  }
+
+  // Urgent position actions (exit, sell, trim, or real developments)
+  const urgentPositions = aftPositions.filter(p => {
+    if (!p.ticker || p.ticker === '-') return false;
+    const action = (p.action || '').toLowerCase();
+    if (action === 'exit' || action === 'sell' || action === 'close' || action === 'trim') return true;
+    if (p.bullets && p.bullets.some(b => !b.toLowerCase().includes('no new developments') && !b.toLowerCase().includes('intact hold') && !b.toLowerCase().includes('could not be parsed') && b.length > 20)) return true;
+    return false;
+  });
+  if (urgentPositions.length > 0) {
+    let posHtml = '<div class="info-card" style="margin-bottom:12px;"><div class="info-card-title">Position Alerts</div>';
+    urgentPositions.forEach(p => {
+      const action = (p.action || 'Hold').charAt(0).toUpperCase() + (p.action || 'hold').slice(1);
+      const badgeClass = {'Exit':'badge-red','Sell':'badge-red','Close':'badge-red','Trim':'badge-amber','Watch':'badge-watch'}[action] || 'badge-hold';
+      posHtml += '<div style="padding:12px;border-bottom:0.5px solid rgba(255,255,255,0.05);">';
+      posHtml += '<div style="display:flex;justify-content:space-between;align-items:center;"><b>' + p.ticker + '</b><span class="badge ' + badgeClass + '">' + action + '</span></div>';
+      if (p.bullets && p.bullets.length) {
+        posHtml += '<ul style="margin-top:6px;">' + p.bullets.filter(b => b.length > 10).map(b => '<li style="font-size:12.5px;line-height:1.6;color:var(--text-body);">' + b + '</li>').join('') + '</ul>';
+      }
+      posHtml += '</div>';
+    });
+    posHtml += '</div>';
+    alerts.push(posHtml);
+  }
+
+  // New investment opportunities
+  const aftCandidates = BRIEFING_DATA.afternoon_candidates || [];
+  const realCandidates = aftCandidates.filter(c => c && c.industry && c.conviction > 50);
+  if (realCandidates.length > 0) {
+    let oppHtml = '<div class="info-card" style="margin-bottom:12px;"><div class="info-card-title">Opportunity Detected</div>';
+    realCandidates.slice(0, 3).forEach(c => {
+      oppHtml += '<div style="padding:10px;border-bottom:0.5px solid rgba(255,255,255,0.05);">';
+      oppHtml += '<div style="display:flex;justify-content:space-between;align-items:center;"><b>' + (c.ticker || c.industry || '') + '</b><span class="badge badge-green">' + (c.conviction || 0) + '/100</span></div>';
+      if (c.bullets && c.bullets.length) {
+        oppHtml += '<ul style="margin-top:6px;">' + c.bullets.map(b => '<li style="font-size:12.5px;line-height:1.6;color:var(--text-body);">' + b + '</li>').join('') + '</ul>';
+      }
+      oppHtml += '</div>';
+    });
+    oppHtml += '</div>';
+    alerts.push(oppHtml);
+  }
+
+  if (alerts.length === 0) {
+    aftAlerts.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:28px;margin-bottom:12px;">\u2705</div><div style="font-size:14px;color:var(--text-secondary);">All positions stable \u2014 no urgent developments today.</div><div style="font-size:12px;color:var(--text-secondary);margin-top:6px;">The afternoon monitor alerts on thesis-breaking events, significant news affecting your holdings, market-wide events, and new investment opportunities.</div></div>';
+  } else {
+    aftAlerts.innerHTML = alerts.join('');
+  }
 }
 
 // ============================================================
