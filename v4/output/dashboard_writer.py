@@ -672,7 +672,7 @@ def write_dashboard_data(
             for c in forward_catalysts
         ],
         "position_review": position_review,
-        "industry_opportunities": industry_opportunities,
+        "industry_opportunities": [],  # Removed — catalyst scanner replaces this
         "what_changed": what_changed,
         "notable_moves": notable_moves,
         "afternoon_positions": afternoon_positions,

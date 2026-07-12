@@ -286,7 +286,7 @@ EXIT/WATCH: [TICKER]
 
 If no entry signals: state clearly "Rules engine found no qualifying entry opportunities today. Hold cash and wait for conviction score above 75 with confirmed catalyst."
 
-## Industry Analysis (Layer 1 — Context Only)
+## Catalyst Analysis (Layer 1 — Context Only)
 This section provides context for the rules engine signals above.
 For each top 2-3 qualifying industry (conviction 75+):
 
@@ -453,7 +453,7 @@ def build_telegram_morning_summary(briefing: dict, industry_results: dict, macro
     lines.append("")
 
     if top:
-        lines.append("<b>🏭 Top Industries</b>")
+        lines.append("<b>🏭 Catalyst Scanner Opportunities</b>")
         for ind in top[:4]:
             score = ind.get("conviction_score", 0)
             name = ind["industry"]
