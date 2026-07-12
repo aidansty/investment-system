@@ -1845,7 +1845,7 @@ if (aftAlerts) {
 
   // New investment opportunities
   const aftCandidates = BRIEFING_DATA.afternoon_candidates || [];
-  const realCandidates = aftCandidates.filter(c => c && c.industry && c.conviction > 50);
+  const realCandidates = aftCandidates.filter(c => c && c.industry && c.conviction >= 65);
   if (realCandidates.length > 0) {
     let oppHtml = '<div class="info-card" style="margin-bottom:12px;"><div class="info-card-title">Opportunity Detected</div>';
     realCandidates.slice(0, 3).forEach(c => {

@@ -200,21 +200,56 @@ def main():
             morning_prices[sp.get("ticker", "")] = sp.get("current_price", 0)
     except Exception:
         pass
+    # Fetch intraday LOWS — catches flash crashes that recovered before 2:45 PM
+    intraday_lows = {}
+    try:
+        _crash_tickers = [p.get("ticker", "") for p in positions if p.get("ticker", "") not in CRYPTO_SKIP_CRASH and p.get("ticker", "") != "SPY"]
+        if _crash_tickers:
+            import yfinance as _yf_crash
+            _crash_data = _yf_crash.download(_crash_tickers, period="1d", interval="1d", progress=False)
+            if "Low" in _crash_data.columns:
+                _low_col = _crash_data["Low"]
+                for _ct in _crash_tickers:
+                    if _ct in _low_col.columns:
+                        _low_val = _low_col[_ct].dropna()
+                        if not _low_val.empty:
+                            intraday_lows[_ct] = round(float(_low_val.iloc[-1]), 2)
+                    elif len(_crash_tickers) == 1:
+                        _low_val = _low_col.dropna()
+                        if not _low_val.empty:
+                            intraday_lows[_ct] = round(float(_low_val.iloc[-1]), 2)
+    except Exception as _e:
+        log(f"Intraday low fetch error (non-fatal): {_e}")
+
     for p in positions:
         tk = p.get("ticker", "")
         if tk in CRYPTO_SKIP_CRASH or tk == "SPY":
             continue
         current = p.get("current_price", 0) or 0
         morning = morning_prices.get(tk, 0)
-        if morning > 0 and current > 0:
-            intraday_change = round((current - morning) / morning * 100, 1)
-            if intraday_change <= -5:
-                log(f"CRASH DETECTION: {tk} is DOWN {intraday_change}% intraday")
-                relevant_headlines.append({
-                    "headline": f"PRICE ALERT: {tk} down {intraday_change}% intraday",
-                    "summary": f"{tk} dropped from ${morning:.2f} this morning to ${current:.2f} now ({intraday_change}% decline). May indicate stealth downgrade, sector rotation, or block trade.",
-                    "matched_ticker": tk, "source": "Price Monitor",
-                })
+        day_low = intraday_lows.get(tk, current)
+
+        if morning > 0 and day_low > 0:
+            # Check the WORST point of the day, not just where it is now
+            low_change = round((day_low - morning) / morning * 100, 1)
+            current_change = round((current - morning) / morning * 100, 1) if current > 0 else 0
+
+            if low_change <= -5:
+                recovered = current_change > low_change + 2
+                if recovered:
+                    log(f"FLASH CRASH DETECTED: {tk} hit {low_change}% intraday low but recovered to {current_change}%")
+                    relevant_headlines.append({
+                        "headline": f"FLASH CRASH WARNING: {tk} hit {low_change}% intraday low",
+                        "summary": f"{tk} dropped from ${morning:.2f} to a low of ${day_low:.2f} ({low_change}%) during today's session but has partially recovered to ${current:.2f} ({current_change}%). The severe intraday wick suggests institutional distribution — a large seller dumped shares. This is a warning sign even though the price recovered.",
+                        "matched_ticker": tk, "source": "Price Monitor",
+                    })
+                else:
+                    log(f"CRASH DETECTION: {tk} is DOWN {current_change}% intraday (low: {low_change}%)")
+                    relevant_headlines.append({
+                        "headline": f"PRICE ALERT: {tk} down {current_change}% intraday (low: {low_change}%)",
+                        "summary": f"{tk} dropped from ${morning:.2f} this morning to ${current:.2f} now ({current_change}% decline, intraday low ${day_low:.2f}). May indicate stealth downgrade, sector rotation, or block trade.",
+                        "matched_ticker": tk, "source": "Price Monitor",
+                    })
     for position in positions:
         position["ticker_news"] = [h for h in relevant_headlines if h.get("matched_ticker") == position["ticker"]]
     macro = fetch_macro_data()

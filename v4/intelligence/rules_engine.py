@@ -302,7 +302,7 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
                 "action": "exit",
                 "ticker": ticker,
                 "exit_type": "checkpoint",
-                "urgency": "next_open",
+                "urgency": "eod_decision",
                 "conviction": conviction,
                 "reason": f"CHECKPOINT REVIEW: Position is DOWN {pct_change:+.1f}% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
                 "pct_change": pct_change,
@@ -349,13 +349,13 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
                 pass
 
     if conviction < MIN_CONVICTION_HOLD and consecutive_low_conviction_days >= THESIS_BREAK_DAYS:
-        return {"action": "exit", "ticker": ticker, "exit_type": "slow", "urgency": "next_open", "reason": f"Conviction {conviction}/100 below {MIN_CONVICTION_HOLD} for {consecutive_low_conviction_days} consecutive days.", "pct_change": pct_change}
+        return {"action": "exit", "ticker": ticker, "exit_type": "slow", "urgency": "eod_decision", "reason": f"Conviction {conviction}/100 below {MIN_CONVICTION_HOLD} for {consecutive_low_conviction_days} consecutive days.", "pct_change": pct_change}
     elif conviction < MIN_CONVICTION_HOLD:
         days_remaining = THESIS_BREAK_DAYS - consecutive_low_conviction_days
         return {"action": "watch", "ticker": ticker, "exit_type": "slow", "urgency": "monitor", "reason": f"Conviction {conviction}/100 below {MIN_CONVICTION_HOLD}. Day {consecutive_low_conviction_days}/5 of exit window. {days_remaining} more days to exit if no recovery.", "pct_change": pct_change}
 
     if consecutive_layer1_miss_days >= 5:
-        return {"action": "exit", "ticker": ticker, "exit_type": "slow", "urgency": "next_open", "reason": f"Industry out of Layer 1 for {consecutive_layer1_miss_days} consecutive days. Momentum broken.", "pct_change": pct_change}
+        return {"action": "exit", "ticker": ticker, "exit_type": "slow", "urgency": "eod_decision", "reason": f"Industry out of Layer 1 for {consecutive_layer1_miss_days} consecutive days. Momentum broken.", "pct_change": pct_change}
 
     if what_to_do and "WATCH" in what_to_do.upper():
         return {"action": "watch", "ticker": ticker, "exit_type": None, "urgency": "monitor", "reason": what_to_do[:300], "pct_change": pct_change}

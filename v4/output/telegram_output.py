@@ -261,8 +261,8 @@ def build_and_send_afternoon_telegram(
 
     # 4. Urgent watch signals
     for sig in exit_signals:
-        if sig.get("action") == "watch" and sig.get("urgency") == "next_open":
-            urgent_items.append(f"\u26a0\ufe0f <b>{sig.get('ticker', '')} — WATCH (urgent)</b>\n  {sig.get('reason', '')[:150]}")
+        if sig.get("action") == "watch" and sig.get("urgency") in ("eod_decision", "next_open"):
+            urgent_items.append(f"\u26a0\ufe0f <b>{sig.get('ticker', '')} — WATCH — decide before 4:00 PM close</b>\n  {sig.get('reason', '')[:150]}")
 
     # 5. Positive opportunity alerts — significant bullish catalysts during the day
     if sections:
@@ -277,14 +277,19 @@ def build_and_send_afternoon_telegram(
                 if sentences:
                     urgent_items.append("\U0001f4b0 <b>New Opportunity Detected</b>\n" + "\n".join(f"  \u2022 {s}." for s in sentences[:4]))
 
-    # 6. Entry signals from rules engine
+    # 6. Entry signals → tagged as SETUP_FOR_TOMORROW (never buy at 3 PM)
+    # Exception: Phase 1 pre-earnings that requires end-of-day positioning
     entry_signals = re_data.get("entry_signals", [])
     for sig in entry_signals:
         ticker = sig.get("ticker", "")
         conviction = sig.get("conviction", 0)
         reason = sig.get("reason", "")[:150]
         size_pct = sig.get("size_pct", 0)
-        urgent_items.append(f"\U0001f4b0 <b>{ticker} — ENTRY SIGNAL ({conviction}/100)</b>\n  Size: {size_pct:.0%} of active sleeve\n  {reason}")
+        entry_phase = sig.get("entry_phase", "")
+        if entry_phase == "phase1_runup":
+            urgent_items.append(f"\U0001f4b0 <b>{ticker} — PRE-EARNINGS ENTRY TODAY ({conviction}/100)</b>\n  Size: {size_pct:.0%} of active sleeve\n  {reason}\n  \u23f0 Position before close — earnings may report after hours")
+        else:
+            urgent_items.append(f"\U0001f4c5 <b>{ticker} — SETUP FOR TOMORROW ({conviction}/100)</b>\n  Size: {size_pct:.0%} of active sleeve\n  {reason}\n  \u23f0 Do NOT buy today. Execute tomorrow after 9:45 AM.")
 
     # Only send if something genuinely important happened
     if not urgent_items:
