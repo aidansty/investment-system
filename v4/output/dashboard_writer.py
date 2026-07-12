@@ -163,30 +163,52 @@ def write_dashboard_data(
         bullets = []
         if relevance == "holding":
             tickers_str = ", ".join([tk for tk in affected if tk in stock_holdings])
-            # Always include: which holdings, the action, AND what the news actually is
-            action_text = impact if impact else ""
-            if action_text:
-                bullets.append(f"Holdings affected ({tickers_str}): {action_text}")
-            else:
-                bullets.append(f"Holdings affected: {tickers_str}")
-            # Always add the actual news content as a second bullet
+            # Bullet 1: What the news/event IS
             if summary:
                 bullets.append(summary[:250])
-        elif relevance == "opportunity":
-            if impact:
-                bullets.append(f"Potential opportunity: {impact}")
             else:
-                bullets.append(f"Potential opportunity in: {', '.join(affected[:3])}")
+                bullets.append(headline[:150])
+            # Bullet 2: HOW it connects to and affects the specific holding
+            if impact:
+                bullets.append(f"How this affects {tickers_str}: {impact}")
+            else:
+                # Build a connection explanation from sentiment and category
+                direction = "positively (bullish)" if sentiment == "bullish" else "negatively (bearish)" if sentiment == "bearish" else "directly"
+                category = n.get("category", "")
+                if category:
+                    bullets.append(f"How this affects {tickers_str}: This {category} event impacts {tickers_str} {direction}. Review your position and consider whether action is needed.")
+                else:
+                    bullets.append(f"How this affects {tickers_str}: This development impacts {tickers_str} {direction}. Monitor for further developments.")
+            # Bullet 3: Recommended action
+            if sentiment == "bearish":
+                bullets.append(f"Action: Watch {tickers_str} closely — if this develops further, consider trimming or exiting.")
+            elif sentiment == "bullish":
+                bullets.append(f"Action: Bullish for {tickers_str} — hold or consider adding if conviction is high.")
+            else:
+                bullets.append(f"Action: No immediate change needed for {tickers_str} — continue holding and monitor.")
+        elif relevance == "opportunity":
+            opp_tickers = ", ".join(affected[:3])
+            # Bullet 1: What the news/event IS
+            if summary:
+                bullets.append(summary[:250])
+            else:
+                bullets.append(headline[:150])
+            # Bullet 2: HOW this creates an opportunity and in what specifically
+            if impact:
+                bullets.append(f"Why this is an opportunity: {impact}")
+            else:
+                bullets.append(f"Why this is an opportunity: This event could drive significant price movement in {opp_tickers}. Check the catalyst scanner for entry timing.")
+            # Bullet 3: Action to take
+            bullets.append(f"Action: Research {opp_tickers} for potential entry — check catalyst dates and conviction score in the catalyst scanner below.")
         elif relevance == "macro":
-            bullets.append(f"Market-wide impact — affects all positions")
-
-        # Add the summary as context
-        if summary:
-            for sentence in summary.replace(". ", ".|").split("|"):
-                s = sentence.strip()
-                if s and len(s) > 20:
-                    bullets.append(s)
-                    break  # Just one context sentence, not the whole summary
+            # Bullet 1: What happened
+            if summary:
+                bullets.append(summary[:250])
+            else:
+                bullets.append(headline[:150])
+            # Bullet 2: How it affects all holdings
+            direction = "positively" if sentiment == "bullish" else "negatively" if sentiment == "bearish" else ""
+            bullets.append(f"Market-wide impact — affects all positions{' ' + direction if direction else ''}. This may change the regime and entry conditions for new positions.")
 
         news_cards.append({
             "headline": headline,
