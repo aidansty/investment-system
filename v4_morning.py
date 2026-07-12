@@ -516,6 +516,25 @@ def main():
         except Exception as e:
             log(f"Catalyst scanner phase 5 error (non-fatal): {e}")
 
+        # Tag high-volatility stocks (avg daily range > 4% of price)
+        # These get half position size + double stop distance (same dollar risk)
+        for c in catalyst_opportunities:
+            tk = c.get("ticker", "")
+            if tk in prices and len(prices[tk]) >= 20:
+                price_list = prices[tk]
+                # Calculate average daily range as % of price over last 20 days
+                daily_ranges = []
+                for i in range(-20, -1):
+                    if price_list[i] > 0:
+                        day_range = abs(price_list[i] - price_list[i-1]) / price_list[i] * 100
+                        daily_ranges.append(day_range)
+                if daily_ranges:
+                    avg_range = sum(daily_ranges) / len(daily_ranges)
+                    c["avg_daily_range"] = round(avg_range, 2)
+                    c["high_volatility"] = avg_range > 4.0
+                    if c["high_volatility"]:
+                        log(f"  HIGH-VOL: {tk} avg daily range {avg_range:.1f}% — half size, wider stop")
+
         # Deduplicate by ticker, keep highest momentum entry
         seen_tickers = set()
         deduped = []

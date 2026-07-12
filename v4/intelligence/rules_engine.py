@@ -133,6 +133,15 @@ def evaluate_entry(opportunity, positions, macro, regime_score, portfolio_value,
     elif conviction >= 75: size_pct = 0.20
     elif conviction >= 65: size_pct = 0.15
     else: size_pct = 0.10
+
+    # Volatility-adjusted sizing: high-volatility stocks get half size + double stop
+    # Same dollar risk, but stop is placed outside the daily noise
+    is_high_vol = opportunity.get("high_volatility", False)
+    vol_label = ""
+    if is_high_vol:
+        size_pct = size_pct / 2  # Half position size
+        vol_label = " (HIGH-VOL: half size, wider stop)"
+
     position_dollars = portfolio_value * size_pct if portfolio_value else 0
     if position_dollars < MIN_POSITION_DOLLARS and cash_balance < MIN_POSITION_DOLLARS:
         return {"action": "no_entry", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": f"Insufficient capital: position would be ${position_dollars:.0f} (minimum ${MIN_POSITION_DOLLARS}). Available cash: ${cash_balance:.0f}.", "size_pct": 0}
@@ -265,6 +274,36 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
                 "pct_change": pct_change,
             }
 
+    # ── First-Day Tight Stop (with relative weakness check) ──────────────────
+    # If position drops 5%+ in first 3 days AND the broader market (SPY) is
+    # flat or green that day, exit immediately — the catalyst thesis is broken.
+    # If SPY is also down heavily, the drop is market-driven, not stock-specific.
+    days_held_exit = (datetime.now(pytz.timezone("America/New_York")).date() - position.get("entry_date", datetime.now(pytz.timezone("America/New_York")).date())).days if hasattr(position.get("entry_date", ""), "date") else 0
+    try:
+        _ed = position.get("entry_date", "")
+        if isinstance(_ed, str) and _ed:
+            from datetime import datetime as _dt2
+            days_held_exit = (_dt2.now(pytz.timezone("America/New_York")).date() - _dt2.strptime(_ed, "%Y-%m-%d").date()).days
+    except Exception:
+        pass
+
+    if days_held_exit <= 3 and pct_change <= -5:
+        # Check if SPY is also down — if so, it's macro noise, not stock-specific
+        spy_change = macro.get("spy_daily_change", 0) if macro else 0
+        if spy_change > -1.5:
+            # Market is flat or green but our stock is down 5% — thesis broken
+            return {
+                "action": "exit",
+                "ticker": ticker,
+                "exit_type": "first_day_stop",
+                "urgency": "eod_decision",
+                "conviction": conviction,
+                "reason": f"FIRST-DAY EXIT: {ticker} is DOWN {pct_change:+.1f}% within {days_held_exit} days of entry while the broader market is stable (SPY {spy_change:+.1f}%). The entry thesis is likely broken — cut fast and redeploy.",
+                "pct_change": pct_change,
+            }
+        # else: market is also tanking — give the stock room to breathe
+
+    # ── Checkpoint Goal Evaluation
     # ── Checkpoint Goal Evaluation ────────────────────────────────────────────
     # Every non-permanent, non-crypto stock position is evaluated against:
     # "Is this position actively helping us reach our growth checkpoints?"
@@ -297,14 +336,16 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
                     pass
 
         # Evaluate: losing + no catalyst = dead capital
-        if pct_change <= -8 and not has_forward_catalyst:
+        is_high_vol_pos = position.get("high_volatility", False)
+        checkpoint_threshold = -16 if is_high_vol_pos else -8  # High-vol gets double stop distance
+        if pct_change <= checkpoint_threshold and not has_forward_catalyst:
             return {
                 "action": "exit",
                 "ticker": ticker,
                 "exit_type": "checkpoint",
                 "urgency": "eod_decision",
                 "conviction": conviction,
-                "reason": f"CHECKPOINT REVIEW: Position is DOWN {pct_change:+.1f}% with no confirmed catalyst in the next 30 days. This capital is not helping reach the next checkpoint — redeploy into the highest-conviction catalyst opportunity to accelerate growth.",
+                "reason": f"CHECKPOINT REVIEW: Position is DOWN {pct_change:+.1f}% with no confirmed catalyst in the next 30 days.{' (high-volatility stock — wider stop applied)' if is_high_vol_pos else ''} Redeploy into the highest-conviction catalyst opportunity.",
                 "pct_change": pct_change,
             }
         elif pct_change <= -5 and not has_forward_catalyst and conviction < 50:
