@@ -1797,24 +1797,9 @@ if (cdEl && cdText && catOpps.length > 0) {
 // ============================================================
 // AFTERNOON TAB
 // ============================================================
-const wcList = document.getElementById('what-changed-list');
-(BRIEFING_DATA.what_changed || []).forEach(b => {
-  const li = document.createElement('li');
-  li.innerHTML = b;
-  wcList.appendChild(li);
-});
+// what-changed-list removed — afternoon uses aft-alerts now
 
-const moveRow = document.getElementById('notable-moves');
-(BRIEFING_DATA.notable_moves || []).forEach(m => {
-  const div = document.createElement('div');
-  div.className = 'move-item';
-  if (typeof m === 'string') {
-    div.innerHTML = '<span style="color:var(--text-body);font-size:13px;">' + m + '</span>';
-  } else {
-    div.innerHTML = '<span class="move-ticker">' + (m.ticker || '') + ' ' + (m.move || '') + '</span> &mdash; ' + (m.reason || '');
-  }
-  moveRow.appendChild(div);
-});
+// notable-moves removed — afternoon uses aft-alerts now
 
 // ── AFTERNOON TAB — Simplified alert-based rendering ──
 const aftAlerts = document.getElementById('aft-alerts');
