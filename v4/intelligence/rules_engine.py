@@ -99,6 +99,35 @@ def evaluate_entry(opportunity, positions, macro, regime_score, portfolio_value,
     if conviction < MIN_CONVICTION_FULL_ENTRY and conviction < MIN_CONVICTION_REDUCED_ENTRY:
         return {"action": "no_entry", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": f"Conviction {conviction}/100 below minimum {MIN_CONVICTION_FULL_ENTRY}.", "size_pct": 0}
 
+    # Wash-sale 30-day cooldown with override for exceptional catalysts
+    import json as _json, os as _os
+    try:
+        _tracker_path = "data/win_rate_tracker.json"
+        if _os.path.exists(_tracker_path):
+            with open(_tracker_path) as _tf:
+                _tracker = _json.load(_tf)
+            from datetime import datetime, timedelta
+            import pytz
+            _eastern = pytz.timezone("America/New_York")
+            _today = datetime.now(_eastern).date()
+            for rec in _tracker.get("recommendations", []):
+                if rec.get("ticker") == ticker and rec.get("action") == "exit":
+                    _exit_date_str = rec.get("date", "")
+                    _exit_pnl = rec.get("pnl_pct", 0) or rec.get("pct_change", 0)
+                    if _exit_date_str and _exit_pnl < 0:
+                        try:
+                            _exit_date = datetime.strptime(_exit_date_str, "%Y-%m-%d").date()
+                            _days_since = (_today - _exit_date).days
+                            if 0 < _days_since <= 30:
+                                if conviction >= 75 and has_catalyst:
+                                    return {"action": "enter_full", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": f"WASH SALE WARNING: {ticker} exited at a loss {_days_since} days ago. Re-entering triggers wash sale. However, conviction {conviction}/100 with confirmed catalyst — expected gain outweighs tax impact.", "size_pct": size_pct, "entry_type": "full", "wash_sale_override": True}
+                                else:
+                                    return {"action": "no_entry", "ticker": ticker, "industry": industry, "conviction": conviction, "reason": f"WASH SALE COOLDOWN: {ticker} exited at a loss {_days_since} days ago. Blocked for {30 - _days_since} more days.", "size_pct": 0}
+                        except Exception:
+                            pass
+    except Exception:
+        pass
+
     # Check minimum position size — naturally limits position count based on capital
     if conviction >= 85: size_pct = 0.25
     elif conviction >= 75: size_pct = 0.20
@@ -133,6 +162,27 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
     # has passed and whether there's still a reason to hold.
     catalyst_date_str = position.get("catalyst_date", "")
     catalyst_type = position.get("catalyst_type", "")
+    entry_phase = position.get("entry_phase", "")
+
+    # Phase 1 pre-earnings exit: force exit before earnings day
+    if entry_phase == "phase1_runup" and catalyst_date_str:
+        try:
+            from datetime import datetime
+            import pytz
+            eastern = pytz.timezone("America/New_York")
+            today_p1 = datetime.now(eastern).date()
+            earn_date = datetime.strptime(catalyst_date_str, "%Y-%m-%d").date()
+            days_to_earnings = (earn_date - today_p1).days
+            if 0 <= days_to_earnings <= 1:
+                return {
+                    "action": "exit", "ticker": ticker, "exit_type": "phase1_pre_earnings",
+                    "conviction": conviction,
+                    "reason": f"PHASE 1 EXIT: {ticker} entered as pre-earnings run-up. Earnings {'today' if days_to_earnings == 0 else 'tomorrow'}. Exit to lock in +{pct_change:.1f}% — do not hold through binary event.",
+                    "pct_change": pct_change,
+                }
+        except Exception:
+            pass
+
     if catalyst_date_str and catalyst_type:
         try:
             from datetime import datetime, timedelta
@@ -200,6 +250,20 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
 
     if ticker in PERMANENT_HOLDS:
         return {"action": "hold", "ticker": ticker, "exit_type": None, "reason": f"{ticker} is a permanent hold."}
+
+    # Trailing stop: up 8%+ floor=breakeven, up 15%+ floor=+5%
+    peak_pct = position.get("peak_pct", pct_change)
+    if pct_change >= 8:
+        trailing_floor = 0
+        if peak_pct >= 15:
+            trailing_floor = 5
+        if pct_change <= trailing_floor:
+            return {
+                "action": "exit", "ticker": ticker, "exit_type": "trailing_stop",
+                "conviction": conviction,
+                "reason": f"TRAILING STOP: {ticker} hit peak of +{peak_pct:.1f}% but pulled back to +{pct_change:.1f}%. Floor was +{trailing_floor}%. Exit to lock in profit.",
+                "pct_change": pct_change,
+            }
 
     # ── Checkpoint Goal Evaluation ────────────────────────────────────────────
     # Every non-permanent, non-crypto stock position is evaluated against:

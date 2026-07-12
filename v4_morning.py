@@ -507,11 +507,12 @@ def main():
                         "price": tk_price,
                         "has_news": True,
                         "news_headlines": [fc_event[:100]],
-                        "catalyst_type": "strong-catalyst",
+                        "catalyst_type": "strong-catalyst-reduced",
                         "days_until": days_until,
                         "significance": "high",
+                        "reduced_sizing": True,
                     })
-                    log(f"  STRONG CATALYST (no momentum required): {tk} — {fc_event[:60]} in {days_until} days")
+                    log(f"  STRONG CATALYST (reduced sizing): {tk} — {fc_event[:60]} in {days_until} days")
         except Exception as e:
             log(f"Catalyst scanner phase 5 error (non-fatal): {e}")
 

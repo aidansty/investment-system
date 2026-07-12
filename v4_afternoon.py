@@ -187,6 +187,34 @@ def main():
     news = relevant_headlines
     forward_catalysts = []
     news_package = {"recent_news": news, "forward_catalysts": []}
+
+    # Intraday crash detection — alert if any stock drops 5%+ even with zero news
+    CRYPTO_SKIP_CRASH = {"BTC", "ETH", "XRP", "ZEC", "SOL", "BNB"}
+    morning_prices = {}
+    try:
+        import json as _json2
+        snapshot_path = f"data/cache/v4_morning_snapshot_{today}.json"
+        with open(snapshot_path) as _sf:
+            snap = _json2.load(_sf)
+        for sp in snap.get("positions", []):
+            morning_prices[sp.get("ticker", "")] = sp.get("current_price", 0)
+    except Exception:
+        pass
+    for p in positions:
+        tk = p.get("ticker", "")
+        if tk in CRYPTO_SKIP_CRASH or tk == "SPY":
+            continue
+        current = p.get("current_price", 0) or 0
+        morning = morning_prices.get(tk, 0)
+        if morning > 0 and current > 0:
+            intraday_change = round((current - morning) / morning * 100, 1)
+            if intraday_change <= -5:
+                log(f"CRASH DETECTION: {tk} is DOWN {intraday_change}% intraday")
+                relevant_headlines.append({
+                    "headline": f"PRICE ALERT: {tk} down {intraday_change}% intraday",
+                    "summary": f"{tk} dropped from ${morning:.2f} this morning to ${current:.2f} now ({intraday_change}% decline). May indicate stealth downgrade, sector rotation, or block trade.",
+                    "matched_ticker": tk, "source": "Price Monitor",
+                })
     for position in positions:
         position["ticker_news"] = [h for h in relevant_headlines if h.get("matched_ticker") == position["ticker"]]
     macro = fetch_macro_data()

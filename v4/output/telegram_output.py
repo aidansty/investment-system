@@ -142,6 +142,8 @@ def build_and_send_morning_telegram(
             price = c.get("price", 0)
             msg2.append(f"  \U0001f4c8 <b>{c.get('ticker','')}</b> — {cat_type} {days_text}")
             msg2.append(f"    21d momentum: +{excess}pp vs SPY | Price: ${price}")
+        if cat_type == 'post-catalyst-confirmed':
+            msg2.append(f"    \u23f0 Execute after 9:45 AM — let opening volatility settle")
             if c.get("news_headlines"):
                 msg2.append(f"    {c['news_headlines'][0][:80]}")
         msg2.append("")

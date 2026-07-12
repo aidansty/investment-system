@@ -32,57 +32,51 @@ def fetch_macro_data() -> dict:
 
 
 def _fetch_vix() -> float:
-    if not FRED_KEY:
-        return 20.0
+    """Fetch current VIX from yfinance (near-real-time) instead of FRED (previous day close)."""
     try:
-        url = f"https://api.stlouisfed.org/fred/series/observations?series_id=VIXCLS&api_key={FRED_KEY}&file_type=json&limit=1&sort_order=desc"
-        r = requests.get(url, timeout=10)
-        data = r.json()
-        obs = data.get("observations", [])
-        if obs:
-            val = obs[0].get("value", ".")
-            if val != ".":
-                vix = round(float(val), 2)
-                log(f"VIX fetched from FRED: {vix}")
-                return vix
+        import yfinance as yf
+        vix_data = yf.download("^VIX", period="2d", progress=False)
+        if not vix_data.empty:
+            vix = round(float(vix_data["Close"].iloc[-1]), 2)
+            log(f"VIX fetched from yfinance: {vix}")
+            return vix
     except Exception as e:
-        log(f"VIX fetch error: {e}")
-
-    # Fallback: try Finnhub
+        log(f"VIX yfinance error: {e}")
     try:
-        if FINNHUB_KEY:
-            url = f"https://finnhub.io/api/v1/quote?symbol=^VIX&token={FINNHUB_KEY}"
+        if FRED_KEY:
+            url = f"https://api.stlouisfed.org/fred/series/observations?series_id=VIXCLS&api_key={FRED_KEY}&file_type=json&limit=1&sort_order=desc"
             r = requests.get(url, timeout=10)
-            data = r.json()
-            c = data.get("c", 0)
-            if c and c > 0:
-                log(f"VIX fetched from Finnhub: {c}")
-                return round(float(c), 2)
+            obs = r.json().get("observations", [])
+            if obs and obs[0].get("value", ".") != ".":
+                vix = round(float(obs[0]["value"]), 2)
+                log(f"VIX fetched from FRED (fallback): {vix}")
+                return vix
     except Exception:
         pass
-
     log("WARNING: Could not fetch VIX — using fallback 20.0")
     return 20.0
 
 
 def _fetch_vix_history(days: int = 30) -> list:
-    if not FRED_KEY:
-        return []
     try:
-        url = f"https://api.stlouisfed.org/fred/series/observations?series_id=VIXCLS&api_key={FRED_KEY}&file_type=json&limit={days}&sort_order=desc"
-        r = requests.get(url, timeout=10)
-        data = r.json()
-        obs = data.get("observations", [])
-        values = []
-        for o in reversed(obs):
-            val = o.get("value", ".")
-            if val != ".":
-                values.append(float(val))
-        log(f"VIX history fetched: {len(values)} days")
-        return values
+        import yfinance as yf
+        vix_data = yf.download("^VIX", period="2mo", progress=False)
+        if not vix_data.empty:
+            values = [round(float(v), 2) for v in vix_data["Close"].dropna().tolist()]
+            log(f"VIX history fetched from yfinance: {len(values)} days")
+            return values[-days:]
     except Exception as e:
-        log(f"VIX history error: {e}")
-        return []
+        log(f"VIX history yfinance error: {e}")
+    try:
+        if FRED_KEY:
+            url = f"https://api.stlouisfed.org/fred/series/observations?series_id=VIXCLS&api_key={FRED_KEY}&file_type=json&limit={days}&sort_order=desc"
+            r = requests.get(url, timeout=10)
+            obs = r.json().get("observations", [])
+            values = [float(o["value"]) for o in reversed(obs) if o.get("value", ".") != "."]
+            return values
+    except Exception:
+        pass
+    return []
 
 
 def _classify_vix(vix: float) -> str:
