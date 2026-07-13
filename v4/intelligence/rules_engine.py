@@ -162,6 +162,22 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
     entry = position.get("entry", 0) or position.get("entry_price", 0) or 0
     current = position.get("current_price", 0) or 0
     pct_change = round((current - entry) / entry * 100, 2) if entry > 0 else 0
+
+    # Robust entry date parsing for days_held calculations
+    import pytz
+    from datetime import datetime as _dt
+    _eastern = pytz.timezone("America/New_York")
+    _today = _dt.now(_eastern).date()
+    _entry_date_raw = position.get("entry_date", "")
+    _days_held = 999  # Default to large number so first-day stops don't trigger incorrectly
+    if _entry_date_raw:
+        try:
+            if hasattr(_entry_date_raw, "date"):
+                _days_held = (_today - _entry_date_raw.date()).days
+            elif isinstance(_entry_date_raw, str) and len(_entry_date_raw) >= 10:
+                _days_held = (_today - _dt.strptime(_entry_date_raw[:10], "%Y-%m-%d").date()).days
+        except Exception:
+            _days_held = 999
     what_to_do = position.get("what_to_do", "")
     conviction = position_review.get("conviction_score", 50)
     thesis_break = position_review.get("thesis_break", False)
@@ -302,6 +318,20 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
                 "pct_change": pct_change,
             }
         # else: market is also tanking — give the stock room to breathe
+
+    # ── First-Day Tight Stop (relative weakness check) ──────────────────
+    if _days_held <= 3 and pct_change <= -5:
+        spy_change = macro.get("spy_daily_change", 0) if macro else 0
+        if spy_change > -1.5:
+            return {
+                "action": "exit",
+                "ticker": ticker,
+                "exit_type": "first_day_stop",
+                "urgency": "eod_decision",
+                "conviction": conviction,
+                "reason": f"FIRST-DAY EXIT: {ticker} is DOWN {pct_change:+.1f}% within {_days_held} days of entry while the broader market is stable (SPY {spy_change:+.1f}%). The entry thesis is likely broken — cut fast and redeploy.",
+                "pct_change": pct_change,
+            }
 
     # ── Checkpoint Goal Evaluation
     # ── Checkpoint Goal Evaluation ────────────────────────────────────────────

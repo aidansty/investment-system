@@ -426,7 +426,7 @@ const POSITION_META = {
 };
 
 // Crypto tickers mapped to Coinbase pairs
-const CRYPTO_TICKERS = { 'BTC': 'BTC-USD', 'ETH': 'ETH-USD', 'XRP': 'XRP-USD', 'ZEC': 'ZEC-USD' };
+const CRYPTO_TICKERS = { 'BTC': 'BTC-USD', 'ETH': 'ETH-USD', 'XRP': 'XRP-USD', 'ZEC': 'ZEC-USD' ,'SOL':'SOL-USD'};
 const STOCK_TICKERS_LIST = ['SPY','MU','AMD','SPCX','CRWV','NVDA','HUM','UFO'];
 
 // Finnhub API key injected by pipeline
@@ -1791,7 +1791,8 @@ if (cdEl && cdText && catOpps.length > 0) {
   const recDollars = Math.round(totalActive * sizePct);
   const catType = topOpp.catalyst_type || 'catalyst';
   const daysLabel = topOpp.days_until === 0 ? 'confirmed today' : topOpp.days_until + ' days away';
-  cdText.innerHTML = 'Cash available: <b>$' + cashAvail.toLocaleString('en-US', {maximumFractionDigits:0}) + '</b> · Top opportunity: <b>' + topOpp.ticker + '</b> (' + catType + ', ' + daysLabel + ') · Recommended allocation: <b>$' + recDollars.toLocaleString('en-US') + '</b> (' + (sizePct*100).toFixed(0) + '% of active sleeve)' + (cashAvail < recDollars ? ' · <span style=color:var(--amber)>Cash short by $' + (recDollars - cashAvail).toLocaleString('en-US', {maximumFractionDigits:0}) + '</span>' : '');
+  const sizeReason = sizePct >= 0.25 ? 'highest conviction tier (85+)' : sizePct >= 0.20 ? 'high conviction tier (75-84)' : 'standard conviction tier (65-74)';
+  cdText.innerHTML = 'Cash available: <b>$' + cashAvail.toLocaleString('en-US', {maximumFractionDigits:0}) + '</b> · Top: <b>' + topOpp.ticker + '</b> (' + catType + ', ' + daysLabel + ') · Allocate: <b>$' + recDollars.toLocaleString('en-US') + '</b> (' + (sizePct*100).toFixed(0) + '% — ' + sizeReason + ')' + (cashAvail < recDollars ? ' · <span style=color:var(--amber)>Cash short by $' + (recDollars - cashAvail).toLocaleString('en-US', {maximumFractionDigits:0}) + '</span>' : '');
   cdEl.style.display = 'block';
 }
 

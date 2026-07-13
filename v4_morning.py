@@ -535,6 +535,23 @@ def main():
                     if c["high_volatility"]:
                         log(f"  HIGH-VOL: {tk} avg daily range {avg_range:.1f}% — half size, wider stop")
 
+        # Tag high-volatility stocks (avg daily range > 4%)
+        for c in catalyst_opportunities:
+            tk = c.get("ticker", "")
+            if tk in prices and len(prices[tk]) >= 20:
+                price_list = prices[tk]
+                daily_ranges = []
+                for i in range(-20, -1):
+                    if price_list[i] > 0:
+                        day_range = abs(price_list[i] - price_list[i-1]) / price_list[i] * 100
+                        daily_ranges.append(day_range)
+                if daily_ranges:
+                    avg_range = sum(daily_ranges) / len(daily_ranges)
+                    c["avg_daily_range"] = round(avg_range, 2)
+                    c["high_volatility"] = avg_range > 4.0
+                    if c["high_volatility"]:
+                        log(f"  HIGH-VOL: {tk} avg daily range {avg_range:.1f}% — half size, wider stop")
+
         # Deduplicate by ticker, keep highest momentum entry
         seen_tickers = set()
         deduped = []
@@ -546,7 +563,121 @@ def main():
 
         catalyst_opportunities.sort(key=lambda x: (-x["excess_21d"], x["days_until"]))
         catalyst_opportunities = catalyst_opportunities[:8]
-        log(f"Catalyst scanner: {len(catalyst_opportunities)} total opportunities (earnings + events + news)")
+        # ── NON-EARNINGS CATALYST SOURCES (Finnhub + yfinance, zero Claude cost) ──
+        try:
+            import requests, os
+            _FK = os.environ.get("FINNHUB_KEY", "")
+            if _FK:
+                # Finnhub: Analyst recommendation changes (upgrades/downgrades)
+                for s in top_momentum[:15]:
+                    tk = s["ticker"]
+                    already = any(c["ticker"] == tk for c in catalyst_opportunities)
+                    if already:
+                        continue
+                    try:
+                        url = f"https://finnhub.io/api/v1/stock/recommendation?symbol={tk}&token={_FK}"
+                        r = requests.get(url, timeout=5)
+                        if r.status_code == 200:
+                            recs = r.json()
+                            if len(recs) >= 2:
+                                latest = recs[0]
+                                prev = recs[1]
+                                buy_change = (latest.get("buy", 0) + latest.get("strongBuy", 0)) - (prev.get("buy", 0) + prev.get("strongBuy", 0))
+                                if buy_change >= 3:
+                                    stock_industry = ""
+                                    for ind_name, tickers_list in INDUSTRY_STOCK_LEADERS.items():
+                                        if tk in tickers_list:
+                                            stock_industry = ind_name
+                                            break
+                                    catalyst_opportunities.append({
+                                        "ticker": tk,
+                                        "industry": stock_industry,
+                                        "earnings_date": "",
+                                        "eps_estimate": None,
+                                        "excess_21d": s["excess_21d"],
+                                        "price": s["price"],
+                                        "has_news": True,
+                                        "news_headlines": [f"Analyst upgrades: {buy_change} more buy ratings this month"],
+                                        "catalyst_type": "analyst_upgrade",
+                                        "days_until": 0,
+                                        "significance": "high",
+                                    })
+                                    log(f"  ANALYST UPGRADE: {tk} — {buy_change} new buy ratings")
+                    except Exception:
+                        continue
+
+                # Finnhub: IPO calendar for upcoming IPOs in our universe
+                try:
+                    from datetime import timedelta
+                    _from = today_dt.strftime("%Y-%m-%d")
+                    _to = (today_dt + timedelta(days=30)).strftime("%Y-%m-%d")
+                    url = f"https://finnhub.io/api/v1/calendar/ipo?from={_from}&to={_to}&token={_FK}"
+                    r = requests.get(url, timeout=5)
+                    if r.status_code == 200:
+                        ipos = r.json().get("ipoCalendar", [])
+                        for ipo in ipos[:5]:
+                            ipo_ticker = ipo.get("symbol", "")
+                            if ipo_ticker and ipo_ticker in prices:
+                                already = any(c["ticker"] == ipo_ticker for c in catalyst_opportunities)
+                                if not already:
+                                    catalyst_opportunities.append({
+                                        "ticker": ipo_ticker,
+                                        "industry": "",
+                                        "earnings_date": ipo.get("date", ""),
+                                        "eps_estimate": None,
+                                        "excess_21d": 0,
+                                        "price": round(prices[ipo_ticker][-1], 2) if ipo_ticker in prices else 0,
+                                        "has_news": True,
+                                        "news_headlines": [f"IPO/lockup event: {ipo.get('name', ipo_ticker)}"],
+                                        "catalyst_type": "ipo_event",
+                                        "days_until": 0,
+                                        "significance": "high",
+                                    })
+                                    log(f"  IPO EVENT: {ipo_ticker}")
+                except Exception:
+                    pass
+
+            # Volume spike fallback — if forward_catalysts is empty, find stocks
+            # with 3x+ volume spikes in last 2 days (something happened)
+            if not forward_catalysts:
+                log("Forward catalysts empty — using volume spike fallback")
+                vol_data_fb = volume_data if "volume_data" in dir() else {}
+                for tk, vd in vol_data_fb.items():
+                    if tk == "SPY" or any(c["ticker"] == tk for c in catalyst_opportunities):
+                        continue
+                    if vd.get("rvol", 0) >= 3.0 and tk in prices:
+                        price_list = prices[tk]
+                        if len(price_list) >= 2:
+                            day1_ret = (price_list[-1] / price_list[-2] - 1) * 100
+                            if day1_ret > 2:
+                                stk_21d = 0
+                                if len(price_list) >= 21 and len(spy_prices_cat) >= 21:
+                                    stk_21d = (price_list[-1] / price_list[-21] - 1) * 100 - spy_21d
+                                stock_industry = ""
+                                for ind_name, tl in INDUSTRY_STOCK_LEADERS.items():
+                                    if tk in tl:
+                                        stock_industry = ind_name
+                                        break
+                                catalyst_opportunities.append({
+                                    "ticker": tk,
+                                    "industry": stock_industry,
+                                    "earnings_date": "",
+                                    "eps_estimate": None,
+                                    "excess_21d": round(stk_21d, 1),
+                                    "price": round(price_list[-1], 2),
+                                    "has_news": False,
+                                    "news_headlines": [f"Volume spike: {vd['rvol']:.1f}x normal with +{day1_ret:.1f}% move"],
+                                    "catalyst_type": "volume_spike",
+                                    "days_until": 0,
+                                    "significance": "medium",
+                                })
+                                log(f"  VOLUME SPIKE: {tk} RVOL {vd['rvol']:.1f}x, +{day1_ret:.1f}%")
+                                if len([c for c in catalyst_opportunities if c["catalyst_type"] == "volume_spike"]) >= 5:
+                                    break
+        except Exception as e:
+            log(f"Non-earnings catalyst sources error (non-fatal): {e}")
+
+        log(f"Catalyst scanner: {len(catalyst_opportunities)} total opportunities (earnings + events + news + upgrades + volume)")
         for c in catalyst_opportunities:
             log(f"  {c['ticker']}: earnings {c['earnings_date']} ({c['days_until']}d away), 21d excess +{c['excess_21d']}pp" + (f", news: {c['news_headlines'][0][:60]}" if c['news_headlines'] else ""))
     except Exception as e:
