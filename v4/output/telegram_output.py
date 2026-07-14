@@ -265,31 +265,16 @@ def build_and_send_afternoon_telegram(
             urgent_items.append(f"\u26a0\ufe0f <b>{sig.get('ticker', '')} — WATCH — decide before 4:00 PM close</b>\n  {sig.get('reason', '')[:150]}")
 
     # 5. Positive opportunity alerts — significant bullish catalysts during the day
-    if sections:
-        candidates_text = sections.get("New or Strengthened Candidates") or sections.get("New Opportunities") or ""
-        if candidates_text:
-            opp_keywords = ["fda approv", "beat estimate", "beat expectations", "raised guidance",
-                            "upgrade", "contract win", "contract award", "acquisition",
-                            "index inclusion", "added to", "stock split", "buyback",
-                            "record revenue", "record earnings", "blowout", "surge"]
-            if any(kw in candidates_text.lower() for kw in opp_keywords):
-                sentences = [s.strip() for s in candidates_text.replace("\n", " ").split(".") if len(s.strip()) > 15]
-                if sentences:
-                    urgent_items.append("\U0001f4b0 <b>New Opportunity Detected</b>\n" + "\n".join(f"  \u2022 {s}." for s in sentences[:4]))
-
-    # 6. Entry signals → tagged as SETUP_FOR_TOMORROW (never buy at 3 PM)
-    # Exception: Phase 1 pre-earnings that requires end-of-day positioning
-    entry_signals = re_data.get("entry_signals", [])
-    for sig in entry_signals:
-        ticker = sig.get("ticker", "")
-        conviction = sig.get("conviction", 0)
-        reason = sig.get("reason", "")[:150]
-        size_pct = sig.get("size_pct", 0)
-        entry_phase = sig.get("entry_phase", "")
-        if entry_phase == "phase1_runup":
-            urgent_items.append(f"\U0001f4b0 <b>{ticker} — PRE-EARNINGS ENTRY TODAY ({conviction}/100)</b>\n  Size: {size_pct:.0%} of active sleeve\n  {reason}\n  \u23f0 Position before close — earnings may report after hours")
-        else:
-            urgent_items.append(f"\U0001f4c5 <b>{ticker} — SETUP FOR TOMORROW ({conviction}/100)</b>\n  Size: {size_pct:.0%} of active sleeve\n  {reason}\n  \u23f0 Do NOT buy today. Execute tomorrow after 9:45 AM.")
+    # Opportunities from catalyst scanner only — not old industry candidates
+    catalyst_opps = re_data.get("catalyst_opportunities", [])
+    for c in (catalyst_opps or [])[:2]:
+        cat_type = c.get("catalyst_type", "catalyst")
+        tk = c.get("ticker", "")
+        excess = c.get("excess_21d", 0)
+        price = c.get("price", 0)
+        headlines = c.get("news_headlines", [])
+        headline_text = headlines[0][:80] if headlines else cat_type
+        urgent_items.append(f"\U0001f4b0 <b>Catalyst Opportunity: {tk}</b>\n  {headline_text}\n  21d momentum: +{excess}pp | Price: ${price}")
 
     # Only send if something genuinely important happened
     if not urgent_items:
