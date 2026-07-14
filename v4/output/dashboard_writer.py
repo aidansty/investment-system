@@ -376,7 +376,35 @@ def write_dashboard_data(
                     pr["bullets"] = [sig_reason[:250]]
                     pr["what_to_do"] = sig_reason[:250]
 
-    # portfolio_positions override happens later, after portfolio_positions is built
+    # Ensure EVERY stock position appears in position_review
+    # If Claude didn't mention a position, add it using rules engine data
+    CRYPTO_SKIP_PR = {"BTC", "ETH", "XRP", "ZEC", "SOL", "BNB", "DOGE"}
+    reviewed_tickers = {pr.get("ticker") for pr in position_review}
+    for p in (positions or []):
+        tk = p.get("ticker", "")
+        if tk in CRYPTO_SKIP_PR or tk == "SPY":
+            continue
+        if tk not in reviewed_tickers:
+            # This position was NOT in Claude's review — add it from rules engine
+            sig = rules_decisions.get(tk, {})
+            sig_action = sig.get("action", "hold").capitalize() if sig else "Hold"
+            sig_reason = sig.get("reason", "Position under active monitoring.") if sig else "No specific update today — position under active monitoring."
+            entry_price = p.get("entry_price", 0) or p.get("entry", 0) or 0
+            current_price = p.get("current_price", 0) or 0
+            pct = round((current_price - entry_price) / entry_price * 100, 1) if entry_price > 0 else 0
+            position_review.append({
+                "ticker": tk,
+                "action": sig_action,
+                "bullets": [sig_reason[:250]],
+                "what_to_do": sig_reason[:250],
+                "catalyst": sig.get("catalyst", ""),
+                "why": sig_reason[:250],
+                "entry_price": entry_price,
+                "term": p.get("term", ""),
+                "industry": p.get("industry", ""),
+                "summary": p.get("summary", ""),
+            })
+
     # Store rules_decisions so we can use it below
     _rules_decisions = rules_decisions
 

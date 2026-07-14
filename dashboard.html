@@ -1123,6 +1123,12 @@ async function syncPositionsFromGitHub() {
         if (fresh) {
           bp.qty = fresh.qty;
           bp.entry_price = fresh.entry_price || fresh.entry || bp.entry_price;
+          // Recalculate balance and P&L with updated qty
+          if (bp.current_price && bp.current_price > 0) {
+            bp.balance = bp.current_price * bp.qty;
+            bp.dollar_change = (bp.current_price - (bp.entry_price || 0)) * bp.qty;
+            bp.pct_change = bp.entry_price > 0 ? ((bp.current_price - bp.entry_price) / bp.entry_price * 100) : 0;
+          }
         }
       }
       // Remove positions that no longer exist
@@ -1541,8 +1547,8 @@ TERM_ORDER.forEach(term => {
       <div class="pos-detail-text">${p.summary || '—'}</div>
       <div class="pos-detail-label">Catalyst</div>
       <div class="pos-detail-text">${p.catalyst || '—'}</div>
-      <div class="pos-detail-label">Why ${termLabel.toLowerCase()}</div>
-      <div class="pos-detail-text">${reviewData?.bullets?.[0] || p.why || '—'}</div>
+      <div class="pos-detail-label">Why ${reviewAction?.toLowerCase() === 'exit' ? 'exit' : reviewAction?.toLowerCase() === 'watch' ? 'watch' : termLabel.toLowerCase()}</div>
+      <div class="pos-detail-text">${reviewData?.bullets?.[0] || whatToDo || p.why || '—'}</div>
       <div class="pos-detail-label" style="margin-top:12px;">What to do</div>
       <div class="pos-what-to-do">${whatToDo || reviewData?.bullets?.join('<br><br>') || "See morning briefing for today's recommendation."}</div>`;
 
@@ -1844,9 +1850,9 @@ if (aftAlerts) {
     alerts.push(posHtml);
   }
 
-  // New investment opportunities
-  const aftCandidates = BRIEFING_DATA.afternoon_candidates || [];
-  const realCandidates = aftCandidates.filter(c => c && c.industry && c.conviction >= 65);
+  // New investment opportunities — from catalyst scanner only
+  const aftCandidates = BRIEFING_DATA.catalyst_opportunities || [];
+  const realCandidates = aftCandidates.filter(c => c && c.ticker && (c.excess_21d > 5 || c.catalyst_type === 'post-catalyst-confirmed' || c.catalyst_type === 'analyst_upgrade'));
   if (realCandidates.length > 0) {
     let oppHtml = '<div class="info-card" style="margin-bottom:12px;"><div class="info-card-title">Opportunity Detected</div>';
     realCandidates.slice(0, 3).forEach(c => {
