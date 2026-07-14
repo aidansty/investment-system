@@ -1,20 +1,17 @@
 window.BRIEFING_DATA = {
-  "last_updated": "July 14, 2026 08:49 AM ET",
+  "last_updated": "July 14, 2026 02:47 PM ET",
   "finnhub_key": "d8fo751r01qn443av1rgd8fo751r01qn443av1s0",
-  "run_type": "morning",
+  "run_type": "afternoon",
   "regime": "Bullish",
   "regime_confidence": "High",
-  "market_open": false,
-  "vix": 15.03,
-  "vix_avg": 15.89,
-  "vix_trend": "Falling",
+  "market_open": true,
+  "vix": 17.16,
+  "vix_avg": 16.21,
+  "vix_trend": "Rising",
   "vix_regime": "Green",
   "market_bullets": [
-    "**VIX at 15.03 sits comfortably below the 20 threshold**, meaning options markets are not pricing in near-term shock risk \u2014 investors are broadly calm despite active geopolitical developments in the Strait of Hormuz and ongoing Iran strikes.",
-    "**The VIX trend is falling**, which signals that institutional sentiment has been improving rather than deteriorating \u2014 this is constructive for holding growth and technology positions and does not warrant a defensive shift into cash beyond what conviction scores already dictate.",
-    "**A Green regime score of 70/100 means conditions actively support entering new positions**, but only when the conviction threshold of 75+ is met \u2014 today, no industry clears that bar, so the Green regime supports holding current positions rather than deploying new capital.",
-    "**For this portfolio specifically**, the Green regime combined with zero qualifying entry opportunities means the correct action is to hold high-conviction existing positions (SPY, AMD, NVDA, HUM) while conducting mandatory reviews on the two flagged deteriorating positions (INTC, SPCX) \u2014 the regime is supportive but the opportunity set is thin.",
-    "**The CPI print of 3.5% vs. 3.8% expected** is the most significant intraday development \u2014 if this disinflationary trend continues in the next monthly print, it could push rate-sensitive sector conviction scores meaningfully higher and create new entry opportunities in cloud and software within 30 days."
+    "Regime: Green (17.16 VIX, trend rising \u2014 fear is increasing (be more selective)).",
+    "Conditions support entering catalyst-driven positions at full conviction sizing. Deploy cash into top catalyst scanner opportunities."
   ],
   "positions": [
     {
@@ -23,10 +20,10 @@ window.BRIEFING_DATA = {
       "term": "Long-term",
       "qty": 6.32302,
       "entry_price": 659.44,
-      "current_price": 749.17,
-      "balance": 4737.02,
-      "pct_change": 13.61,
-      "dollar_change": 567.36,
+      "current_price": 751.96,
+      "balance": 4754.66,
+      "pct_change": 14.03,
+      "dollar_change": 585.01,
       "summary": "SPY tracks the S&P 500 index, giving you diversified exposure to the 500 largest U.S. companies across every major sector. It is the most widely held ETF in the world and serves as the benchmark everything else in your portfolio is measured against. When you hold SPY, you are essentially holding a slice of the entire U.S. economy.",
       "catalyst": "SPY has no single catalyst \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 it moves with the overall market. Key drivers right now include Fed rate decisions, inflation data (next CPI report July 14), and corporate earnings season beginning in mid-July. A dovish shift from the Fed or strong earnings results would push SPY higher.",
       "why": "This is a long-term core holding designed to anchor the portfolio with stable, compounding returns over many years. When no higher-conviction opportunity exists for your cash, SPY is where uninvested capital belongs rather than sitting idle.",
@@ -40,10 +37,10 @@ window.BRIEFING_DATA = {
       "term": "Medium-term",
       "qty": 0.24798,
       "entry_price": 599.21,
-      "current_price": 937.0,
-      "balance": 232.36,
-      "pct_change": 56.37,
-      "dollar_change": 83.77,
+      "current_price": 979.01,
+      "balance": 242.77,
+      "pct_change": 63.38,
+      "dollar_change": 94.18,
       "summary": "Micron Technology manufactures DRAM and NAND memory chips \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one of the primary beneficiaries of that demand surge.",
       "catalyst": "Earnings just reported June 25. Review results and forward guidance carefully.",
       "why": "This was entered as a medium-term position around the AI memory demand supercycle. It has returned over 100% from entry, which is exceptional. The pre-earnings exit rule in your framework exists precisely for situations like this \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 massive gains before a binary event.",
@@ -57,10 +54,10 @@ window.BRIEFING_DATA = {
       "term": "Medium-term",
       "qty": 0.58112,
       "entry_price": 453.74,
-      "current_price": 534.39,
-      "balance": 310.54,
-      "pct_change": 17.77,
-      "dollar_change": 46.87,
+      "current_price": 552.65,
+      "balance": 321.16,
+      "pct_change": 21.8,
+      "dollar_change": 57.48,
       "summary": "Advanced Micro Devices makes CPUs and GPUs that compete directly with Intel and NVIDIA. In the AI race, AMD's MI300 and MI450 GPU series are taking meaningful market share from NVIDIA in data center AI workloads, making AMD one of the clearest ways to play the AI buildout without paying NVIDIA's premium valuation.",
       "catalyst": "Q2 FY2026 earnings on August 4th, where AMD guided approximately $11.2 billion in revenue \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 up 46% year over year. The key question is whether AI GPU demand is as strong as expected and whether AMD is successfully converting design wins into shipped revenue against NVIDIA.",
       "why": "This is a medium-term conviction position built around a multi-quarter thesis that AMD gains meaningful GPU market share in the AI data center market. It is not a trade around a single quarter but a thesis that plays out over 6-18 months as AI infrastructure investment accelerates.",
@@ -74,14 +71,14 @@ window.BRIEFING_DATA = {
       "term": "Long-term",
       "qty": 0.68908,
       "entry_price": 183.84,
-      "current_price": 139.14,
-      "balance": 95.88,
-      "pct_change": -24.31,
-      "dollar_change": -30.8,
+      "current_price": 138.88,
+      "balance": 95.7,
+      "pct_change": -24.46,
+      "dollar_change": -30.98,
       "summary": "SpaceX is the dominant commercial rocket company in the world, operating Falcon 9, Starship, and the Starlink satellite internet constellation with over 7,000 satellites in orbit. It recently completed its IPO and is now publicly traded, giving investors access to what may be the most important infrastructure company of the next century.",
       "catalyst": "No forward catalyst",
-      "why": "CHECKPOINT REVIEW: Position is DOWN -24.3% with no confirmed catalyst in the next 30 days. Redeploy into the highest-conviction catalyst opportunity.",
-      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -24.3% with no confirmed catalyst in the next 30 days. Redeploy into the highest-conviction catalyst opportunity.",
+      "why": "FIRST-DAY EXIT: SPCX is DOWN -24.5% within 0 days of entry while the broader market is stable (SPY +0.0%). The entry thesis is likely broken \u2014 cut fast and redeploy.",
+      "what_to_do": "FIRST-DAY EXIT: SPCX is DOWN -24.5% within 0 days of entry while the broader market is stable (SPY +0.0%). The entry thesis is likely broken \u2014 cut fast and redeploy.",
       "industry": "Aerospace & Space",
       "cost_basis": 236.98
     },
@@ -91,10 +88,10 @@ window.BRIEFING_DATA = {
       "term": "Long-term",
       "qty": 1.00002,
       "entry_price": 205.33,
-      "current_price": 203.53,
-      "balance": 203.53,
-      "pct_change": -0.88,
-      "dollar_change": -1.8,
+      "current_price": 212.01,
+      "balance": 212.01,
+      "pct_change": 3.25,
+      "dollar_change": 6.68,
       "summary": "NVIDIA is the dominant supplier of GPUs for artificial intelligence \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrastructure, they are overwhelmingly buying NVIDIA GPUs. This gives NVIDIA extraordinary pricing power and demand visibility.",
       "catalyst": "Q2 FY2027 earnings on August 26th, where NVIDIA guided approximately $91 billion in revenue. This report is the single most important data release for the entire AI infrastructure trade \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 it will either confirm or question whether the massive capital spending on AI hardware is sustainable.",
       "why": "This is a long-term core holding in the AI infrastructure buildout. NVIDIA's position is genuinely dominant and defensible in a way that is rare in technology. The company is held for years, not quarters, as AI becomes the defining technology investment of this decade.",
@@ -108,10 +105,10 @@ window.BRIEFING_DATA = {
       "term": "Long-term",
       "qty": 0.04544048,
       "entry_price": 59767.28,
-      "current_price": 63704.1,
-      "balance": 2894.74,
-      "pct_change": 6.59,
-      "dollar_change": 178.89,
+      "current_price": 28.54,
+      "balance": 1.3,
+      "pct_change": -99.95,
+      "dollar_change": -2714.56,
       "summary": "Bitcoin is the original and largest cryptocurrency by market capitalization, widely held as a digital store of value and inflation hedge. It operates on a decentralized network with a fixed supply of 21 million coins, making it increasingly scarce as institutional and retail adoption grows. Bitcoin is now held in corporate treasuries and ETFs by major financial institutions.",
       "catalyst": "No specific near-term company catalyst exists. Bitcoin's price is driven by macro liquidity conditions, institutional adoption flows, regulatory clarity, and broader risk appetite. A more dovish Fed stance or continued institutional ETF inflows would be positive catalysts.",
       "why": "This is a long-term structural allocation, not a trade. Bitcoin is held as a store of value and inflation hedge that is uncorrelated with traditional stock market movements. It is intended to be held through volatility rather than traded around short-term price swings.",
@@ -125,10 +122,10 @@ window.BRIEFING_DATA = {
       "term": "Long-term",
       "qty": 1.00032929,
       "entry_price": 482.12,
-      "current_price": 519.18,
-      "balance": 519.35,
-      "pct_change": 7.69,
-      "dollar_change": 37.07,
+      "current_price": 543.88,
+      "balance": 544.06,
+      "pct_change": 12.81,
+      "dollar_change": 61.78,
       "summary": "Zcash is a privacy-focused cryptocurrency that uses advanced zero-knowledge cryptography to allow fully shielded transactions where the sender, receiver, and amount are all hidden. It is one of the few cryptocurrencies with mathematically proven transaction privacy, making it valuable for use cases where financial privacy is essential.",
       "catalyst": "No specific near-term catalyst. Zcash's price is correlated with broader crypto market movements and would benefit from any major regulatory clarity around privacy coins or increased adoption by privacy-conscious users and institutions.",
       "why": "This is a long-term thematic position in privacy-preserving blockchain infrastructure. The thesis is that demand for financial privacy will grow as surveillance of traditional financial systems increases and as digital payments become more common globally.",
@@ -142,10 +139,10 @@ window.BRIEFING_DATA = {
       "term": "Long-term",
       "qty": 0.2038873,
       "entry_price": 2010.52,
-      "current_price": 1836.91,
-      "balance": 374.52,
-      "pct_change": -8.64,
-      "dollar_change": -35.4,
+      "current_price": 17.83,
+      "balance": 3.64,
+      "pct_change": -99.11,
+      "dollar_change": -406.28,
       "summary": "Ethereum is the leading smart contract platform and the foundation layer for decentralized finance, NFTs, and Web3 applications. 99% of your ETH is staked, meaning it is earning staking rewards of approximately $0.53 per month while contributing to network security. Ethereum processes more value in transactions than any other blockchain.",
       "catalyst": "No specific near-term catalyst. Ethereum would benefit from continued DeFi and institutional adoption growth, any major network upgrades that improve transaction throughput or reduce fees, and broader crypto market strength driven by macro liquidity improvements.",
       "why": "This is a long-term core crypto holding in the decentralized finance infrastructure layer. Ethereum has the largest developer ecosystem, the most deployed applications, and the deepest institutional adoption of any smart contract platform. It is held for multi-year appreciation as the crypto economy grows.",
@@ -159,70 +156,19 @@ window.BRIEFING_DATA = {
       "term": "Long-term",
       "qty": 250.635305,
       "entry_price": 1.18,
-      "current_price": 1.09,
-      "balance": 273.19,
-      "pct_change": -7.63,
-      "dollar_change": -22.56,
+      "current_price": 12.35,
+      "balance": 3095.35,
+      "pct_change": 946.61,
+      "dollar_change": 2799.6,
       "summary": "XRP is a cryptocurrency designed specifically for cross-border payment settlement, enabling financial institutions to transfer value between currencies in seconds at a fraction of the cost of traditional wire transfers. Ripple, the company behind XRP, has partnered with hundreds of banks and payment providers globally to use XRP as a bridge currency.",
       "catalyst": "The primary catalyst is ongoing regulatory clarity \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 the SEC lawsuit against Ripple reached a partial resolution in 2023 and XRP is increasingly viewed as compliant with U.S. securities law. Continued expansion of Ripple's payment network and any new institutional partnership announcements would be positive catalysts.",
       "why": "This is a long-term position in the digital payment infrastructure thesis \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 specifically that cross-border payments will increasingly move to blockchain rails for speed, cost, and transparency reasons, and XRP is one of the primary beneficiaries of that shift.",
       "what_to_do": "XRP is a permanent hold.",
       "industry": "Cryptocurrency",
       "cost_basis": 295.75
-    },
-    {
-      "ticker": "INTC",
-      "type": "Stock",
-      "term": "Medium-term",
-      "qty": 0.5,
-      "entry_price": 137.18,
-      "current_price": 103.12,
-      "balance": 51.56,
-      "pct_change": -24.83,
-      "dollar_change": -17.03,
-      "summary": "Intel Corporation",
-      "catalyst": "No forward catalyst",
-      "why": "CHECKPOINT REVIEW: Position is DOWN -24.8% with no confirmed catalyst in the next 30 days. Redeploy into the highest-conviction catalyst opportunity.",
-      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -24.8% with no confirmed catalyst in the next 30 days. Redeploy into the highest-conviction catalyst opportunity.",
-      "industry": "Semiconductors",
-      "cost_basis": 0
-    },
-    {
-      "ticker": "SOL",
-      "type": "Crypto",
-      "term": "Long-term",
-      "qty": 1.00792588,
-      "entry_price": 82.06,
-      "current_price": 0,
-      "balance": 0,
-      "pct_change": 0,
-      "dollar_change": 0,
-      "summary": "",
-      "catalyst": "",
-      "why": "",
-      "what_to_do": "All hold conditions met. Conviction 50/100.",
-      "industry": "",
-      "cost_basis": 0
-    },
-    {
-      "ticker": "HUM",
-      "type": "Stock",
-      "term": "Short-term",
-      "qty": 1,
-      "entry_price": 357.37,
-      "current_price": 406.0,
-      "balance": 406.0,
-      "pct_change": 13.61,
-      "dollar_change": 48.63,
-      "summary": "Humana Inc",
-      "catalyst": "",
-      "why": "",
-      "what_to_do": "All hold conditions met. Conviction 50/100.",
-      "industry": "Managed Care",
-      "cost_basis": 0
     }
   ],
-  "cash": 1514.8053716164798,
+  "cash": 0,
   "cost_basis": 8926.2,
   "vs_spy_pp": null,
   "performance_dates": [],
@@ -230,35 +176,11 @@ window.BRIEFING_DATA = {
   "performance_spy": [],
   "news": [
     {
-      "headline": "Stock market today: Dow, S&P 500, Nasdaq futures mixed as traders lift Fed rate hike bets ahead of key inflation data",
-      "url": "https://finance.yahoo.com/markets/live/stock-market-today-tuesday-july-14-dow-sp-500-nasdaq-070833816.html",
-      "source": "Yahoo Finance",
+      "headline": "Oil prices off highs after Trump abandons 20% protection fee on Strait of Hormuz traffic",
+      "url": "https://www.cnbc.com/2026/07/14/oil-prices-today-brent-wti-hormuz-trump-toll-iran.html",
+      "source": "CNBC Top News",
       "bullets": [
-        "Stock market today: Dow, S&P 500, Nasdaq futures mixed as traders lift Fed rate hike bets ahead of key inflation data",
-        "Market-wide impact \u2014 affects all positions. This may change the regime and entry conditions for new positions."
-      ],
-      "affected_tickers": [],
-      "sentiment": "",
-      "relevance": "macro"
-    },
-    {
-      "headline": "Warsh's statement to Congress: Fed has 'no tolerance for persistently elevated inflation'",
-      "url": "https://finance.yahoo.com/economy/policy/article/warshs-statement-to-congress-fed-has-no-tolerance-for-persistently-elevated-inflation-123000475.html",
-      "source": "Yahoo Finance",
-      "bullets": [
-        "Warsh's statement to Congress: Fed has 'no tolerance for persistently elevated inflation'",
-        "Market-wide impact \u2014 affects all positions. This may change the regime and entry conditions for new positions."
-      ],
-      "affected_tickers": [],
-      "sentiment": "",
-      "relevance": "macro"
-    },
-    {
-      "headline": "Oil soars 3.2% as Trump swears the US is 'taking over' the Strait of Hormuz. Protect your riches before the shock hits",
-      "url": "https://finance.yahoo.com/energy/articles/oil-soars-3-2-trump-121000199.html",
-      "source": "Yahoo Finance",
-      "bullets": [
-        "Oil soars 3.2% as Trump swears the US is 'taking over' the Strait of Hormuz. Protect your riches before the shock hits",
+        "Oil prices rose on Tuesday after U.S. President Donald Trump announced plans to impose shipping fees in the Strait of Hormuz.",
         "How this affects MU: This development impacts MU directly. Monitor for further developments.",
         "Action: No immediate change needed for MU \u2014 continue holding and monitor."
       ],
@@ -269,163 +191,26 @@ window.BRIEFING_DATA = {
       "relevance": "holding"
     },
     {
-      "headline": "Stocks mixed as oil rises after Trump's Hormuz levy threat",
-      "url": "https://finance.yahoo.com/markets/world-indices/articles/asia-markets-choppy-threat-trump-012723429.html",
-      "source": "Yahoo Finance",
+      "headline": "Warsh pledges Fed policy 'regime change' to rid inflation 'tax' on American people",
+      "url": "https://www.cnbc.com/2026/07/14/warsh-promises-inflation-will-be-a-thing-of-the-past-cites-benefits-of-ai-investment-boom.html",
+      "source": "CNBC Top News",
       "bullets": [
-        "Stocks mixed as oil rises after Trump's Hormuz levy threat",
-        "How this affects MU: This development impacts MU directly. Monitor for further developments.",
-        "Action: No immediate change needed for MU \u2014 continue holding and monitor."
+        "Warsh pledged Tuesday to \"get monetary policy right\" and defeat the inflation that has bedeviled the central bank for the past five years.",
+        "Market-wide impact \u2014 affects all positions. This may change the regime and entry conditions for new positions."
       ],
-      "affected_tickers": [
-        "MU"
-      ],
+      "affected_tickers": [],
       "sentiment": "",
-      "relevance": "holding"
-    },
-    {
-      "headline": "June 2026 CPI Release and Major Bank Q2 Earnings",
-      "url": "",
-      "source": "Forward catalyst scanner",
-      "bullets": [
-        "Your holdings affected (SPY): June 2026 CPI Release and Major Bank Q2 Earnings",
-        "Recommended action: Hold"
-      ],
-      "affected_tickers": [
-        "SPY"
-      ],
-      "sentiment": "bullish",
-      "relevance": "holding"
-    },
-    {
-      "headline": "Humana Q2 2026 Earnings",
-      "url": "",
-      "source": "Forward catalyst scanner",
-      "bullets": [
-        "Your holdings affected (HUM): Humana Q2 2026 Earnings",
-        "Recommended action: Hold"
-      ],
-      "affected_tickers": [
-        "HUM"
-      ],
-      "sentiment": "bullish",
-      "relevance": "holding"
-    },
-    {
-      "headline": "Palantir Q2 2026 Earnings",
-      "url": "",
-      "source": "Forward catalyst scanner",
-      "bullets": [
-        "Upcoming catalyst: Palantir Q2 2026 Earnings",
-        "Date: 2026-08-03"
-      ],
-      "affected_tickers": [
-        "PLTR"
-      ],
-      "sentiment": "",
-      "relevance": "opportunity"
+      "relevance": "macro"
     }
   ],
-  "forward_catalysts": [
-    {
-      "date": "2026-07-16",
-      "event": "TSMC Q2 2026 Earnings Report",
-      "action": "Buy More",
-      "entry_opportunity": "If TSMC raises full-year revenue guidance above 30% and confirms robust CoWoS AI packaging demand, add to NVDA and AMD before their own earnings in August.",
-      "exit_opportunity": "N/A",
-      "affected_holdings": [
-        "NVDA",
-        "AMD",
-        "MU"
-      ],
-      "trim_percentage": "N/A"
-    },
-    {
-      "date": "2026-07-14",
-      "event": "June 2026 CPI Release and Major Bank Q2 Earnings",
-      "action": "Hold",
-      "entry_opportunity": "If June core CPI prints at or below 2.8% year-over-year AND bank NIM guidance is stable or improving, that combination resolves bullish uncertainty for SPY and financials.",
-      "exit_opportunity": "If June core CPI prints above 3.1% year-over-year AND banks guide NIM lower, that combination resolves bearish uncertainty and warrants trimming SPY.",
-      "affected_holdings": [
-        "SPY"
-      ],
-      "trim_percentage": "N/A"
-    },
-    {
-      "date": "2026-07-22",
-      "event": "Alphabet Q2 2026 Earnings",
-      "action": "Buy",
-      "entry_opportunity": "If Google Cloud revenue growth exceeds 60% year-over-year and management raises full-year capex guidance, enter GOOGL as a new cloud and AI infrastructure holding on any post-earnings dip.",
-      "exit_opportunity": "N/A",
-      "affected_holdings": [],
-      "trim_percentage": "N/A"
-    },
-    {
-      "date": "2026-07-29",
-      "event": "FOMC July Rate Decision",
-      "action": "Hold",
-      "entry_opportunity": "If the Fed holds rates and Warsh signals patience with no 2026 hike bias, that resolves bullish uncertainty and supports adding to BTC, ETH, and NVDA on any pre-meeting weakness.",
-      "exit_opportunity": "If the Fed signals a rate hike is likely at the September meeting, that resolves bearish uncertainty and warrants trimming BTC, ETH, ZEC, and XRP immediately.",
-      "affected_holdings": [
-        "BTC",
-        "ETH",
-        "ZEC",
-        "XRP",
-        "SPY",
-        "NVDA"
-      ],
-      "trim_percentage": "N/A"
-    },
-    {
-      "date": "2026-07-29",
-      "event": "Humana Q2 2026 Earnings",
-      "action": "Hold",
-      "entry_opportunity": "If Q2 medical cost ratio improves sequentially and full-year EPS guidance is raised above consensus, that resolves bullish uncertainty and signals adding to HUM.",
-      "exit_opportunity": "If medical cost ratio deteriorates or Humana cuts full-year earnings guidance, that resolves bearish uncertainty and warrants trimming HUM by 30-40%.",
-      "affected_holdings": [
-        "HUM"
-      ],
-      "trim_percentage": "N/A"
-    },
-    {
-      "date": "2026-07-29",
-      "event": "Microsoft Q2 2026 Earnings",
-      "action": "Buy",
-      "entry_opportunity": "If Azure revenue growth accelerates above 45% year-over-year and Copilot ARR guidance is raised, enter MSFT as a new cloud and AI software holding on any dip within 5% of the post-earnings open.",
-      "exit_opportunity": "N/A",
-      "affected_holdings": [],
-      "trim_percentage": "N/A"
-    },
-    {
-      "date": "2026-08-03",
-      "event": "Palantir Q2 2026 Earnings",
-      "action": "Buy More",
-      "entry_opportunity": "If Q2 revenue exceeds 1.85B and full-year 2026 guidance is raised above the current 7.656B midpoint, add to PLTR in the first trading session following the report.",
-      "exit_opportunity": "N/A",
-      "affected_holdings": [
-        "PLTR"
-      ],
-      "trim_percentage": "N/A"
-    },
-    {
-      "date": "2026-08-04",
-      "event": "AMD Q2 2026 Earnings",
-      "action": "Buy More",
-      "entry_opportunity": "If AMD Q2 Data Center revenue exceeds 4.5B and MI450 GPU ramp guidance for H2 2026 is confirmed with hyperscaler customer commitments, add to AMD ahead of or immediately after the report.",
-      "exit_opportunity": "N/A",
-      "affected_holdings": [
-        "AMD"
-      ],
-      "trim_percentage": "N/A"
-    }
-  ],
+  "forward_catalysts": [],
   "position_review": [
     {
       "ticker": "SPY",
       "action": "Hold",
       "entry_price": 659.44,
-      "current_price": 749.17,
-      "pct_change": 13.61,
+      "current_price": 751.96,
+      "pct_change": 14.03,
       "bullets": [
         "SPY is a permanent hold."
       ],
@@ -441,8 +226,8 @@ window.BRIEFING_DATA = {
       "ticker": "MU",
       "action": "Watch",
       "entry_price": 599.21,
-      "current_price": 937.0,
-      "pct_change": 56.37,
+      "current_price": 979.01,
+      "pct_change": 63.38,
       "bullets": [
         "WATCH \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates "
       ],
@@ -458,8 +243,8 @@ window.BRIEFING_DATA = {
       "ticker": "AMD",
       "action": "Hold",
       "entry_price": 453.74,
-      "current_price": 534.39,
-      "pct_change": 17.77,
+      "current_price": 552.65,
+      "pct_change": 21.8,
       "bullets": [
         "All hold conditions met. Conviction 50/100."
       ],
@@ -475,16 +260,16 @@ window.BRIEFING_DATA = {
       "ticker": "SPCX",
       "action": "Exit",
       "entry_price": 183.84,
-      "current_price": 139.14,
-      "pct_change": -24.31,
+      "current_price": 138.88,
+      "pct_change": -24.46,
       "bullets": [
-        "CHECKPOINT REVIEW: Position is DOWN -24.3% with no confirmed catalyst in the next 30 days. Redeploy into the highest-conviction catalyst opportunity."
+        "FIRST-DAY EXIT: SPCX is DOWN -24.5% within 0 days of entry while the broader market is stable (SPY +0.0%). The entry thesis is likely broken \u2014 cut fast and redeploy."
       ],
       "reasoning": "Hold through the index inclusion dates. The Russell 1000 and Nasdaq-100 inclusion through early July is the immediate catalyst. After index inclusion is complete, reassess the position size and whether to add more or hold at current allocation.",
       "summary": "SpaceX is the dominant commercial rocket company in the world, operating Falcon 9, Starship, and the Starlink satellite internet constellation with over 7,000 satellites in orbit. It recently completed its IPO and is now publicly traded, giving investors access to what may be the most important infrastructure company of the next century.",
       "catalyst": "No forward catalyst identified",
-      "why": "CHECKPOINT REVIEW: Position is DOWN -24.3% with no confirmed catalyst in the next 30 days. Redeploy into the highest-conviction catalyst opportunity.",
-      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -24.3% with no confirmed catalyst in the next 30 days. Redeploy into the highest-conviction catalyst opportunity.",
+      "why": "FIRST-DAY EXIT: SPCX is DOWN -24.5% within 0 days of entry while the broader market is stable (SPY +0.0%). The entry thesis is likely broken \u2014 cut fast and redeploy.",
+      "what_to_do": "FIRST-DAY EXIT: SPCX is DOWN -24.5% within 0 days of entry while the broader market is stable (SPY +0.0%). The entry thesis is likely broken \u2014 cut fast and redeploy.",
       "industry": "Aerospace & Space",
       "term": "Long-term"
     },
@@ -492,8 +277,8 @@ window.BRIEFING_DATA = {
       "ticker": "NVDA",
       "action": "Watch",
       "entry_price": 205.33,
-      "current_price": 203.53,
-      "pct_change": -0.88,
+      "current_price": 212.01,
+      "pct_change": 3.25,
       "bullets": [
         "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 it is a position to hold through the AI i"
       ],
@@ -509,8 +294,8 @@ window.BRIEFING_DATA = {
       "ticker": "BTC",
       "action": "Hold",
       "entry_price": 59767.28,
-      "current_price": 63704.1,
-      "pct_change": 6.59,
+      "current_price": 28.54,
+      "pct_change": -99.95,
       "bullets": [
         "BTC is a permanent hold."
       ],
@@ -526,8 +311,8 @@ window.BRIEFING_DATA = {
       "ticker": "ZEC",
       "action": "Hold",
       "entry_price": 482.12,
-      "current_price": 519.18,
-      "pct_change": 7.69,
+      "current_price": 543.88,
+      "pct_change": 12.81,
       "bullets": [
         "ZEC is a permanent hold."
       ],
@@ -543,8 +328,8 @@ window.BRIEFING_DATA = {
       "ticker": "ETH",
       "action": "Hold",
       "entry_price": 2010.52,
-      "current_price": 1836.91,
-      "pct_change": -8.64,
+      "current_price": 17.83,
+      "pct_change": -99.11,
       "bullets": [
         "ETH is a permanent hold."
       ],
@@ -560,8 +345,8 @@ window.BRIEFING_DATA = {
       "ticker": "XRP",
       "action": "Hold",
       "entry_price": 1.18,
-      "current_price": 1.09,
-      "pct_change": -7.63,
+      "current_price": 12.35,
+      "pct_change": 946.61,
       "bullets": [
         "XRP is a permanent hold."
       ],
@@ -572,207 +357,190 @@ window.BRIEFING_DATA = {
       "what_to_do": "XRP is a permanent hold.",
       "industry": "Cryptocurrency",
       "term": "Long-term"
-    },
-    {
-      "ticker": "INTC",
-      "action": "Exit",
-      "entry_price": 137.18,
-      "current_price": 103.12,
-      "pct_change": -24.83,
-      "bullets": [
-        "CHECKPOINT REVIEW: Position is DOWN -24.8% with no confirmed catalyst in the next 30 days. Redeploy into the highest-conviction catalyst opportunity."
-      ],
-      "reasoning": "Hold \u2014 thesis intact.",
-      "summary": "Intel Corporation",
-      "catalyst": "No forward catalyst identified",
-      "why": "CHECKPOINT REVIEW: Position is DOWN -24.8% with no confirmed catalyst in the next 30 days. Redeploy into the highest-conviction catalyst opportunity.",
-      "what_to_do": "CHECKPOINT REVIEW: Position is DOWN -24.8% with no confirmed catalyst in the next 30 days. Redeploy into the highest-conviction catalyst opportunity.",
-      "industry": "Semiconductors",
-      "term": "Medium-term"
-    },
-    {
-      "ticker": "SOL",
-      "action": "Hold",
-      "entry_price": 82.06,
-      "current_price": 0,
-      "pct_change": -100.0,
-      "bullets": [
-        "All hold conditions met. Conviction 50/100."
-      ],
-      "reasoning": "Hold \u2014 thesis intact.",
-      "summary": "",
-      "catalyst": "",
-      "why": "",
-      "what_to_do": "All hold conditions met. Conviction 50/100.",
-      "industry": "",
-      "term": "Long-term"
-    },
-    {
-      "ticker": "HUM",
-      "action": "Hold",
-      "entry_price": 357.37,
-      "current_price": 406.0,
-      "pct_change": 13.61,
-      "bullets": [
-        "All hold conditions met. Conviction 50/100."
-      ],
-      "reasoning": "Hold \u2014 thesis intact.",
-      "summary": "Humana Inc",
-      "catalyst": "",
-      "why": "",
-      "what_to_do": "All hold conditions met. Conviction 50/100.",
-      "industry": "Managed Care",
-      "term": "Short-term"
     }
   ],
   "industry_opportunities": [],
-  "what_changed": [],
-  "notable_moves": [],
-  "afternoon_positions": [],
-  "afternoon_candidates": [],
-  "intraday": {},
-  "catalyst_opportunities": [
+  "what_changed": [
+    "**Fed regime shift language hardened:** New Fed Chair Warsh explicitly pledged a policy \"regime change\" to eliminate what he called the inflation \"tax\" on Americans \u2014 language meaningfully more hawkish than the Fed's recent communications. This is not a routine statement; \"regime change\" implies structural tightening bias, which pressures growth stocks, high-multiple AI names, and risk assets broadly. NVDA, AMD, and the crypto positions all face headwinds if this framing takes hold in bond markets this afternoon.",
+    "**Oil prices reversed lower after Trump abandons Hormuz protection fee:** The White House walked back a proposed 20% protection fee on Strait of Hormuz traffic, removing a near-term geopolitical risk premium from crude. This is a net positive for inflation expectations (lower energy costs), but also confirms oil price support was partially artificial \u2014 relevant to the macro backdrop that drives the Fed's next move.",
+    "**New York imposes AI data center ban:** New York State became the first U.S. jurisdiction to ban new AI data center construction, citing energy grid concerns. This is a direct, tangible headwind for NVDA and any company dependent on domestic AI infrastructure buildout. While one state is not a national policy, it creates a precedent and regulatory overhang that the market is digesting in real time this afternoon.",
+    "**Inflation cooling signals reinforced:** The Social Security COLA estimate for 2027 fell as inflation cools \u2014 a secondary but meaningful confirmation that CPI-linked metrics are moving in the right direction. This supports the case that Warsh's \"regime change\" rhetoric may be more posturing than imminent action, softening the bond market reaction somewhat.",
+    "**SPCX index inclusion window has now fully passed:** The Russell 1000, MSCI Global, and Nasdaq-100 index inclusion dates for SpaceX (SPCX) cited in the original thesis have elapsed (late June through early July 2026). The position is down -24.5% and the primary near-term catalyst is now complete \u2014 this requires a mandatory thesis reassessment today per portfolio rules, not a hold-and-hope posture.",
+    "<b>Close watch:</b> **The single most important thing to monitor before today's close is the XRP position size relative to the 15%"
+  ],
+  "notable_moves": [
+    "**QQQ** \u2014 approximately **-1.2%** intraday: The Nasdaq-100 is under direct pressure from two converging forces today \u2014 Warsh's hawkish \"regime change\" language lifting rate expectations, and the New York AI data center ban creating regulatory uncertainty for the largest index constituents (NVDA, MSFT, META, AMZN). This directly affects NVDA and AMD in this portfolio.",
+    "**NVDA** \u2014 approximately **-2.8%** intraday: NVDA is the single largest AI data center infrastructure name and therefore the most direct target of New York's data center ban news. The stock was already near a low-conviction entry point at +3.3% P&L and this regulatory headline adds a new risk dimension ahead of August 26 earnings. The move matters because it tests whether AI infrastructure demand narratives can absorb state-level regulatory friction.",
+    "**XOP (Oil & Gas ETF)** \u2014 approximately **-1.8%** intraday: Trump's reversal on the Strait of Hormuz protection fee drained the geopolitical risk premium from crude prices this afternoon. XOP is not a current holding but the move signals that oil-driven inflation pressure is easing, which is the key macro variable influencing Fed rhetoric and rate path \u2014 relevant to every growth position in this portfolio.",
+    "**CIBR (Cybersecurity ETF)** \u2014 approximately **+1.4%** intraday: New York's AI data center ban is triggering concern about data sovereignty and AI governance, which historically correlates with increased enterprise cybersecurity spending. CIBR is on the new opportunities watchlist at conviction 42/100 and this afternoon's move strengthens the case for reviewing it closely.",
+    "**IHF (Managed Care ETF)** \u2014 approximately **+0.9%** intraday: Healthcare and managed care names are acting as defensive rotation destinations as rate uncertainty and AI regulatory headlines pressure growth stocks. IHF sits on the watchlist at 36/100 conviction and today's outperformance versus the broad market is consistent with its defensive characteristics."
+  ],
+  "afternoon_positions": [
     {
-      "ticker": "RPD",
-      "industry": "Cybersecurity",
-      "earnings_date": "2026-08-11",
-      "eps_estimate": 0.3496,
-      "excess_21d": 65.4,
-      "price": 11.92,
-      "has_news": false,
-      "news_headlines": [],
-      "catalyst_type": "earnings",
-      "days_until": 28,
-      "significance": "high",
-      "avg_daily_range": 3.86,
-      "high_volatility": false
+      "ticker": "SPY",
+      "action": "Hold",
+      "entry_price": 659.44,
+      "current_price": 751.96,
+      "qty": 6.32302,
+      "pct_change": 14.03,
+      "bullets": []
     },
     {
-      "ticker": "TENB",
-      "industry": "Cybersecurity",
-      "earnings_date": "2026-07-28",
-      "eps_estimate": 0.479,
-      "excess_21d": 44.1,
-      "price": 39.2,
-      "has_news": false,
-      "news_headlines": [],
-      "catalyst_type": "earnings",
-      "days_until": 14,
-      "significance": "high",
-      "avg_daily_range": 3.59,
-      "high_volatility": false
+      "ticker": "MU",
+      "action": "Hold",
+      "entry_price": 599.21,
+      "current_price": 979.01,
+      "qty": 0.24798,
+      "pct_change": 63.38,
+      "bullets": [
+        "No new developments today \u2014 thesis intact, hold into tomorrow."
+      ]
     },
     {
-      "ticker": "RARE",
-      "industry": "Biotech",
-      "earnings_date": "2026-07-30",
-      "eps_estimate": -1.2518,
-      "excess_21d": 36.7,
-      "price": 33.22,
-      "has_news": false,
-      "news_headlines": [],
-      "catalyst_type": "earnings",
-      "days_until": 16,
-      "significance": "high",
-      "avg_daily_range": 3.04,
-      "high_volatility": false
+      "ticker": "AMD",
+      "action": "Hold",
+      "entry_price": 453.74,
+      "current_price": 552.65,
+      "qty": 0.58112,
+      "pct_change": 21.8,
+      "bullets": [
+        "No new developments today \u2014 thesis intact, hold into tomorrow."
+      ]
     },
     {
-      "ticker": "QLYS",
-      "industry": "Cybersecurity",
-      "earnings_date": "2026-08-10",
-      "eps_estimate": 1.8195,
-      "excess_21d": 34.9,
-      "price": 151.54,
-      "has_news": false,
-      "news_headlines": [],
-      "catalyst_type": "earnings",
-      "days_until": 27,
-      "significance": "high",
-      "avg_daily_range": 2.99,
-      "high_volatility": false
+      "ticker": "SPCX",
+      "action": "Hold",
+      "entry_price": 183.84,
+      "current_price": 138.88,
+      "qty": 0.68908,
+      "pct_change": -24.46,
+      "bullets": [
+        "No new developments today \u2014 thesis intact, hold into tomorrow."
+      ]
     },
     {
-      "ticker": "MRNA",
-      "industry": "Biotech",
-      "earnings_date": "2026-07-31",
-      "eps_estimate": -2.1227,
-      "excess_21d": 33.2,
-      "price": 67.01,
-      "has_news": false,
-      "news_headlines": [],
-      "catalyst_type": "earnings",
-      "days_until": 17,
-      "significance": "high",
-      "avg_daily_range": 4.92,
-      "high_volatility": true
+      "ticker": "NVDA",
+      "action": "Hold",
+      "entry_price": 205.33,
+      "current_price": 212.01,
+      "qty": 1.00002,
+      "pct_change": 3.25,
+      "bullets": [
+        "No new developments today \u2014 thesis intact, hold into tomorrow."
+      ]
     },
     {
-      "ticker": "SE",
-      "industry": "Emerging Markets",
-      "earnings_date": "2026-08-10",
-      "eps_estimate": 0.806,
-      "excess_21d": 27.3,
-      "price": 110.66,
-      "has_news": true,
-      "news_headlines": [
-        "Stocks mixed as oil rises after Trump's Hormuz levy threat",
-        "Project44 forms two new businesses, launches AI-native LSP44"
-      ],
-      "catalyst_type": "earnings",
-      "days_until": 27,
-      "significance": "high",
-      "avg_daily_range": 2.46,
-      "high_volatility": false
+      "ticker": "BTC",
+      "action": "Hold",
+      "entry_price": 59767.28,
+      "current_price": 28.54,
+      "qty": 0.04544048,
+      "pct_change": -99.95,
+      "bullets": [
+        "No new developments today \u2014 thesis intact, hold into tomorrow."
+      ]
     },
     {
-      "ticker": "MOH",
-      "industry": "Managed Care",
-      "earnings_date": "2026-07-22",
-      "eps_estimate": 1.4361,
-      "excess_21d": 23.9,
-      "price": 242.88,
-      "has_news": false,
-      "news_headlines": [],
-      "catalyst_type": "earnings",
-      "days_until": 8,
-      "significance": "high",
-      "avg_daily_range": 1.71,
-      "high_volatility": false
+      "ticker": "ZEC",
+      "action": "Hold",
+      "entry_price": 482.12,
+      "current_price": 543.88,
+      "qty": 1.00032929,
+      "pct_change": 12.81,
+      "bullets": [
+        "No new developments today \u2014 thesis intact, hold into tomorrow."
+      ]
     },
     {
-      "ticker": "FIVN",
-      "industry": "Cloud Computing",
-      "earnings_date": "2026-07-29",
-      "eps_estimate": 0.6973,
-      "excess_21d": 22.1,
-      "price": 25.81,
-      "has_news": false,
-      "news_headlines": [],
-      "catalyst_type": "earnings",
-      "days_until": 15,
-      "significance": "high",
-      "avg_daily_range": 2.66,
-      "high_volatility": false
+      "ticker": "ETH",
+      "action": "Hold",
+      "entry_price": 2010.52,
+      "current_price": 17.83,
+      "qty": 0.2038873,
+      "pct_change": -99.11,
+      "bullets": [
+        "No new developments today \u2014 thesis intact, hold into tomorrow."
+      ]
+    },
+    {
+      "ticker": "XRP",
+      "action": "Hold",
+      "entry_price": 1.18,
+      "current_price": 12.35,
+      "qty": 250.635305,
+      "pct_change": 946.61,
+      "bullets": [
+        "No new developments today \u2014 thesis intact, hold into tomorrow."
+      ]
     }
   ],
+  "afternoon_candidates": [
+    {
+      "industry": "**CYBERSECURITY (CIBR)",
+      "conviction": 42,
+      "status": "STRENGTHENED",
+      "bullets": [],
+      "vehicle": "",
+      "stocks": [],
+      "etf": "",
+      "term": "Medium-term"
+    },
+    {
+      "industry": "- Conviction is 42/100",
+      "conviction": 42,
+      "status": "CONFIRMED",
+      "bullets": [
+        "Wait for a tactical entry pullback before deploying. CIBR's 1.4% gain today on regulatory news suggests the market is already pricing some of this. A position on a flat or down day for CIBR would offer a better risk-adjusted entry. Set a watchlist alert. Do not chase today's move."
+      ],
+      "vehicle": "",
+      "stocks": [],
+      "etf": "",
+      "term": "Medium-term"
+    },
+    {
+      "industry": "**PHARMACEUTICALS (XPH)",
+      "conviction": 41,
+      "status": "CONFIRMED",
+      "bullets": [],
+      "vehicle": "",
+      "stocks": [],
+      "etf": "",
+      "term": "Medium-term"
+    },
+    {
+      "industry": "- Conviction remains at 41/100",
+      "conviction": 41,
+      "status": "NEW",
+      "bullets": [
+        "XPH remains a candidate to monitor, not act on today. The vehicle is appropriate (diversified pharma ETF rather than single-name binary risk), but conviction must rise above 50/100 before deployment. No action before close."
+      ],
+      "vehicle": "",
+      "stocks": [],
+      "etf": "",
+      "term": "Medium-term"
+    },
+    {
+      "industry": "**MANAGED CARE (IHF)",
+      "conviction": 36,
+      "status": "CONFIRMED",
+      "bullets": [],
+      "vehicle": "",
+      "stocks": [],
+      "etf": "",
+      "term": "Medium-term"
+    }
+  ],
+  "intraday": {},
+  "catalyst_opportunities": [],
   "rules_engine": {
-    "regime_score": 70,
+    "regime_score": 65,
     "regime": "Green",
     "exit_signals": [
       {
         "action": "hold",
         "ticker": "SPY",
         "exit_type": null,
-        "reason": "SPY is a permanent hold.",
-        "tax_awareness": {
-          "ticker": "SPY",
-          "currently_short_term": true,
-          "long_term_date": "2027-04-15",
-          "days_to_long_term": 274,
-          "tax_recommendation": "Short-term position. Long-term gain date: Apr 15, 2027.",
-          "urgency": "low"
-        }
+        "reason": "SPY is a permanent hold."
       },
       {
         "action": "watch",
@@ -780,47 +548,23 @@ window.BRIEFING_DATA = {
         "exit_type": null,
         "urgency": "monitor",
         "reason": "WATCH \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cut, exit and reallocate.",
-        "pct_change": 56.37,
-        "tax_awareness": {
-          "ticker": "MU",
-          "currently_short_term": true,
-          "long_term_date": "2027-04-15",
-          "days_to_long_term": 274,
-          "tax_recommendation": "Short-term position. Long-term gain date: Apr 15, 2027.",
-          "urgency": "low"
-        }
+        "pct_change": 63.38
       },
       {
         "action": "hold",
         "ticker": "AMD",
         "exit_type": null,
         "reason": "All hold conditions met. Conviction 50/100.",
-        "pct_change": 17.77,
-        "tax_awareness": {
-          "ticker": "AMD",
-          "currently_short_term": true,
-          "long_term_date": "2027-04-15",
-          "days_to_long_term": 274,
-          "tax_recommendation": "Short-term position. Long-term gain date: Apr 15, 2027.",
-          "urgency": "low"
-        }
+        "pct_change": 21.8
       },
       {
         "action": "exit",
         "ticker": "SPCX",
-        "exit_type": "checkpoint",
+        "exit_type": "first_day_stop",
         "urgency": "eod_decision",
         "conviction": 50,
-        "reason": "CHECKPOINT REVIEW: Position is DOWN -24.3% with no confirmed catalyst in the next 30 days. Redeploy into the highest-conviction catalyst opportunity.",
-        "pct_change": -24.31,
-        "tax_awareness": {
-          "ticker": "SPCX",
-          "currently_short_term": true,
-          "long_term_date": "2027-04-15",
-          "days_to_long_term": 274,
-          "tax_recommendation": "Short-term position. Long-term gain date: Apr 15, 2027.",
-          "urgency": "low"
-        }
+        "reason": "FIRST-DAY EXIT: SPCX is DOWN -24.5% within 0 days of entry while the broader market is stable (SPY +0.0%). The entry thesis is likely broken \u2014 cut fast and redeploy.",
+        "pct_change": -24.46
       },
       {
         "action": "watch",
@@ -828,15 +572,7 @@ window.BRIEFING_DATA = {
         "exit_type": null,
         "urgency": "monitor",
         "reason": "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 it is a position to hold through the AI infrastructure buildout cycle.",
-        "pct_change": -0.88,
-        "tax_awareness": {
-          "ticker": "NVDA",
-          "currently_short_term": true,
-          "long_term_date": "2027-04-15",
-          "days_to_long_term": 274,
-          "tax_recommendation": "Short-term position. Long-term gain date: Apr 15, 2027.",
-          "urgency": "low"
-        }
+        "pct_change": 3.25
       },
       {
         "action": "hold",
@@ -861,54 +597,15 @@ window.BRIEFING_DATA = {
         "ticker": "XRP",
         "exit_type": null,
         "reason": "XRP is a permanent hold."
-      },
-      {
-        "action": "exit",
-        "ticker": "INTC",
-        "exit_type": "checkpoint",
-        "urgency": "eod_decision",
-        "conviction": 50,
-        "reason": "CHECKPOINT REVIEW: Position is DOWN -24.8% with no confirmed catalyst in the next 30 days. Redeploy into the highest-conviction catalyst opportunity.",
-        "pct_change": -24.83,
-        "tax_awareness": {
-          "ticker": "INTC",
-          "currently_short_term": true,
-          "long_term_date": "2027-05-02",
-          "days_to_long_term": 291,
-          "tax_recommendation": "Short-term position. Long-term gain date: May 02, 2027.",
-          "urgency": "low"
-        }
-      },
-      {
-        "action": "hold",
-        "ticker": "SOL",
-        "exit_type": null,
-        "reason": "All hold conditions met. Conviction 50/100.",
-        "pct_change": -100.0
-      },
-      {
-        "action": "hold",
-        "ticker": "HUM",
-        "exit_type": null,
-        "reason": "All hold conditions met. Conviction 50/100.",
-        "pct_change": 13.61,
-        "tax_awareness": {
-          "ticker": "HUM",
-          "currently_short_term": true,
-          "long_term_date": "2027-05-02",
-          "days_to_long_term": 291,
-          "tax_recommendation": "Short-term position. Long-term gain date: May 02, 2027.",
-          "urgency": "low"
-        }
       }
     ],
     "entry_signals": [],
     "crypto_check": {
-      "crypto_pct": 0.402,
+      "crypto_pct": 0.393,
       "max_allowed_pct": 0.2,
       "over_limit": true,
       "regime": "Green",
-      "warning": "\u26a0\ufe0f Crypto 40.2% exceeds 20% limit in Green regime."
+      "warning": "\u26a0\ufe0f Crypto 39.3% exceeds 20% limit in Green regime."
     },
     "kill_criteria": {
       "triggered": false,
