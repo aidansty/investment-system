@@ -569,10 +569,11 @@ const prevPrices = {};
 
 async function fetchAndUpdatePrices() {
   try {
-    const tickers = POSITIONS_CONFIG.map(p => p.ticker);
+    const _livePositions = window.POSITIONS_CONFIG || POSITIONS_CONFIG;
+    const tickers = _livePositions.map(p => p.ticker);
     const prices = await fetchLivePrices(tickers);
 
-    const updatedPositions = POSITIONS_CONFIG.map(p => {
+    const updatedPositions = _livePositions.map(p => {
       const livePrice = prices[p.ticker];
       if (livePrice == null) return p;
       const balance = round2(livePrice * p.qty);
@@ -839,7 +840,7 @@ function buildAllocData(positions, cash) {
 }
 
 // Initial alloc chart built from pipeline data, rebuilt with live prices after fetch
-rebuildAllocChart(POSITIONS_CONFIG, currentCash);
+rebuildAllocChart(window.POSITIONS_CONFIG || POSITIONS_CONFIG, currentCash);
 
 // ============================================================
 // POSITION ROWS
@@ -1582,12 +1583,14 @@ TERM_ORDER.forEach(term => {
 });
 
 // Fetch all prices on load
-fetchAndUpdatePrices();
+// Wait for sync to complete before first price fetch
+setTimeout(fetchAndUpdatePrices, 2000);
 
 // Crypto refreshes every 10 seconds via Coinbase
 async function fetchCryptoOnly() {
   try {
-    const cryptoTickers = POSITIONS_CONFIG.filter(p => CRYPTO_TICKERS[p.ticker]).map(p => p.ticker);
+    const _cryptoPositions = window.POSITIONS_CONFIG || POSITIONS_CONFIG;
+    const cryptoTickers = _cryptoPositions.filter(p => CRYPTO_TICKERS[p.ticker]).map(p => p.ticker);
     const prices = {};
     const results = await Promise.all(cryptoTickers.map(async t => {
       const price = await fetchCryptoPrice(t);
