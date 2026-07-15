@@ -144,7 +144,7 @@ Return ONLY a valid JSON array. No markdown, no explanation, just the JSON:
     "bullets": [
       "What happened: one clear sentence",
       "Why it matters: one clear sentence on market or sector impact",
-      "Portfolio relevance: name the SPECIFIC holding(s) from the list above this affects and explain exactly how (bullish/bearish, thesis strengthened/weakened). If no current holding is affected, name the specific NEW investment opportunity this points to. NEVER write a generic sentence — always name specific tickers."
+      "Portfolio relevance: name the SPECIFIC holding(s) affected and explain the CAUSAL LINK — what about this news/event directly impacts that company revenue, market position, regulatory status, or stock price. Example: This affects MU because memory chip demand increases when AI infrastructure spending rises, directly boosting MU revenue forecast. If no current holding is affected, name the specific NEW investment opportunity and explain WHY it could move 5%+. NEVER write affects MU without explaining WHY."
     ],
     "affected_tickers": ["list of tickers from holdings affected, or new tickers representing opportunities"],
     "sentiment": "bullish or bearish or neutral",
