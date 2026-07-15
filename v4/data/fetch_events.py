@@ -272,8 +272,8 @@ def fetch_all_events(days_ahead=30):
         for block in response.content:
             if hasattr(block, "text"):
                 fda_text += block.text
-        for line in fda_text.strip().split("
-"):
+        for line in fda_text.strip().splitlines():
+
             parts = line.strip().strip("-•").split("|")
             if len(parts) >= 3:
                 tk = parts[0].strip().upper()
