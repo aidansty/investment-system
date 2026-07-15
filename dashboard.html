@@ -1863,57 +1863,78 @@ if (cdEl && cdText && catOpps.length > 0) {
 
 // notable-moves removed — afternoon uses aft-alerts now
 
-// ── AFTERNOON TAB — Simplified alert-based rendering ──
+// ── AFTERNOON TAB — Reads from rules engine + Claude ──
 const aftAlerts = document.getElementById('aft-alerts');
 if (aftAlerts) {
   const alerts = [];
   const whatChanged = BRIEFING_DATA.what_changed || [];
   const aftPositions = BRIEFING_DATA.afternoon_positions || [];
+  const exitSignals = BRIEFING_DATA.exit_signals || [];
+  const cryptoSkipAft = new Set(['BTC','ETH','XRP','ZEC','SOL']);
+  const myStockTickers = (window.POSITIONS_CONFIG || POSITIONS_CONFIG || [])
+    .filter(p => !cryptoSkipAft.has(p.ticker) && p.ticker !== 'SPY')
+    .map(p => p.ticker);
 
-  // Real content from What Changed (skip boilerplate/errors)
+  // 1. EXIT SIGNALS from rules engine (same source as Telegram)
+  const stockExits = exitSignals.filter(s => s.action === 'exit' && !cryptoSkipAft.has(s.ticker) && s.ticker !== 'SPY');
+  if (stockExits.length > 0) {
+    let exitHtml = '<div class="info-card" style="margin-bottom:12px;"><div class="info-card-title">Exit Signals</div>';
+    stockExits.forEach(s => {
+      exitHtml += '<div style="padding:12px;border-bottom:0.5px solid rgba(255,255,255,0.05);">';
+      exitHtml += '<div style="display:flex;justify-content:space-between;align-items:center;"><b>' + s.ticker + '</b><span class="badge badge-red">EXIT</span></div>';
+      exitHtml += '<p style="font-size:12.5px;line-height:1.6;color:var(--text-body);margin-top:6px;">' + (s.reason || '') + '</p>';
+      exitHtml += '</div>';
+    });
+    exitHtml += '</div>';
+    alerts.push(exitHtml);
+  }
+
+  // 2. WATCH signals from rules engine
+  const watchSignals = exitSignals.filter(s => s.action === 'watch' && !cryptoSkipAft.has(s.ticker));
+  if (watchSignals.length > 0) {
+    let watchHtml = '<div class="info-card" style="margin-bottom:12px;"><div class="info-card-title">Watch Signals</div>';
+    watchSignals.forEach(s => {
+      watchHtml += '<div style="padding:12px;border-bottom:0.5px solid rgba(255,255,255,0.05);">';
+      watchHtml += '<div style="display:flex;justify-content:space-between;align-items:center;"><b>' + s.ticker + '</b><span class="badge badge-watch">WATCH</span></div>';
+      watchHtml += '<p style="font-size:12.5px;line-height:1.6;color:var(--text-body);margin-top:6px;">' + (s.reason || '') + '</p>';
+      watchHtml += '</div>';
+    });
+    watchHtml += '</div>';
+    alerts.push(watchHtml);
+  }
+
+  // 3. WHAT CHANGED — connected to specific holdings where possible
   const realChanges = (Array.isArray(whatChanged) ? whatChanged : [whatChanged]).filter(w => {
     const text = (w || '').toLowerCase();
-    return text.length > 20 && !text.includes('unavailable') && !text.includes('could not be parsed');
+    return text.length > 20 && !text.includes('unavailable') && !text.includes('could not be parsed') && !text.includes('no new developments');
   });
   if (realChanges.length > 0) {
-    alerts.push('<div class="info-card" style="margin-bottom:12px;"><div class="info-card-title">What Changed Today</div><ul>' +
-      realChanges.map(w => '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">' + w + '</li>').join('') + '</ul></div>');
-  }
-
-  // Urgent position actions (exit, sell, trim, or real developments)
-  const urgentPositions = aftPositions.filter(p => {
-    if (!p.ticker || p.ticker === '-') return false;
-    const action = (p.action || '').toLowerCase();
-    if (action === 'exit' || action === 'sell' || action === 'close' || action === 'trim') return true;
-    if (p.bullets && p.bullets.some(b => !b.toLowerCase().includes('no new developments') && !b.toLowerCase().includes('intact hold') && !b.toLowerCase().includes('could not be parsed') && b.length > 20)) return true;
-    return false;
-  });
-  if (urgentPositions.length > 0) {
-    let posHtml = '<div class="info-card" style="margin-bottom:12px;"><div class="info-card-title">Position Alerts</div>';
-    urgentPositions.forEach(p => {
-      const action = (p.action || 'Hold').charAt(0).toUpperCase() + (p.action || 'hold').slice(1);
-      const badgeClass = {'Exit':'badge-red','Sell':'badge-red','Close':'badge-red','Trim':'badge-amber','Watch':'badge-watch'}[action] || 'badge-hold';
-      posHtml += '<div style="padding:12px;border-bottom:0.5px solid rgba(255,255,255,0.05);">';
-      posHtml += '<div style="display:flex;justify-content:space-between;align-items:center;"><b>' + p.ticker + '</b><span class="badge ' + badgeClass + '">' + action + '</span></div>';
-      if (p.bullets && p.bullets.length) {
-        posHtml += '<ul style="margin-top:6px;">' + p.bullets.filter(b => b.length > 10).map(b => '<li style="font-size:12.5px;line-height:1.6;color:var(--text-body);">' + b + '</li>').join('') + '</ul>';
+    let changeHtml = '<div class="info-card" style="margin-bottom:12px;"><div class="info-card-title">What Changed Today</div>';
+    realChanges.forEach(w => {
+      // Check if this change mentions any of my holdings
+      const affectedTickers = myStockTickers.filter(tk => w.toUpperCase().includes(tk));
+      let holdingBadge = '';
+      if (affectedTickers.length > 0) {
+        holdingBadge = ' <span class="badge badge-amber" style="font-size:9px;padding:1px 6px;">AFFECTS: ' + affectedTickers.join(', ') + '</span>';
       }
-      posHtml += '</div>';
+      changeHtml += '<div style="padding:10px;border-bottom:0.5px solid rgba(255,255,255,0.05);">';
+      changeHtml += '<p style="font-size:13px;line-height:1.65;color:var(--text-body);">' + w + holdingBadge + '</p>';
+      changeHtml += '</div>';
     });
-    posHtml += '</div>';
-    alerts.push(posHtml);
+    changeHtml += '</div>';
+    alerts.push(changeHtml);
   }
 
-  // New investment opportunities — from catalyst scanner only
+  // 4. Opportunities from catalyst scanner
   const aftCandidates = BRIEFING_DATA.catalyst_opportunities || [];
   const realCandidates = aftCandidates.filter(c => c && c.ticker && (c.excess_21d > 5 || c.catalyst_type === 'post-catalyst-confirmed' || c.catalyst_type === 'analyst_upgrade'));
   if (realCandidates.length > 0) {
     let oppHtml = '<div class="info-card" style="margin-bottom:12px;"><div class="info-card-title">Opportunity Detected</div>';
     realCandidates.slice(0, 3).forEach(c => {
       oppHtml += '<div style="padding:10px;border-bottom:0.5px solid rgba(255,255,255,0.05);">';
-      oppHtml += '<div style="display:flex;justify-content:space-between;align-items:center;"><b>' + (c.ticker || c.industry || '') + '</b><span class="badge badge-green">' + (c.conviction || 0) + '/100</span></div>';
-      if (c.bullets && c.bullets.length) {
-        oppHtml += '<ul style="margin-top:6px;">' + c.bullets.map(b => '<li style="font-size:12.5px;line-height:1.6;color:var(--text-body);">' + b + '</li>').join('') + '</ul>';
+      oppHtml += '<div style="display:flex;justify-content:space-between;align-items:center;"><b>' + (c.ticker || '') + '</b><span class="badge badge-green">' + (c.catalyst_type || 'catalyst') + '</span></div>';
+      if (c.news_headlines && c.news_headlines[0]) {
+        oppHtml += '<p style="font-size:12.5px;color:var(--text-body);margin-top:4px;">' + c.news_headlines[0] + '</p>';
       }
       oppHtml += '</div>';
     });
@@ -1921,8 +1942,9 @@ if (aftAlerts) {
     alerts.push(oppHtml);
   }
 
+  // 5. All stable — only shows if NOTHING above triggered
   if (alerts.length === 0) {
-    aftAlerts.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:28px;margin-bottom:12px;">\u2705</div><div style="font-size:14px;color:var(--text-secondary);">All positions stable \u2014 no urgent developments today.</div><div style="font-size:12px;color:var(--text-secondary);margin-top:6px;">The afternoon monitor alerts on thesis-breaking events, significant news affecting your holdings, market-wide events, and new investment opportunities.</div></div>';
+    aftAlerts.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:28px;margin-bottom:12px;">\u2705</div><div style="font-size:14px;color:var(--text-secondary);">All positions stable — no urgent developments today.</div><div style="font-size:12px;color:var(--text-secondary);margin-top:6px;">The afternoon monitor alerts on thesis-breaking events, significant news affecting your holdings, market-wide events, and new investment opportunities.</div></div>';
   } else {
     aftAlerts.innerHTML = alerts.join('');
   }

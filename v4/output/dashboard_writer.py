@@ -771,6 +771,7 @@ def write_dashboard_data(
         "notable_moves": notable_moves,
         "afternoon_positions": afternoon_positions,
         "afternoon_candidates": afternoon_candidates,
+        "exit_signals": [{"ticker": s.get("ticker",""), "action": s.get("action",""), "reason": s.get("reason","")[:250], "exit_type": s.get("exit_type",""), "urgency": s.get("urgency",""), "pct_change": s.get("pct_change",0)} for s in (re.get("exit_signals",[]) if re else [])] if run_type == "afternoon" else [],
         "intraday": intraday or {},
         "catalyst_opportunities": catalyst_opportunities if catalyst_opportunities else _morning_catalysts,
         "rules_engine": {
