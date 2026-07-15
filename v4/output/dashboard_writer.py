@@ -641,7 +641,25 @@ def write_dashboard_data(
         if not what_changed:
             what_changed = ["⚠️ What Changed section unavailable — Claude output could not be parsed. Check GitHub Actions logs for this run."]
 
-        # IMPORTANT: preserve morning briefing data — do not clear it
+        # Read existing dashboard data to preserve morning-only fields during afternoon runs
+    _morning_catalysts = []
+    _morning_position_review = []
+    _morning_news = []
+    try:
+        import os as _os2
+        _existing_path = _os2.path.join(_os2.path.dirname(__file__), "..", "..", "dashboard_data.js")
+        if _os2.path.exists(_existing_path):
+            with open(_existing_path) as _ef:
+                _existing_raw = _ef.read()
+            import json as _json2
+            _existing = _json2.loads(_existing_raw.replace("window.BRIEFING_DATA = ", "").rstrip(";"))
+            _morning_catalysts = _existing.get("catalyst_opportunities", [])
+            _morning_position_review = _existing.get("position_review", [])
+            _morning_news = _existing.get("news", [])
+    except Exception:
+        pass
+
+    # IMPORTANT: preserve morning briefing data — do not clear it
         # Morning position_review and industry_opportunities stay in their keys
         # so the morning briefing tab remains populated after afternoon run
 
@@ -732,7 +750,7 @@ def write_dashboard_data(
         "performance_dates": perf_dates,
         "performance_portfolio": perf_portfolio,
         "performance_spy": perf_spy,
-        "news": news_cards,
+        "news": news_cards if news_cards else _morning_news,
         "forward_catalysts": [
             {
                 "date": c.get("date", ""),
@@ -745,14 +763,14 @@ def write_dashboard_data(
             }
             for c in forward_catalysts
         ],
-        "position_review": position_review,
+        "position_review": position_review if position_review else _morning_position_review,
         "industry_opportunities": [],  # Removed — catalyst scanner replaces this
         "what_changed": what_changed,
         "notable_moves": notable_moves,
         "afternoon_positions": afternoon_positions,
         "afternoon_candidates": afternoon_candidates,
         "intraday": intraday or {},
-        "catalyst_opportunities": catalyst_opportunities or [],
+        "catalyst_opportunities": catalyst_opportunities if catalyst_opportunities else _morning_catalysts,
         "rules_engine": {
             "regime_score": (rules_output or {}).get("regime_score", 0),
             "regime": (rules_output or {}).get("regime", "Yellow"),
