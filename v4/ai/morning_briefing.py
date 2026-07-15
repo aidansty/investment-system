@@ -334,7 +334,16 @@ TICKER — HOLD / WATCH / TRIM / EXIT / CLOSE
 - Bullet 3: Exact reasoning for the recommended action — cite the specific factor
 - Bullet 4: What to monitor next — specific data point, date, or event
 
-MANDATORY: This position review must reflect information CURRENT as of today's date above — not generic evergreen reasoning that could apply on any day. Every position gets fresh eyes every single morning: check recent earnings results, check today's news for this ticker or its industry, check current momentum data. Do not reuse the same boilerplate reasoning across multiple days.
+MANDATORY: This position review must reflect information CURRENT as of today's date above — not generic evergreen reasoning that could apply on any day. Every position gets fresh eyes every single morning.
+
+CRITICAL DATE RULE: Today is {today}. Do NOT reference any event that happened more than 7 days ago as if it is current news. If an earnings report was more than 7 days ago, it is OLD — do not say "earnings just reported" or "review the actual results." Instead, focus on:
+1. What has happened SINCE that event (price movement, analyst reactions, guidance implications)
+2. What comes NEXT for this stock (next earnings date, upcoming catalysts, sector developments)
+3. Today's specific news or price action
+
+If SpaceX had index inclusion dates that have already passed, do NOT say "hold through inclusion dates." Those dates are gone. Focus on what is NEXT.
+
+Every position review must be DIFFERENT from yesterday's. If you find yourself writing the same text as yesterday, you are doing it wrong. Reference specific news from TODAY's feed, specific price changes from THIS MORNING, and specific upcoming events with actual dates.
 
 SIGNIFICANCE FILTER — apply this to EVERY position:
 When evaluating whether news or events should change the action on a position, apply this test:

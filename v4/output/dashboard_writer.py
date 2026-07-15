@@ -723,6 +723,41 @@ def write_dashboard_data(
                 pp["why"] = pr_match.get("why") or pp.get("why", "")
                 pp["catalyst"] = pr_match.get("catalyst") or pp.get("catalyst", "")
 
+    # Ensure NO portfolio card has empty fields — fallback to positions.json data
+    pos_lookup = {p.get("ticker"): p for p in (positions or [])}
+    for pp in portfolio_positions:
+        tk = pp.get("ticker", "")
+        raw = pos_lookup.get(tk, {})
+        # If what_to_do is empty or just contains price data, populate from thesis/rules
+        wtd = pp.get("what_to_do", "")
+        if not wtd or "Entry at" in wtd or len(wtd) < 20:
+            # Check position_review for this ticker
+            pr_match = next((pr for pr in position_review if pr.get("ticker") == tk), None)
+            if pr_match and pr_match.get("bullets"):
+                pp["what_to_do"] = pr_match["bullets"][0][:250]
+            elif raw.get("thesis"):
+                pp["what_to_do"] = raw["thesis"][:250]
+            else:
+                pp["what_to_do"] = f"Position under active monitoring. Next update at morning run."
+        if not pp.get("summary") or len(pp.get("summary", "")) < 10:
+            pp["summary"] = raw.get("summary", raw.get("thesis", raw.get("name", tk)))
+        if not pp.get("catalyst") or len(pp.get("catalyst", "")) < 5:
+            ct = raw.get("catalyst_type", raw.get("catalyst", ""))
+            if ct:
+                pp["catalyst"] = ct.replace("_", " ").capitalize()
+            elif pr_match and pr_match.get("catalyst"):
+                pp["catalyst"] = pr_match["catalyst"]
+            else:
+                pp["catalyst"] = "Awaiting catalyst identification"
+        if not pp.get("why") or len(pp.get("why", "")) < 10:
+            pr_match2 = next((pr for pr in position_review if pr.get("ticker") == tk), None)
+            if pr_match2 and pr_match2.get("bullets"):
+                pp["why"] = pr_match2["bullets"][0][:250]
+            elif raw.get("thesis"):
+                pp["why"] = raw["thesis"][:250]
+            else:
+                pp["why"] = pp.get("what_to_do", "Position under monitoring")
+
     # Performance history — placeholder until real history is tracked
     perf_dates = []
     perf_portfolio = []

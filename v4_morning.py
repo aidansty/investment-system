@@ -239,7 +239,9 @@ def main():
             event_calendar = []
 
         # Build set of currently held tickers — scanner only finds NEW opportunities
+        # held_tickers from positions.json — scanner must SKIP all of these
         held_tickers = {p.get("ticker", "") for p in positions}
+        log(f"  Held tickers to skip: {held_tickers}")
         log(f"  Skipping {len(held_tickers)} held positions")
 
         import requests, os
