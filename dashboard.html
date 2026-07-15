@@ -1810,6 +1810,12 @@ catOpps.forEach(c => {
   bullets += '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">21-day momentum vs SPY: <b style="color:' + momentumColor + ';">+' + c.excess_21d + 'pp</b>' + (isPreCatalyst ? ' <span style="color:var(--amber);font-size:11px;">(pre-catalyst — price has not fully reacted yet)</span>' : '') + '</li>';
   if (c.price) {
     bullets += '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">Current price: $' + c.price + '</li>';
+  if (c.hold_period) {
+    bullets += '<li style="font-size:13px;line-height:1.65;color:var(--text-body);"><b>Hold period:</b> ' + c.hold_period + '</li>';
+  }
+  if (c.exit_strategy) {
+    bullets += '<li style="font-size:13px;line-height:1.65;color:var(--green);"><b>Exit plan:</b> ' + c.exit_strategy + '</li>';
+  }
   }
   if (c.eps_estimate) {
     bullets += '<li style="font-size:13px;line-height:1.65;color:var(--text-body);">Expected earnings/share: $' + c.eps_estimate + ' (stock rises if actual beats this)</li>';

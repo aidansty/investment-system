@@ -600,7 +600,79 @@ def main():
                 deduped.append(c)
         catalyst_opportunities = deduped
 
-        catalyst_opportunities.sort(key=lambda x: (-x["excess_21d"], x["days_until"]))
+        # FILTER: Only show candidates with REAL forward catalysts
+        # Must have a specific identifiable event AND a date
+        # Remove backward-looking signals (volume spikes, post-catalyst) unless
+        # they have a specific press release headline explaining what happened
+        valid_forward_types = {"earnings", "stock_split", "ipo", "ipo_event",
+                               "press_release", "economic", "strong-catalyst-reduced",
+                               "event", "analyst_upgrade"}
+        filtered = []
+        for c in catalyst_opportunities:
+            ct = c.get("catalyst_type", "")
+
+            # Always keep earnings, splits, IPOs, press releases — these are real dated events
+            if ct in ("earnings", "stock_split", "ipo", "ipo_event", "press_release"):
+                filtered.append(c)
+                continue
+
+            # Analyst upgrades — only keep if we have a target price showing 10%+ upside
+            if ct == "analyst_upgrade":
+                target = c.get("target_price") or c.get("eps_estimate")
+                price = c.get("price", 0)
+                if target and price and float(target) > price * 1.10:
+                    filtered.append(c)
+                    continue
+                else:
+                    continue  # Minor upgrade, skip
+
+            # Post-catalyst confirmed — only keep if we have a news headline explaining WHAT happened
+            if ct == "post-catalyst-confirmed":
+                headlines = c.get("news_headlines", [])
+                has_real_headline = any(h and len(h) > 15 and not h.startswith("Volume") for h in headlines)
+                if has_real_headline:
+                    filtered.append(c)
+                continue
+
+            # Volume spikes — REMOVE entirely (backward-looking, no explanation)
+            if ct == "volume_spike":
+                continue
+
+            # Forward catalysts from Claude/FMP — keep if they have a date
+            if c.get("earnings_date") or c.get("days_until", 99) < 30:
+                filtered.append(c)
+
+        catalyst_opportunities = filtered
+
+        # Add exit date and reasoning to each candidate
+        for c in catalyst_opportunities:
+            ct = c.get("catalyst_type", "")
+            cat_date = c.get("earnings_date", "")
+
+            # Calculate exit date based on catalyst type
+            if ct == "earnings":
+                c["exit_strategy"] = f"Exit BEFORE earnings date ({cat_date}) to capture pre-earnings run-up profit. Do not hold through the binary event."
+                c["hold_period"] = "Enter now, exit 1 day before earnings"
+            elif ct == "stock_split":
+                c["exit_strategy"] = f"Hold through split date ({cat_date}). Retail buying typically peaks 1-2 weeks after the split. Exit 5-10 trading days post-split."
+                c["hold_period"] = "Hold through split + 1-2 weeks"
+            elif ct in ("ipo", "ipo_event"):
+                c["exit_strategy"] = f"IPO/lockup event on {cat_date}. Position for volatility around this date. Exit within 3-5 days of the event."
+                c["hold_period"] = "3-5 days around event"
+            elif ct == "press_release":
+                c["exit_strategy"] = "Material corporate announcement detected. Hold for 2-3 weeks of institutional follow-through, then exit when momentum stalls."
+                c["hold_period"] = "2-3 weeks post-announcement"
+            elif ct == "analyst_upgrade":
+                c["exit_strategy"] = "Major analyst upgrade with significant target price increase. Hold for 1-2 weeks as institutions rebalance to match new targets."
+                c["hold_period"] = "1-2 weeks"
+            elif ct == "post-catalyst-confirmed":
+                c["exit_strategy"] = "Confirmed catalyst with institutional volume. Ride the 2-3 week post-catalyst drift. Exit when trailing stop triggers."
+                c["hold_period"] = "2-3 weeks (trailing stop active)"
+            else:
+                c["exit_strategy"] = f"Forward catalyst on {cat_date}. Hold through event, exit if no next catalyst within 30 days."
+                c["hold_period"] = "Through catalyst date"
+
+        catalyst_opportunities.sort(key=lambda x: (-x.get("significance_score", x["excess_21d"]), x["days_until"]))
         catalyst_opportunities = catalyst_opportunities[:8]
         # ── NON-EARNINGS CATALYST SOURCES (Finnhub + yfinance, zero Claude cost) ──
         try:
