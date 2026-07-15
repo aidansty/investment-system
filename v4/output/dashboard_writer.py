@@ -345,11 +345,11 @@ def write_dashboard_data(
             pr["avg_surprise"] = quant.get("avg_earnings_surprise_pct")
             pr["analyst_target"] = quant.get("analyst_price_target")
 
-    # Override ALL position data with rules engine signals (the actual decisions)
-    # This ensures dashboard matches Telegram AND replaces stale static text everywhere
+    # Smart override: rules engine controls the ACTION, Claude provides fresh context
+    # When they agree → use Claude's fresh text (news-driven, updated daily)
+    # When they disagree → show rules engine reason FIRST, then Claude's context
     re = rules_output or {}
     exit_signals = re.get("exit_signals", [])
-    # Build a lookup of rules engine decisions for every position
     rules_decisions = {}
     for sig in exit_signals:
         rules_decisions[sig.get("ticker", "")] = sig
@@ -358,23 +358,43 @@ def write_dashboard_data(
         ticker = pr.get("ticker", "")
         sig = rules_decisions.get(ticker)
         if sig:
-            sig_action = sig.get("action", "")
+            sig_action = sig.get("action", "").lower()
             sig_reason = sig.get("reason", "")
+            claude_action = (pr.get("action", "") or "Hold").lower()
+            claude_bullets = pr.get("bullets", [])
+
             if sig_action == "exit":
                 pr["action"] = "Exit"
-                pr["bullets"] = [sig_reason[:250]]
-                pr["what_to_do"] = sig_reason[:250]
-                pr["catalyst"] = "No forward catalyst identified"
-                pr["why"] = sig_reason[:250]
+                if claude_action != "exit":
+                    # DISAGREE — show both: rules engine reason + Claude context
+                    combined_bullets = [sig_reason[:250]]
+                    if claude_bullets:
+                        combined_bullets.append("Claude analysis: " + claude_bullets[0][:200])
+                    pr["bullets"] = combined_bullets
+                    pr["what_to_do"] = sig_reason[:250]
+                    pr["catalyst"] = "No forward catalyst identified"
+                    pr["why"] = sig_reason[:250]
+                else:
+                    # AGREE on exit — use Claude's explanation (it's fresher)
+                    pr["what_to_do"] = claude_bullets[0][:250] if claude_bullets else sig_reason[:250]
+                    pr["why"] = claude_bullets[0][:250] if claude_bullets else sig_reason[:250]
             elif sig_action == "watch":
                 pr["action"] = "Watch"
-                pr["bullets"] = [sig_reason[:250]]
-                pr["what_to_do"] = sig_reason[:250]
-            elif sig_action == "hold":
-                pr["action"] = "Hold"
-                if sig_reason:
-                    pr["bullets"] = [sig_reason[:250]]
+                if claude_action not in ("watch", "trim"):
+                    combined_bullets = [sig_reason[:250]]
+                    if claude_bullets:
+                        combined_bullets.append("Claude analysis: " + claude_bullets[0][:200])
+                    pr["bullets"] = combined_bullets
                     pr["what_to_do"] = sig_reason[:250]
+                else:
+                    pr["what_to_do"] = claude_bullets[0][:250] if claude_bullets else sig_reason[:250]
+            elif sig_action == "hold":
+                # Both agree on hold — keep Claude's fresh, news-driven text entirely
+                # Do NOT override — Claude's text references today's news
+                pr["action"] = "Hold"
+                # Only touch what_to_do if Claude left it empty
+                if not pr.get("what_to_do") and claude_bullets:
+                    pr["what_to_do"] = claude_bullets[0][:250]
 
     # Ensure EVERY stock position appears in position_review
     # If Claude didn't mention a position, add it using rules engine data
@@ -660,24 +680,28 @@ def write_dashboard_data(
             "cost_basis": p.get("cost_basis", 0),
         })
 
-    # Override portfolio positions what_to_do with rules engine decisions
-    # This fixes the card face vs expanded detail mismatch
+    # Override portfolio positions — same smart logic as position review
     _rd = _rules_decisions if "_rules_decisions" in dir() else {}
+    # Find matching position_review entry for Claude's fresh text
+    _pr_lookup = {pr.get("ticker"): pr for pr in position_review}
     for pp in portfolio_positions:
         ticker = pp.get("ticker", "")
         sig = _rd.get(ticker)
+        pr_match = _pr_lookup.get(ticker, {})
         if sig:
-            sig_action = sig.get("action", "")
+            sig_action = sig.get("action", "").lower()
             sig_reason = sig.get("reason", "")
             if sig_action == "exit":
-                pp["what_to_do"] = sig_reason[:250]
-                pp["catalyst"] = "No forward catalyst"
-                pp["why"] = sig_reason[:250]
+                pp["what_to_do"] = pr_match.get("what_to_do") or sig_reason[:250]
+                pp["catalyst"] = pr_match.get("catalyst") or "No forward catalyst"
+                pp["why"] = pr_match.get("why") or sig_reason[:250]
             elif sig_action == "watch":
-                pp["what_to_do"] = sig_reason[:250]
+                pp["what_to_do"] = pr_match.get("what_to_do") or sig_reason[:250]
             elif sig_action == "hold":
-                if sig_reason:
-                    pp["what_to_do"] = sig_reason[:250]
+                # Use Claude's fresh text for holds
+                pp["what_to_do"] = pr_match.get("what_to_do") or pp.get("what_to_do", "")
+                pp["why"] = pr_match.get("why") or pp.get("why", "")
+                pp["catalyst"] = pr_match.get("catalyst") or pp.get("catalyst", "")
 
     # Performance history — placeholder until real history is tracked
     perf_dates = []

@@ -576,6 +576,7 @@ def main():
                         continue
                     try:
                         url = f"https://finnhub.io/api/v1/stock/recommendation?symbol={tk}&token={_FK}"
+                        log(f"  Checking analyst recs for {tk}...")
                         r = requests.get(url, timeout=5)
                         if r.status_code == 200:
                             recs = r.json()
@@ -583,7 +584,7 @@ def main():
                                 latest = recs[0]
                                 prev = recs[1]
                                 buy_change = (latest.get("buy", 0) + latest.get("strongBuy", 0)) - (prev.get("buy", 0) + prev.get("strongBuy", 0))
-                                if buy_change >= 3:
+                                if buy_change >= 1:  # Lowered from 3 to catch more analyst upgrades
                                     stock_industry = ""
                                     for ind_name, tickers_list in INDUSTRY_STOCK_LEADERS.items():
                                         if tk in tickers_list:
@@ -637,15 +638,15 @@ def main():
                 except Exception:
                     pass
 
-            # Volume spike fallback — if forward_catalysts is empty, find stocks
-            # with 3x+ volume spikes in last 2 days (something happened)
-            if not forward_catalysts:
-                log("Forward catalysts empty — using volume spike fallback")
+            # Volume spike detection — ALWAYS scan for unusual volume
+            # regardless of whether forward_catalysts has data
+            if True:  # Always run volume spike scan
+                log("Scanning for volume spikes across universe...")
                 vol_data_fb = volume_data if "volume_data" in dir() else {}
                 for tk, vd in vol_data_fb.items():
                     if tk == "SPY" or any(c["ticker"] == tk for c in catalyst_opportunities):
                         continue
-                    if vd.get("rvol", 0) >= 3.0 and tk in prices:
+                    if vd.get("rvol", 0) >= 2.0 and tk in prices:  # Lowered from 3x to catch more events
                         price_list = prices[tk]
                         if len(price_list) >= 2:
                             day1_ret = (price_list[-1] / price_list[-2] - 1) * 100
