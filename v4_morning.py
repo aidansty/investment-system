@@ -17,6 +17,7 @@ from v4.utils.market_calendar import is_trading_day, get_trading_date
 from v4.utils.telegram import send_telegram
 from v4.data.fetch_prices import fetch_etf_prices, fetch_stock_prices
 from v4.data.fetch_news import fetch_complete_news_package
+from v4.data.fetch_events import fetch_all_events
 from v4.data.fetch_macro import fetch_macro_data, fetch_earnings_calendar, fetch_recent_earnings_results
 from v4.intelligence.industry_scanner import run_industry_scan
 from v4.intelligence.event_engine import enrich_industries_with_events
@@ -229,6 +230,14 @@ def main():
         top_momentum = stocks_with_momentum[:30]
         log(f"Catalyst scanner: {len(stocks_with_momentum)} stocks with 21d momentum > SPY+3pp, scanning top {len(top_momentum)}")
 
+        # ── Fetch structured event calendar (FMP + Finnhub, zero Claude cost) ──
+        try:
+            event_calendar = fetch_all_events(days_ahead=30)
+            log(f"Event calendar loaded: {len(event_calendar)} events")
+        except Exception as e:
+            log(f"Event calendar error (non-fatal): {e}")
+            event_calendar = []
+
         # Build set of currently held tickers — scanner only finds NEW opportunities
         held_tickers = {p.get("ticker", "") for p in positions}
         log(f"  Skipping {len(held_tickers)} held positions")
@@ -290,65 +299,83 @@ def main():
                         "significance": "high",
                     })
 
-        # PHASE 2: Non-earnings catalysts from forward_catalysts and enriched news
-        # These cover: FDA decisions, index inclusions, product launches, M&A,
-        # contract wins, analyst upgrades, share buybacks, guidance raises,
-        # conference presentations, regulatory decisions, partnerships — everything
-        # that moves stock prices beyond just earnings.
+        # PHASE 2: EVENT-FIRST — find stocks with upcoming non-earnings events
+        # Approach: start from EVENTS, find the stocks. Not momentum-first.
+        # Sources: FMP splits/IPOs/press releases + Finnhub + Claude forward_catalysts
         try:
-            for fc in (forward_catalysts or []):
-                affected = fc.get("affected_holdings", []) or fc.get("tickers", [])
-                if not isinstance(affected, list):
-                    affected = []
-                fc_date = fc.get("date", "") or fc.get("event_date", "")
-                fc_event = fc.get("event", "") or fc.get("description", "")
-                fc_action = fc.get("action", "")
+            all_forward_events = list(event_calendar) + [
+                {"ticker": fc.get("affected_holdings", fc.get("tickers", [""]))[0] if isinstance(fc.get("affected_holdings", fc.get("tickers", [])), list) and fc.get("affected_holdings", fc.get("tickers", [])) else "",
+                 "event_type": fc.get("action", "event"),
+                 "date": fc.get("date", fc.get("event_date", "")),
+                 "description": fc.get("event", fc.get("description", "")),
+                 "significance": "high"}
+                for fc in (forward_catalysts or [])
+            ]
 
-                for tk in affected:
-                    # Check if this ticker has momentum data
-                    tk_momentum = None
-                    for s in stocks_with_momentum:
-                        if s["ticker"] == tk:
-                            tk_momentum = s
-                            break
+            for evt in all_forward_events:
+                tk = evt.get("ticker", "")
+                if not tk or tk == "MACRO" or tk in held_tickers:
+                    continue
+                evt_type = evt.get("event_type", "")
+                if evt_type == "earnings":
+                    continue  # Phase 1 handles earnings
 
-                    # Skip if already in catalyst_opportunities from earnings scan
-                    if tk in held_tickers:
-                        continue  # Already holding this stock — find NEW opportunities
-                    already_listed = any(c["ticker"] == tk for c in catalyst_opportunities)
-                    if already_listed:
-                        continue
+                already_listed = any(c["ticker"] == tk for c in catalyst_opportunities)
+                if already_listed:
+                    continue
 
-                    if tk_momentum:
-                        stock_industry = ""
-                        for ind_name, tickers in INDUSTRY_STOCK_LEADERS.items():
-                            if tk in tickers:
-                                stock_industry = ind_name
-                                break
+                # Get price data if available
+                if tk not in prices or len(prices[tk]) < 5:
+                    continue
 
-                        days_until = 30
-                        if fc_date:
-                            try:
-                                fc_dt = datetime.strptime(fc_date, "%Y-%m-%d").date()
-                                days_until = (fc_dt - today_dt).days
-                            except Exception:
-                                pass
+                price_list = prices[tk]
+                tk_price = round(price_list[-1], 2)
+                tk_excess = 0
+                if len(price_list) >= 21 and len(spy_prices_cat) >= 21:
+                    stk_21d = (price_list[-1] / price_list[-21] - 1) * 100 if price_list[-21] > 0 else 0
+                    tk_excess = round(stk_21d - spy_21d, 1)
 
-                        if 0 <= days_until <= 45:
-                            catalyst_opportunities.append({
-                                "ticker": tk,
-                                "industry": stock_industry,
-                                "earnings_date": fc_date,
-                                "eps_estimate": None,
-                                "excess_21d": tk_momentum["excess_21d"],
-                                "price": tk_momentum["price"],
-                                "has_news": True,
-                                "news_headlines": [fc_event[:100]],
-                                "catalyst_type": fc_action or "event",
-                                "days_until": days_until,
-                            })
+                # Filter micro-caps
+                vol_info = volume_data.get(tk, {}) if "volume_data" in dir() else {}
+                avg_vol = vol_info.get("avg_50d", 0)
+                if 0 < avg_vol < 500_000:
+                    continue
 
-            # PHASE 3: News-driven catalysts — positive sentiment news affecting
+                evt_date = evt.get("date", "")
+                days_until = 30
+                if evt_date:
+                    try:
+                        evt_dt = datetime.strptime(evt_date[:10], "%Y-%m-%d").date()
+                        days_until = (evt_dt - today_dt).days
+                    except Exception:
+                        pass
+                if days_until < 0 or days_until > 30:
+                    continue
+
+                stock_industry = ""
+                for ind_name, tickers_list in INDUSTRY_STOCK_LEADERS.items():
+                    if tk in tickers_list:
+                        stock_industry = ind_name
+                        break
+
+                catalyst_opportunities.append({
+                    "ticker": tk,
+                    "industry": stock_industry,
+                    "earnings_date": evt_date,
+                    "eps_estimate": evt.get("eps_estimate"),
+                    "excess_21d": tk_excess,
+                    "price": tk_price,
+                    "has_news": True,
+                    "news_headlines": [evt.get("description", evt_type)[:100]],
+                    "catalyst_type": evt_type,
+                    "days_until": days_until,
+                    "significance": evt.get("significance", "medium"),
+                })
+                log(f"  EVENT-FIRST: {tk} — {evt_type}: {evt.get('description', '')[:60]} in {days_until}d")
+        except Exception as e:
+            log(f"Phase 2 event-first error (non-fatal): {e}")
+
+# PHASE 3: News-driven catalysts — positive sentiment news affecting
             # stocks with momentum, even without a specific future date
             for n_item in (news or []):
                 sentiment = (n_item.get("sentiment", "") or "").lower()
