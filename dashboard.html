@@ -1835,6 +1835,8 @@ catOpps.forEach(c => {
     'ipo': 'Why this matters: IPO lockup expirations and new listings create predictable volatility windows. Insider selling pressure after lockup expiry, or initial demand for new listings, can create significant price movement.',
     'press_release': 'Why this matters: Major corporate announcements (FDA approvals, contract wins, acquisitions) directly change a company\'s revenue trajectory and market valuation, typically driving 5%+ moves on the announcement.',
     'strong-catalyst-reduced': 'Why this matters: A significant catalyst is confirmed but the stock lacks prior momentum — this is an early positioning opportunity before the market prices in the event. Reduced position size recommended.',
+    'fda_pdufa': 'Why this matters: FDA PDUFA decisions are the highest-impact catalyst in the market. Approval can drive 20-50% gains as the company gains access to a new revenue stream. This is a binary event — consider reduced sizing or exit before the decision to manage risk.',
+    'insider_buying': 'Why this matters: When multiple company executives buy their own stock with personal money, they are signaling they believe the stock is undervalued. Insider buying clusters historically lead to 8-12% outperformance over the following 60 days.',
   };
   const reason = catReasons[c.catalyst_type] || catReasons[c.catalyst_type?.split('-')[0]] || '';
   if (reason) {

@@ -606,7 +606,7 @@ def main():
         # they have a specific press release headline explaining what happened
         valid_forward_types = {"earnings", "stock_split", "ipo", "ipo_event",
                                "press_release", "economic", "strong-catalyst-reduced",
-                               "event", "analyst_upgrade"}
+                               "event", "analyst_upgrade", "fda_pdufa", "insider_buying"}
         filtered = []
         for c in catalyst_opportunities:
             ct = c.get("catalyst_type", "")
@@ -668,6 +668,12 @@ def main():
             elif ct == "post-catalyst-confirmed":
                 c["exit_strategy"] = "Confirmed catalyst with institutional volume. Ride the 2-3 week post-catalyst drift. Exit when trailing stop triggers."
                 c["hold_period"] = "2-3 weeks (trailing stop active)"
+            elif ct == "fda_pdufa":
+                c["exit_strategy"] = f"FDA PDUFA decision on {cat_date}. This is a BINARY event — approval drives 20-50% up, rejection drives 20-40% down. Consider entering with REDUCED sizing or exiting before the decision date to avoid binary risk."
+                c["hold_period"] = "Pre-decision run-up: exit 1 day before PDUFA date OR hold through with half position"
+            elif ct == "insider_buying":
+                c["exit_strategy"] = "Multiple executives buying their own stock. Historical data shows 8-12% outperformance over 60 days. Hold for 3-4 weeks, exit when trailing stop triggers."
+                c["hold_period"] = "3-4 weeks"
             else:
                 c["exit_strategy"] = f"Forward catalyst on {cat_date}. Hold through event, exit if no next catalyst within 30 days."
                 c["hold_period"] = "Through catalyst date"
