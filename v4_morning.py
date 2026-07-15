@@ -229,6 +229,10 @@ def main():
         top_momentum = stocks_with_momentum[:30]
         log(f"Catalyst scanner: {len(stocks_with_momentum)} stocks with 21d momentum > SPY+3pp, scanning top {len(top_momentum)}")
 
+        # Build set of currently held tickers — scanner only finds NEW opportunities
+        held_tickers = {p.get("ticker", "") for p in positions}
+        log(f"  Skipping {len(held_tickers)} held positions")
+
         import requests, os
         FINNHUB_KEY = os.environ.get("FINNHUB_KEY", "")
         catalyst_earnings = dict(earnings_calendar or {})
