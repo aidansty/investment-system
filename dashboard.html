@@ -1320,11 +1320,40 @@ document.getElementById('add-position-btn')?.addEventListener('click', async () 
       if (result) { result.style.display='block'; result.style.background='rgba(226,80,79,0.1)'; result.style.color='#e2504f'; result.textContent=ticker + ' already exists in positions.'; }
       return;
     }
+    // Check if this ticker was in the catalyst scanner — pull all catalyst data
+    const catMatch = (BRIEFING_DATA.catalyst_opportunities || []).find(c => c.ticker === ticker);
+    const catType = catMatch ? catMatch.catalyst_type : '';
+    const catDate = catMatch ? (catMatch.earnings_date || '') : '';
+    const catDays = catMatch ? catMatch.days_until : null;
+    const catMomentum = catMatch ? catMatch.excess_21d : null;
+    const catHeadline = catMatch && catMatch.news_headlines && catMatch.news_headlines[0] ? catMatch.news_headlines[0] : '';
+    const catIndustry = catMatch ? (catMatch.industry || industry) : industry;
+
+    let entryReason = summary || '';
+    let exitPlan = '';
+    if (catMatch) {
+      const termAuto = 'Short-term';
+      term = termAuto;
+      entryReason = 'Catalyst scanner: ' + catType.replace(/_/g, ' ') + (catDate ? ' on ' + catDate : '') + (catMomentum ? '. 21d momentum: +' + catMomentum + 'pp vs SPY' : '') + (catHeadline ? '. ' + catHeadline : '');
+      if (catType === 'earnings' || catType === 'phase1_runup') {
+        exitPlan = 'Exit BEFORE earnings date (' + catDate + ') to lock in run-up profit. Do not hold through binary event.';
+      } else if (catType === 'post-catalyst-confirmed') {
+        exitPlan = 'Hold for 2-3 week post-catalyst drift. Exit when momentum stalls or trailing stop triggers.';
+      } else if (catType === 'analyst_upgrade' || catType === 'volume_spike') {
+        exitPlan = 'Hold for momentum follow-through. Exit when trailing stop triggers or after 25 trading days max.';
+      } else {
+        exitPlan = 'Hold through catalyst event. Exit after event if no next catalyst within 30 days.';
+      }
+    }
+
     decoded.positions.push({
-      ticker: ticker, name: ticker, type: type, term: term,
+      ticker: ticker, name: ticker, type: type, term: catMatch ? 'Short-term' : term,
       entry_price: entry, entry_date: date, qty: qty,
-      industry: industry, holding_type: term.toLowerCase().replace('-','_'),
-      thesis: summary, what_to_do: '', catalyst: '', summary: summary, why: ''
+      industry: catIndustry, holding_type: catMatch ? 'short_term' : term.toLowerCase().replace('-','_'),
+      thesis: entryReason, what_to_do: exitPlan, catalyst: catType,
+      catalyst_type: catType, catalyst_date: catDate,
+      entry_phase: catType === 'earnings' ? 'phase1_runup' : catType,
+      summary: entryReason, why: entryReason
     });
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(decoded, null, 2))));
     const putRes = await fetch('https://api.github.com/repos/aidansty/investment-system/contents/v4/config/positions.json', {

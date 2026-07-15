@@ -309,6 +309,8 @@ def main():
                             break
 
                     # Skip if already in catalyst_opportunities from earnings scan
+                    if tk in held_tickers:
+                        continue  # Already holding this stock — find NEW opportunities
                     already_listed = any(c["ticker"] == tk for c in catalyst_opportunities)
                     if already_listed:
                         continue
@@ -399,6 +401,8 @@ def main():
             for ticker, price_list in prices.items():
                 if ticker == "SPY" or len(price_list) < 5:
                     continue
+                if ticker in held_tickers:
+                    continue  # Already holding
                 already_listed = any(c["ticker"] == ticker for c in catalyst_opportunities)
                 if already_listed:
                     continue
@@ -473,6 +477,8 @@ def main():
                     continue
 
                 for tk in affected:
+                    if tk in held_tickers:
+                        continue  # Already holding
                     already_listed = any(c["ticker"] == tk for c in catalyst_opportunities)
                     if already_listed:
                         continue
