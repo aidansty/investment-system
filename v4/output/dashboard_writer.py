@@ -645,6 +645,7 @@ def write_dashboard_data(
     _morning_catalysts = []
     _morning_position_review = []
     _morning_news = []
+    _morning_market = []
     try:
         import os as _os2
         _existing_path = _os2.path.join(_os2.path.dirname(__file__), "..", "..", "dashboard_data.js")
@@ -656,6 +657,7 @@ def write_dashboard_data(
             _morning_catalysts = _existing.get("catalyst_opportunities", [])
             _morning_position_review = _existing.get("position_review", [])
             _morning_news = _existing.get("news", [])
+            _morning_market = _existing.get("market_bullets", [])
     except Exception:
         pass
 
@@ -742,7 +744,7 @@ def write_dashboard_data(
         "vix_avg": vix_avg,
         "vix_trend": vix_trend,
         "vix_regime": vix_regime,
-        "market_bullets": market_bullets,
+        "market_bullets": market_bullets if market_bullets else _morning_market,
         "positions": portfolio_positions,
         "cash": cash,
         "cost_basis": cost_basis,
