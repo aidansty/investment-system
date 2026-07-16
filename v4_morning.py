@@ -602,84 +602,145 @@ def main():
 
         # FILTER: Only show candidates with REAL forward catalysts
         # Must have a specific identifiable event AND a date
-        # Remove backward-looking signals (volume spikes, post-catalyst) unless
-        # they have a specific press release headline explaining what happened
         valid_forward_types = {"earnings", "stock_split", "ipo", "ipo_event",
                                "press_release", "economic", "strong-catalyst-reduced",
                                "event", "analyst_upgrade", "fda_pdufa", "insider_buying"}
         filtered = []
         for c in catalyst_opportunities:
             ct = c.get("catalyst_type", "")
-
-            # Always keep earnings, splits, IPOs, press releases — these are real dated events
-            if ct in ("earnings", "stock_split", "ipo", "ipo_event", "press_release"):
+            if ct in ("earnings", "stock_split", "ipo", "ipo_event", "press_release",
+                       "fda_pdufa", "insider_buying"):
                 filtered.append(c)
                 continue
-
-            # Analyst upgrades — only keep if we have a target price showing 10%+ upside
             if ct == "analyst_upgrade":
                 target = c.get("target_price") or c.get("eps_estimate")
                 price = c.get("price", 0)
                 if target and price and float(target) > price * 1.10:
                     filtered.append(c)
-                    continue
-                else:
-                    continue  # Minor upgrade, skip
-
-            # Post-catalyst confirmed — only keep if we have a news headline explaining WHAT happened
+                continue
             if ct == "post-catalyst-confirmed":
                 headlines = c.get("news_headlines", [])
                 has_real_headline = any(h and len(h) > 15 and not h.startswith("Volume") for h in headlines)
                 if has_real_headline:
                     filtered.append(c)
                 continue
-
-            # Volume spikes — REMOVE entirely (backward-looking, no explanation)
             if ct == "volume_spike":
                 continue
-
-            # Forward catalysts from Claude/FMP — keep if they have a date
             if c.get("earnings_date") or c.get("days_until", 99) < 30:
                 filtered.append(c)
-
         catalyst_opportunities = filtered
 
-        # Add exit date and reasoning to each candidate
+        # ── CONVICTION SCORING ──────────────────────────────────────
+        # Score each candidate 0-100 based on catalyst quality, timing,
+        # momentum, and institutional interest
+        for c in catalyst_opportunities:
+            score = 0
+            ct = c.get("catalyst_type", "")
+            days = c.get("days_until", 30)
+            excess = c.get("excess_21d", 0)
+            rvol = c.get("rvol", 0)
+
+            # 1. Catalyst type strength (0-35 points)
+            type_scores = {
+                "fda_pdufa": 35,
+                "earnings": 22,
+                "insider_buying": 20,
+                "stock_split": 18,
+                "press_release": 17,
+                "ipo": 15,
+                "ipo_event": 15,
+                "analyst_upgrade": 14,
+                "post-catalyst-confirmed": 20,
+                "event": 12,
+                "economic": 8,
+                "strong-catalyst-reduced": 10,
+            }
+            score += type_scores.get(ct, 10)
+
+            # 2. Timing — sweet spot is 5-15 days out (0-20 points)
+            if 5 <= days <= 15:
+                score += 20  # Perfect timing
+            elif 1 <= days <= 4:
+                score += 15  # Very soon — still good
+            elif days == 0:
+                score += 12  # Today — may have already moved
+            elif 16 <= days <= 25:
+                score += 10  # A few weeks out
+            elif days > 25:
+                score += 5   # Far out
+
+            # 3. Momentum confirmation (0-20 points)
+            if excess > 15:
+                score += 20
+            elif excess > 10:
+                score += 16
+            elif excess > 5:
+                score += 12
+            elif excess > 3:
+                score += 8
+            elif excess > 0:
+                score += 4
+            # No penalty for no momentum — event-first approach allows it
+
+            # 4. RVOL / institutional interest (0-15 points)
+            if rvol >= 3.0:
+                score += 15
+            elif rvol >= 2.0:
+                score += 12
+            elif rvol >= 1.5:
+                score += 8
+            elif rvol >= 1.0:
+                score += 3
+
+            # 5. Description significance boost (0-10 points)
+            desc = (c.get("news_headlines", [""])[0] if c.get("news_headlines") else "").upper()
+            high_impact_words = ["APPROVAL", "APPROVED", "CONTRACT", "ACQUISITION",
+                                 "MERGER", "RECORD", "BREAKTHROUGH", "PHASE 3",
+                                 "BEAT", "RAISE", "UPGRADE", "SPLIT"]
+            matches = sum(1 for w in high_impact_words if w in desc)
+            score += min(10, matches * 4)
+
+            c["conviction_score"] = min(100, score)
+            log(f"  SCORED: {c['ticker']} ({ct}) = {c['conviction_score']}/100")
+
+        # Add exit strategy to each candidate
         for c in catalyst_opportunities:
             ct = c.get("catalyst_type", "")
             cat_date = c.get("earnings_date", "")
-
-            # Calculate exit date based on catalyst type
             if ct == "earnings":
                 c["exit_strategy"] = f"Exit BEFORE earnings date ({cat_date}) to capture pre-earnings run-up profit. Do not hold through the binary event."
                 c["hold_period"] = "Enter now, exit 1 day before earnings"
             elif ct == "stock_split":
-                c["exit_strategy"] = f"Hold through split date ({cat_date}). Retail buying typically peaks 1-2 weeks after the split. Exit 5-10 trading days post-split."
+                c["exit_strategy"] = f"Hold through split date ({cat_date}). Retail buying peaks 1-2 weeks after split. Exit 5-10 days post-split."
                 c["hold_period"] = "Hold through split + 1-2 weeks"
             elif ct in ("ipo", "ipo_event"):
-                c["exit_strategy"] = f"IPO/lockup event on {cat_date}. Position for volatility around this date. Exit within 3-5 days of the event."
+                c["exit_strategy"] = f"IPO/lockup event on {cat_date}. Position for volatility. Exit within 3-5 days."
                 c["hold_period"] = "3-5 days around event"
             elif ct == "press_release":
-                c["exit_strategy"] = "Material corporate announcement detected. Hold for 2-3 weeks of institutional follow-through, then exit when momentum stalls."
-                c["hold_period"] = "2-3 weeks post-announcement"
+                c["exit_strategy"] = "Material announcement detected. Hold for 2-3 weeks of institutional follow-through."
+                c["hold_period"] = "2-3 weeks"
             elif ct == "analyst_upgrade":
-                c["exit_strategy"] = "Major analyst upgrade with significant target price increase. Hold for 1-2 weeks as institutions rebalance to match new targets."
+                c["exit_strategy"] = "Major upgrade. Hold 1-2 weeks as institutions rebalance."
                 c["hold_period"] = "1-2 weeks"
             elif ct == "post-catalyst-confirmed":
-                c["exit_strategy"] = "Confirmed catalyst with institutional volume. Ride the 2-3 week post-catalyst drift. Exit when trailing stop triggers."
-                c["hold_period"] = "2-3 weeks (trailing stop active)"
+                c["exit_strategy"] = "Confirmed catalyst with institutional volume. Ride 2-3 week drift."
+                c["hold_period"] = "2-3 weeks (trailing stop)"
             elif ct == "fda_pdufa":
-                c["exit_strategy"] = f"FDA PDUFA decision on {cat_date}. This is a BINARY event — approval drives 20-50% up, rejection drives 20-40% down. Consider entering with REDUCED sizing or exiting before the decision date to avoid binary risk."
-                c["hold_period"] = "Pre-decision run-up: exit 1 day before PDUFA date OR hold through with half position"
+                c["exit_strategy"] = f"FDA decision on {cat_date}. Binary event — consider half sizing or exit 1 day before."
+                c["hold_period"] = "Pre-decision run-up, exit before PDUFA date"
             elif ct == "insider_buying":
-                c["exit_strategy"] = "Multiple executives buying their own stock. Historical data shows 8-12% outperformance over 60 days. Hold for 3-4 weeks, exit when trailing stop triggers."
+                c["exit_strategy"] = "Insider cluster detected. Historical 8-12% over 60 days. Hold 3-4 weeks."
                 c["hold_period"] = "3-4 weeks"
             else:
-                c["exit_strategy"] = f"Forward catalyst on {cat_date}. Hold through event, exit if no next catalyst within 30 days."
+                c["exit_strategy"] = f"Forward catalyst on {cat_date}. Hold through event, exit if no next catalyst."
                 c["hold_period"] = "Through catalyst date"
 
-        catalyst_opportunities.sort(key=lambda x: (-x.get("significance_score", x["excess_21d"]), x["days_until"]))
-        catalyst_opportunities = catalyst_opportunities[:8]
+        # Sort by conviction score (highest first) and limit to top 5
+        catalyst_opportunities.sort(key=lambda x: -x.get("conviction_score", 0))
+        catalyst_opportunities = catalyst_opportunities[:5]
+        log(f"Catalyst scanner: top {len(catalyst_opportunities)} candidates by conviction (filtered from {len(filtered)})")
+        for c in catalyst_opportunities:
+            log(f"  #{catalyst_opportunities.index(c)+1}: {c['ticker']} ({c['catalyst_type']}) conviction={c['conviction_score']}/100, {c.get('days_until',0)}d away")
         # ── NON-EARNINGS CATALYST SOURCES (Finnhub + yfinance, zero Claude cost) ──
         try:
             import requests, os

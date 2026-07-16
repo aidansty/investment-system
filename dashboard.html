@@ -1848,7 +1848,7 @@ catOpps.forEach(c => {
     '<div class="candidate-title">' + c.ticker + '</div>' +
     '<div class="candidate-sub">' + (c.industry || 'Unknown industry') + ' &middot; ' + typeLabel + '</div>' +
     '</div>' +
-    '<span class="badge ' + (isPreCatalyst ? 'badge-amber' : 'badge-green') + '">' + daysText + '</span>' +
+    '<span class="badge ' + (c.conviction_score >= 70 ? 'badge-green' : c.conviction_score >= 50 ? 'badge-amber' : 'badge-hold') + '">' + (c.conviction_score || 0) + '/100</span> <span style="font-size:10px;color:var(--text-secondary);">' + daysText + '</span>' +
     '</div>' +
     '<ul>' + bullets + '</ul>';
   catScan.appendChild(card);
@@ -1868,6 +1868,8 @@ if (cdEl && cdText && catOpps.length > 0) {
     activeVal += (p.current_price || 0) * (p.qty || 0);
   });
   const cashAvail = parseFloat(localStorage.getItem('investment_desk_cash') || BRIEFING_DATA?.cash || 0);
+  // Auto-deploy recommendations for candidates with 70+ conviction
+  const deployableCandidates = catOpps.filter(c => (c.conviction_score || 0) >= 70);
   const totalActive = activeVal + cashAvail;
   let sizePct = 0.15;
   if (topOpp.excess_21d > 15) sizePct = 0.25;
@@ -1875,8 +1877,25 @@ if (cdEl && cdText && catOpps.length > 0) {
   const recDollars = Math.round(totalActive * sizePct);
   const catType = topOpp.catalyst_type || 'catalyst';
   const daysLabel = topOpp.days_until === 0 ? 'confirmed today' : topOpp.days_until + ' days away';
+  let cdHtmlParts = [];
+  deployableCandidates.forEach(dc => {
+    const dcConv = dc.conviction_score || 0;
+    let dcSize = 0.15;
+    let dcReason = 'standard conviction';
+    if (dcConv >= 85) { dcSize = 0.25; dcReason = 'highest conviction (85+)'; }
+    else if (dcConv >= 75) { dcSize = 0.20; dcReason = 'high conviction (75-84)'; }
+    else { dcSize = 0.15; dcReason = 'conviction (70-74)'; }
+    const dcDollars = Math.round(totalActive * dcSize);
+    const dcCatType = (dc.catalyst_type || 'catalyst').replace(/_/g, ' ');
+    const dcDays = dc.days_until === 0 ? 'today' : dc.days_until + ' days';
+    cdHtmlParts.push('<b>' + dc.ticker + '</b>: $' + dcDollars.toLocaleString() + ' (' + dcReason + ') — ' + dcCatType + ' in ' + dcDays);
+  });
   const sizeReason = sizePct >= 0.25 ? 'highest conviction tier (85+)' : sizePct >= 0.20 ? 'high conviction tier (75-84)' : 'standard conviction tier (65-74)';
-  cdText.innerHTML = 'Cash available: <b>$' + cashAvail.toLocaleString('en-US', {maximumFractionDigits:0}) + '</b> · Top: <b>' + topOpp.ticker + '</b> (' + catType + ', ' + daysLabel + ') · Allocate: <b>$' + recDollars.toLocaleString('en-US') + '</b> (' + (sizePct*100).toFixed(0) + '% — ' + sizeReason + ')' + (cashAvail < recDollars ? ' · <span style=color:var(--amber)>Cash short by $' + (recDollars - cashAvail).toLocaleString('en-US', {maximumFractionDigits:0}) + '</span>' : '');
+  if (deployableCandidates.length > 0) {
+    cdText.innerHTML = 'Cash available: <b>$' + cashAvail.toLocaleString('en-US', {maximumFractionDigits:0}) + '</b><br>' + cdHtmlParts.join('<br>');
+  } else {
+    cdText.innerHTML = 'Cash available: <b>$' + cashAvail.toLocaleString('en-US', {maximumFractionDigits:0}) + '</b> · No candidates above 70 conviction threshold today. Top candidate: <b>' + topOpp.ticker + '</b> at ' + (topOpp.conviction_score || 0) + '/100.';
+  }
   cdEl.style.display = 'block';
 }
 
