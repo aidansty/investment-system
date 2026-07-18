@@ -736,6 +736,39 @@ def main():
                 c["hold_period"] = "Through catalyst date"
 
         # Sort by conviction score (highest first) and limit to top 5
+        # Re-score any candidates that missed conviction scoring (late additions)
+        for c in catalyst_opportunities:
+            if "conviction_score" not in c or c["conviction_score"] is None:
+                score = 0
+                ct = c.get("catalyst_type", "")
+                days = c.get("days_until", 30)
+                excess = c.get("excess_21d", 0)
+                rvol = c.get("rvol", 0)
+                type_scores = {"fda_pdufa": 35, "earnings": 22, "insider_buying": 20, "stock_split": 18, "press_release": 17, "ipo": 15, "ipo_event": 15, "analyst_upgrade": 14, "post-catalyst-confirmed": 20, "event": 12, "economic": 8, "strong-catalyst-reduced": 10, "volume_spike": 5}
+                score += type_scores.get(ct, 10)
+                if 5 <= days <= 15: score += 20
+                elif 1 <= days <= 4: score += 15
+                elif days == 0: score += 12
+                elif 16 <= days <= 25: score += 10
+                else: score += 5
+                if excess > 15: score += 20
+                elif excess > 10: score += 16
+                elif excess > 5: score += 12
+                elif excess > 3: score += 8
+                elif excess > 0: score += 4
+                if rvol >= 3.0: score += 15
+                elif rvol >= 2.0: score += 12
+                elif rvol >= 1.5: score += 8
+                c["conviction_score"] = min(100, score)
+
+        # Final filter: remove volume spikes and ensure all have required fields
+        catalyst_opportunities = [c for c in catalyst_opportunities if c.get("catalyst_type") != "volume_spike"]
+        for c in catalyst_opportunities:
+            if "exit_strategy" not in c:
+                c["exit_strategy"] = "Monitor position. Exit when trailing stop triggers."
+            if "hold_period" not in c:
+                c["hold_period"] = "1-3 weeks"
+
         catalyst_opportunities.sort(key=lambda x: -x.get("conviction_score", 0))
         catalyst_opportunities = catalyst_opportunities[:5]
         log(f"Catalyst scanner: top {len(catalyst_opportunities)} candidates by conviction (filtered from {len(filtered)})")
