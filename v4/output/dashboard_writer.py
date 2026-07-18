@@ -656,6 +656,7 @@ def write_dashboard_data(
             _existing = _json2.loads(_existing_raw.replace("window.BRIEFING_DATA = ", "").rstrip(";"))
             _morning_catalysts = _existing.get("catalyst_opportunities", [])
             _morning_position_review = _existing.get("position_review", [])
+            _morning_updated = _existing.get("morning_updated", _existing.get("last_updated", ""))
             _morning_news = _existing.get("news", [])
             _morning_market = _existing.get("market_bullets", [])
     except Exception:

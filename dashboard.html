@@ -204,7 +204,10 @@
   <div class="tab-panel" id="tab-afternoon">
 
     <div id="afternoon-summary" class="section-gap" style="padding:16px 20px;">
-      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);margin-bottom:12px;">Afternoon Monitor</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);">Afternoon Monitor</div>
+        <div id="aft-date" style="font-size:11px;color:var(--text-secondary);">—</div>
+      </div>
       <div id="aft-alerts"></div>
     </div>
 
@@ -1186,7 +1189,13 @@ async function syncPositionsFromGitHub() {
       // Remove closed positions
       const beforeLen = BRIEFING_DATA.positions.length;
       BRIEFING_DATA.positions = BRIEFING_DATA.positions.filter(p => githubTickers.has(p.ticker));
-      if (BRIEFING_DATA.positions.length !== beforeLen) changed = true;
+      if (BRIEFING_DATA.positions.length !== beforeLen) {
+        changed = true;
+        // Also remove from portfolio rendering data
+        if (window._renderPositions) {
+          window._renderPositions = window._renderPositions.filter(p => githubTickers.has(p.ticker));
+        }
+      }
 
       // If positions changed and we haven't reloaded yet this session, reload to re-render portfolio
       if (changed && !sessionStorage.getItem('pos_synced')) {
@@ -1639,10 +1648,10 @@ TERM_ORDER.forEach(term => {
 // Fetch all prices on load
 // Wait for sync to complete before first price fetch
 setTimeout(fetchAndUpdatePrices, 2000);
-// Show briefing date
+// Show briefing date — uses morning-specific timestamp
 const bdDate = document.getElementById('bd-date');
-if (bdDate && BRIEFING_DATA.last_updated) {
-  bdDate.textContent = BRIEFING_DATA.last_updated;
+if (bdDate) {
+  bdDate.textContent = BRIEFING_DATA.morning_updated || BRIEFING_DATA.last_updated || '—';
 }
 
 // Crypto refreshes every 10 seconds via Coinbase
@@ -1915,6 +1924,10 @@ if (cdEl && cdText && catOpps.length > 0) {
 
 // ── AFTERNOON TAB — Reads from rules engine + Claude ──
 const aftAlerts = document.getElementById('aft-alerts');
+const aftDateEl = document.getElementById('aft-date');
+if (aftDateEl) {
+  aftDateEl.textContent = BRIEFING_DATA.afternoon_updated || '';
+}
 if (aftAlerts) {
   const alerts = [];
   const whatChanged = BRIEFING_DATA.what_changed || [];
