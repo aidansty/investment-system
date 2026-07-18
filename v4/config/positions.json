@@ -127,22 +127,6 @@
       "entry_date": "2026-04-14"
     },
     {
-      "ticker": "INTC",
-      "name": "Intel",
-      "type": "Stock",
-      "term": "Medium-term",
-      "entry_price": 137.18,
-      "entry_date": "2026-05-01",
-      "qty": 0.5,
-      "industry": "Semiconductors",
-      "holding_type": "medium_term",
-      "thesis": "Apple partnership catalyst",
-      "what_to_do": "",
-      "catalyst": "",
-      "summary": "Intel Corporation",
-      "why": "Apple partnership announcement"
-    },
-    {
       "ticker": "SOL",
       "name": "SOL",
       "type": "Crypto",
