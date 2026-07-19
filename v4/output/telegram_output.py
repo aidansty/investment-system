@@ -134,22 +134,28 @@ def build_and_send_morning_telegram(
         catalyst_opps = briefing.get("catalyst_opportunities", []) if briefing else []
     if catalyst_opps:
         msg2.append(f"<b>\U0001f50e Catalyst Scanner ({len(catalyst_opps)} found)</b>")
-        for c in catalyst_opps[:4]:
-            cat_type = c.get("catalyst_type", "catalyst")
+        for c in catalyst_opps[:5]:
+            cat_type = (c.get("catalyst_type", "catalyst") or "catalyst").replace("_", " ").capitalize()
             days = c.get("days_until", 0)
             days_text = "today" if days == 0 else f"in {days} days"
             excess = c.get("excess_21d", 0)
             price = c.get("price", 0)
-            msg2.append(f"  \U0001f4c8 <b>{c.get('ticker','')}</b> — {cat_type} {days_text}")
-            msg2.append(f"    21d momentum: +{excess}pp vs SPY | Price: ${price}")
-        if cat_type == 'post-catalyst-confirmed':
-            msg2.append(f"    \u23f0 Execute after 9:45 AM — let opening volatility settle")
-            if c.get("news_headlines"):
+            conv = c.get("conviction_score", 0)
+            hold = c.get("hold_period", "")
+            exit_plan = c.get("exit_strategy", "")
+            conv_emoji = "\U0001f7e2" if conv >= 70 else "\U0001f7e1" if conv >= 50 else "\u26aa"
+            msg2.append(f"  {conv_emoji} <b>{c.get('ticker','')}</b> — {cat_type} | {conv}/100")
+            msg2.append(f"    {days_text} | ${price} | +{excess}pp vs SPY")
+            if c.get("news_headlines") and c["news_headlines"][0]:
                 msg2.append(f"    {c['news_headlines'][0][:80]}")
+            if hold:
+                msg2.append(f"    Hold: {hold}")
+            if exit_plan:
+                msg2.append(f"    Exit: {exit_plan[:100]}")
         msg2.append("")
     else:
         msg2.append("<b>\U0001f50e Catalyst Scanner</b>")
-        msg2.append("  No qualifying catalyst opportunities found today.")
+        msg2.append("  No qualifying candidates today.")
         msg2.append("")
 
     # Position alerts — only WATCH, EXIT, TRIM (skip clean HOLDs)
