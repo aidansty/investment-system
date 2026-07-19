@@ -265,16 +265,21 @@ def build_and_send_afternoon_telegram(
             urgent_items.append(f"\u26a0\ufe0f <b>{sig.get('ticker', '')} — WATCH — decide before 4:00 PM close</b>\n  {sig.get('reason', '')[:150]}")
 
     # 5. Positive opportunity alerts — significant bullish catalysts during the day
-    # Opportunities from catalyst scanner only — not old industry candidates
+    # Opportunities from catalyst scanner — tagged as SETUP_FOR_TOMORROW
     catalyst_opps = re_data.get("catalyst_opportunities", [])
     for c in (catalyst_opps or [])[:2]:
-        cat_type = c.get("catalyst_type", "catalyst")
+        cat_type = (c.get("catalyst_type", "catalyst") or "catalyst").replace("_", " ").capitalize()
         tk = c.get("ticker", "")
+        conv = c.get("conviction_score", 0)
+        if conv < 65:
+            continue  # Only show high-conviction opportunities
         excess = c.get("excess_21d", 0)
         price = c.get("price", 0)
+        hold = c.get("hold_period", "")
+        exit_plan = c.get("exit_strategy", "")
         headlines = c.get("news_headlines", [])
         headline_text = headlines[0][:80] if headlines else cat_type
-        urgent_items.append(f"\U0001f4b0 <b>Catalyst Opportunity: {tk}</b>\n  {headline_text}\n  21d momentum: +{excess}pp | Price: ${price}")
+        urgent_items.append(f"\U0001f4c5 <b>SETUP FOR TOMORROW: {tk}</b> ({conv}/100)\n  {cat_type} | Price: ${price} | +{excess}pp vs SPY\n  {headline_text}\n  \u23f0 Do NOT buy today. Execute tomorrow after 9:45 AM.\n  Exit plan: {exit_plan[:80]}" if exit_plan else f"\U0001f4c5 <b>SETUP FOR TOMORROW: {tk}</b> ({conv}/100)\n  {cat_type} | Price: ${price}\n  {headline_text}\n  \u23f0 Do NOT buy today. Execute tomorrow after 9:45 AM.")
 
     # Only send if something genuinely important happened
     if not urgent_items:
