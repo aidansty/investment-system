@@ -397,7 +397,6 @@ def write_dashboard_data(
                     pr["what_to_do"] = claude_bullets[0][:250]
 
     # Ensure EVERY stock position appears in position_review
-    # If Claude didn't mention a position, add it using rules engine data
     CRYPTO_SKIP_PR = {"BTC", "ETH", "XRP", "ZEC", "SOL", "BNB", "DOGE"}
     reviewed_tickers = {pr.get("ticker") for pr in position_review}
     for p in (positions or []):
@@ -405,24 +404,29 @@ def write_dashboard_data(
         if tk in CRYPTO_SKIP_PR or tk == "SPY":
             continue
         if tk not in reviewed_tickers:
-            # This position was NOT in Claude's review — add it from rules engine
             sig = rules_decisions.get(tk, {})
             sig_action = sig.get("action", "hold").capitalize() if sig else "Hold"
-            sig_reason = sig.get("reason", "Position under active monitoring.") if sig else "No specific update today — position under active monitoring."
-            entry_price = p.get("entry_price", 0) or p.get("entry", 0) or 0
-            current_price = p.get("current_price", 0) or 0
-            pct = round((current_price - entry_price) / entry_price * 100, 1) if entry_price > 0 else 0
+            sig_reason = sig.get("reason", "") if sig else ""
+            thesis = p.get("thesis", p.get("summary", ""))
+            catalyst = p.get("catalyst_type", p.get("catalyst", ""))
+            # Build meaningful text, NOT price data
+            if sig_reason and "Entry:" not in sig_reason:
+                review_text = sig_reason[:250]
+            elif thesis:
+                review_text = f"{sig_action}: {thesis[:200]}"
+            else:
+                review_text = f"{sig_action} — position under active monitoring. Full review after next morning run with Claude analysis."
             position_review.append({
                 "ticker": tk,
                 "action": sig_action,
-                "bullets": [sig_reason[:250]],
-                "what_to_do": sig_reason[:250],
-                "catalyst": sig.get("catalyst", ""),
-                "why": sig_reason[:250],
-                "entry_price": entry_price,
+                "bullets": [review_text],
+                "what_to_do": review_text,
+                "catalyst": catalyst.replace("_", " ").capitalize() if catalyst else "Monitoring for catalyst",
+                "why": review_text,
+                "entry_price": p.get("entry_price", 0) or p.get("entry", 0) or 0,
                 "term": p.get("term", ""),
                 "industry": p.get("industry", ""),
-                "summary": p.get("summary", ""),
+                "summary": p.get("summary", thesis),
             })
 
     # Store rules_decisions so we can use it below
@@ -724,36 +728,62 @@ def write_dashboard_data(
                 pp["why"] = pr_match.get("why") or pp.get("why", "")
                 pp["catalyst"] = pr_match.get("catalyst") or pp.get("catalyst", "")
 
-    # Ensure NO portfolio card has empty fields — fallback to positions.json data
+    # Ensure NO portfolio card has empty fields
+    # Detect price-only text ("Entry: $X | Current: $Y | P&L: Z%") and replace
+    CRYPTO_SKIP_CARDS = {"BTC", "ETH", "XRP", "ZEC", "SOL"}
     pos_lookup = {p.get("ticker"): p for p in (positions or [])}
     for pp in portfolio_positions:
         tk = pp.get("ticker", "")
         raw = pos_lookup.get(tk, {})
-        # If what_to_do is empty or just contains price data, populate from thesis/rules
-        wtd = pp.get("what_to_do", "")
-        if not wtd or "Entry at" in wtd or len(wtd) < 20:
-            # Check position_review for this ticker
-            pr_match = next((pr for pr in position_review if pr.get("ticker") == tk), None)
+        pr_match = next((pr for pr in position_review if pr.get("ticker") == tk), None)
+
+        # Set action from position_review
+        if pr_match and pr_match.get("action"):
+            pp["action"] = pr_match["action"]
+        elif tk in CRYPTO_SKIP_CARDS or tk == "SPY":
+            pp["action"] = "Hold"
+
+        # Fix what_to_do — detect price-only fallback
+        wtd = pp.get("what_to_do", "") or ""
+        is_price_only = "Entry:" in wtd or "P&L:" in wtd or "Entry at" in wtd or len(wtd) < 20
+        if not wtd or is_price_only:
             if pr_match and pr_match.get("bullets"):
-                pp["what_to_do"] = pr_match["bullets"][0][:250]
+                # Use first bullet that isn't price-only
+                real_bullets = [b for b in pr_match["bullets"] if "Entry:" not in b and "P&L:" not in b]
+                if real_bullets:
+                    pp["what_to_do"] = real_bullets[0][:250]
+                elif raw.get("thesis"):
+                    pp["what_to_do"] = raw["thesis"][:250]
+                else:
+                    pp["what_to_do"] = "Position under active monitoring."
             elif raw.get("thesis"):
                 pp["what_to_do"] = raw["thesis"][:250]
             else:
-                pp["what_to_do"] = f"Position under active monitoring. Next update at morning run."
+                pp["what_to_do"] = "Position under active monitoring."
+
+        # Fix catalyst
+        cat = pp.get("catalyst", "") or ""
+        if not cat or len(cat) < 5:
+            if pr_match and pr_match.get("catalyst") and len(pr_match["catalyst"]) > 5:
+                pp["catalyst"] = pr_match["catalyst"]
+            elif raw.get("catalyst_type"):
+                pp["catalyst"] = raw["catalyst_type"].replace("_", " ").capitalize()
+            elif raw.get("catalyst"):
+                pp["catalyst"] = raw["catalyst"]
+            elif raw.get("thesis"):
+                pp["catalyst"] = raw["thesis"][:100]
+            else:
+                pp["catalyst"] = "Monitoring for catalyst"
+
+        # Fix summary
         if not pp.get("summary") or len(pp.get("summary", "")) < 10:
             pp["summary"] = raw.get("summary", raw.get("thesis", raw.get("name", tk)))
-        if not pp.get("catalyst") or len(pp.get("catalyst", "")) < 5:
-            ct = raw.get("catalyst_type", raw.get("catalyst", ""))
-            if ct:
-                pp["catalyst"] = ct.replace("_", " ").capitalize()
-            elif pr_match and pr_match.get("catalyst"):
-                pp["catalyst"] = pr_match["catalyst"]
-            else:
-                pp["catalyst"] = "Awaiting catalyst identification"
-        if not pp.get("why") or len(pp.get("why", "")) < 10:
-            pr_match2 = next((pr for pr in position_review if pr.get("ticker") == tk), None)
-            if pr_match2 and pr_match2.get("bullets"):
-                pp["why"] = pr_match2["bullets"][0][:250]
+
+        # Fix why
+        why = pp.get("why", "") or ""
+        if not why or len(why) < 10 or "Entry:" in why:
+            if pr_match and pr_match.get("why") and len(pr_match["why"]) > 10 and "Entry:" not in pr_match["why"]:
+                pp["why"] = pr_match["why"]
             elif raw.get("thesis"):
                 pp["why"] = raw["thesis"][:250]
             else:
@@ -771,6 +801,8 @@ def write_dashboard_data(
 
     data = {
         "last_updated": now,
+        "morning_updated": now if run_type == "morning" else (_morning_updated if "_morning_updated" in dir() and _morning_updated else ""),
+        "afternoon_updated": now if run_type == "afternoon" else "",
         "finnhub_key": os.environ.get("FINNHUB_KEY", ""),
         "run_type": run_type,
         "regime": regime_label,
@@ -801,13 +833,13 @@ def write_dashboard_data(
             }
             for c in forward_catalysts
         ],
-        "position_review": position_review if position_review else _morning_position_review,
+        "position_review": [pr for pr in (position_review if position_review else _morning_position_review) if pr.get("ticker","") not in {"SPY","BTC","ETH","XRP","ZEC","SOL"}],
         "industry_opportunities": [],  # Removed — catalyst scanner replaces this
         "what_changed": what_changed,
         "notable_moves": notable_moves,
         "afternoon_positions": afternoon_positions,
         "afternoon_candidates": afternoon_candidates,
-        "exit_signals": [{"ticker": s.get("ticker",""), "action": s.get("action",""), "reason": s.get("reason","")[:250], "exit_type": s.get("exit_type",""), "urgency": s.get("urgency",""), "pct_change": s.get("pct_change",0)} for s in (re.get("exit_signals",[]) if re else [])] if run_type == "afternoon" else [],
+        "exit_signals": [{"ticker": s.get("ticker",""), "action": s.get("action",""), "reason": s.get("reason","")[:250], "exit_type": s.get("exit_type",""), "urgency": s.get("urgency",""), "pct_change": s.get("pct_change",0)} for s in (re.get("exit_signals",[]) if re else []) if s.get("ticker","") not in {"SPY","BTC","ETH","XRP","ZEC","SOL"}] if run_type == "afternoon" else [],
         "intraday": intraday or {},
         "catalyst_opportunities": catalyst_opportunities if catalyst_opportunities else _morning_catalysts,
         "rules_engine": {

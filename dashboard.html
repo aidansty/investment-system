@@ -1988,10 +1988,13 @@ if (aftAlerts) {
     alerts.push(changeHtml);
   }
 
-  // 4. Opportunities from catalyst scanner
+  // 4. Opportunities — if same as morning, say so
   const aftCandidates = BRIEFING_DATA.catalyst_opportunities || [];
-  const realCandidates = aftCandidates.filter(c => c && c.ticker && (c.excess_21d > 5 || c.catalyst_type === 'post-catalyst-confirmed' || c.catalyst_type === 'analyst_upgrade'));
-  if (realCandidates.length > 0) {
+  const isAfternoon = (BRIEFING_DATA.run_type === 'afternoon');
+  const realCandidates = aftCandidates.filter(c => c && c.ticker && (c.conviction_score >= 65 || c.catalyst_type === 'fda_pdufa'));
+  if (isAfternoon && realCandidates.length > 0) {
+    alerts.push('<div class="info-card" style="margin-bottom:12px;padding:12px;"><p style="font-size:13px;color:var(--text-body);">Morning catalyst opportunities remain valid — review the Morning Briefing tab for full details and conviction scores.</p></div>');
+  } else if (!isAfternoon && realCandidates.length > 0) {
     let oppHtml = '<div class="info-card" style="margin-bottom:12px;"><div class="info-card-title">Opportunity Detected</div>';
     realCandidates.slice(0, 3).forEach(c => {
       oppHtml += '<div style="padding:10px;border-bottom:0.5px solid rgba(255,255,255,0.05);">';
