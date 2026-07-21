@@ -266,15 +266,17 @@ def main():
         except Exception as e:
             log(f"Event enrichment error: {e}")
 
-    # Generate afternoon update
+    # Generate afternoon update — ONLY call Claude if urgent news found (saves $0.50-1.00/day)
     update = {"sections": {}}
-    try:
-        update = generate_afternoon_update(
-            positions=positions,
-            industry_results=industry_results,
-            news=news,
-            morning_top_industries=morning_top,
-            today=str(today),
+    if relevant_headlines:
+        log(f"Urgent headlines found ({len(relevant_headlines)}) — calling Claude for afternoon update")
+        try:
+            update = generate_afternoon_update(
+                positions=positions,
+                industry_results=industry_results,
+                news=news,
+                morning_top_industries=morning_top,
+                today=str(today),
         )
     except Exception as e:
         log(f"Afternoon update error: {e}")

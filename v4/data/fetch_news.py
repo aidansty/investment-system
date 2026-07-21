@@ -257,7 +257,7 @@ def fetch_forward_catalysts(current_holdings: list = None) -> list:
             tools=[{"type": "web_search_20250305", "name": "web_search"}],
             messages=[{
                 "role": "user",
-                "content": f"""Today is {today_str}. Search for upcoming market-moving events scheduled in the next 1 to 3 weeks.
+                "content": f"""Today is {today_str}. Search for FDA PDUFA drug approval dates AND upcoming market-moving events scheduled in the next 1 to 3 weeks.
 
 Focus on events affecting: {industries_list}, and these specific current holdings: {holdings_str}.
 
