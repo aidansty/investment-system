@@ -156,7 +156,7 @@ Return ONLY a valid JSON array. No markdown, no explanation, just the JSON:
     try:
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=2000,
+            max_tokens=1000,
             messages=[{"role": "user", "content": prompt}]
         )
 
@@ -253,7 +253,7 @@ def fetch_forward_catalysts(current_holdings: list = None) -> list:
     try:
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=2000,
+            max_tokens=1200,
             tools=[{"type": "web_search_20250305", "name": "web_search"}],
             messages=[{
                 "role": "user",
@@ -453,47 +453,4 @@ def fetch_complete_news_package() -> dict:
     }
 
 
-def fetch_ticker_news(ticker: str, days: int = 1) -> list:
-    """
-    Fetch news specific to one ticker for afternoon position review.
-    Uses Yahoo Finance RSS filtered by ticker mention, plus targeted web search.
-    """
-    client = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
-    eastern = pytz.timezone("America/New_York")
-    today_str = datetime.now(eastern).strftime("%B %d, %Y")
-
-    try:
-        response = client.messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=600,
-            tools=[{"type": "web_search_20250305", "name": "web_search"}],
-            messages=[{
-                "role": "user",
-                "content": f"""Search Yahoo Finance and CNBC for news specifically about {ticker} stock from today, {today_str}, and yesterday after market close.
-
-Return ONLY a JSON array, nothing else, no markdown fences, no trailing commas:
-[
-  {{"headline": "...", "source": "...", "datetime": "{today_str}", "summary": "1-2 sentences"}}
-]
-
-If no ticker-specific news exists, return an empty array: []"""
-            }]
-        )
-
-        for block in response.content:
-            if hasattr(block, "text"):
-                text = block.text.strip()
-                match = re.search(r"\[.*\]", text, re.DOTALL)
-                if match:
-                    import json
-                    try:
-                        items = json.loads(match.group())
-                        return items
-                    except Exception:
-                        return _extract_partial_catalysts(match.group())
-
-        return []
-
-    except Exception as e:
-        log(f"Ticker news error for {ticker}: {e}")
-        return []
+# fetch_ticker_news REMOVED — was costing $0.30-0.80 per call and not needed

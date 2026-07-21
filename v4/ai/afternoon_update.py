@@ -108,7 +108,7 @@ The single most important thing to monitor or act on before market close today.
 
     message = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=4000,
+        max_tokens=1500,
         system="You are a portfolio intelligence system generating an afternoon update. Be direct and specific. Every sentence must reference real data, news, or price action. Always use ## headers exactly as specified in the instructions.",
         messages=[{"role": "user", "content": prompt}]
     )

@@ -123,21 +123,7 @@ Economic events today: {len(econ_events)}"""
     industries_block += f"Layer 2 (deep analysis): {len(layer2)}\n"
     industries_block += f"High conviction (70+): {len(high_conviction)}\n\n"
 
-    for ind in top_industries[:MAX_INDUSTRIES_BRIEFING]:
-        industries_block += f"""
-INDUSTRY: {ind['industry']}
-ETF: {ind['etf']} | Current Price: ${ind['current_price']}
-Conviction Score: {ind['conviction_score']}/100
-63-day return: {ind['etf_63d_return']}% vs SPY {ind['spy_63d_return']}% (outperformance: {ind['excess_63d']:+.1f}pp)
-21-day return: {ind['etf_21d_return']}% (recent trend)
-Macro alignment: {ind.get('macro_alignment', 'Neutral')}
-Relevant news count: {ind.get('news_count', 0)}
-Ripple benefits: {', '.join(ind.get('ripple_benefits', [])) or 'None detected'}
-Ripple harms: {', '.join(ind.get('ripple_harms', [])) or 'None detected'}
-Relevant headlines:"""
-        for news_item in ind.get("relevant_news", [])[:2]:
-            industries_block += f"\n  - {news_item['headline']}"
-        industries_block += "\n"
+    # Industry detail loop removed — catalyst scanner handles this
 
     # Remaining layer 2 industries summary
     remaining = [i for i in layer2 if i not in top_industries]
@@ -420,7 +406,7 @@ def generate_morning_briefing(
 
     message = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=4000,
+        max_tokens=2500,
         system="""You are a no-fluff, data-driven investment strategist generating a daily
 morning briefing. You think like an institutional research desk.
 You prioritize industries before stocks. You think in second and third-order effects.

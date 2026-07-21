@@ -254,44 +254,9 @@ def fetch_all_events(days_ahead=30):
         except Exception as e:
             log(f"  Finnhub insider buying error: {e}")
 
-    # ── SOURCE 4: FDA PDUFA dates via Claude web search (ONE focused call) ──
-    try:
-        import anthropic
-        client = anthropic.Anthropic()
-        log("Fetching FDA PDUFA dates via focused Claude search...")
-        response = client.messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=1500,
-            messages=[{
-                "role": "user",
-                "content": f"List ALL FDA PDUFA drug approval decision dates between {today_str} and {end_str}. For each, provide: 1) the pharmaceutical company ticker symbol, 2) the exact PDUFA date, 3) the drug name, 4) what it treats. Format each as: TICKER|DATE|DRUG|INDICATION. Only include publicly traded US stocks. No commentary, just the list."
-            }],
-            tools=[{"type": "web_search_20250305", "name": "web_search"}],
-        )
-        fda_text = ""
-        for block in response.content:
-            if hasattr(block, "text"):
-                fda_text += block.text
-        for line in fda_text.strip().splitlines():
+    # FDA PDUFA dates — merged into forward_catalysts call to save $0.50-0.80/day
+    # See fetch_news.py fetch_forward_catalysts() which now includes FDA search
 
-            parts = line.strip().strip("-•").split("|")
-            if len(parts) >= 3:
-                tk = parts[0].strip().upper()
-                dt = parts[1].strip()
-                drug = parts[2].strip()
-                indication = parts[3].strip() if len(parts) > 3 else ""
-                if len(tk) <= 5 and tk.isalpha():
-                    events.append({
-                        "ticker": tk,
-                        "event_type": "fda_pdufa",
-                        "date": dt,
-                        "description": f"FDA PDUFA decision: {drug} for {indication}. Binary event — approval typically drives 20-50% upside, rejection drives 20-40% downside. Date is publicly known and confirmed.",
-                        "significance": "high",
-                    })
-        fda_count = len([e for e in events if e["event_type"] == "fda_pdufa"])
-        log(f"  FDA PDUFA dates found: {fda_count}")
-    except Exception as e:
-        log(f"  FDA PDUFA search error (non-fatal): {e}")
 
     # ── Deduplicate by ticker + event_type ────────────────────────────
 # ── Deduplicate by ticker + event_type ────────────────────────────
