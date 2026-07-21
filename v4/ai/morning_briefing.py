@@ -153,8 +153,11 @@ Economic events today: {len(econ_events)}"""
                     ticker_news_map[ptk].append(n_item.get("headline", ""))
 
     # Open positions block — now includes per-ticker news context
-    positions_block = f"Open positions: {len(positions)}\n"
-    for p in positions:
+    # Only send STOCK positions to Claude — skip crypto and SPY to save tokens
+    CRYPTO_SKIP_BRIEF = {"BTC", "ETH", "XRP", "ZEC", "SOL"}
+    stock_positions = [p for p in positions if p.get("ticker", "") not in CRYPTO_SKIP_BRIEF and p.get("ticker", "") != "SPY"]
+    positions_block = f"Stock positions to review ({len(stock_positions)} — crypto and SPY excluded):\n"
+    for p in stock_positions:
         entry = p.get("entry_price", 0)
         current = p.get("current_price", 0)
         pnl = ((current - entry) / entry * 100) if entry > 0 else 0

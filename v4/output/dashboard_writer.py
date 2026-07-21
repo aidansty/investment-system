@@ -169,16 +169,22 @@ def write_dashboard_data(
             else:
                 bullets.append(headline[:150])
             # Bullet 2: HOW it connects to and affects the specific holding
-            if impact:
+            # Explain impact on EACH affected holding separately
+            affected_stocks = [tk for tk in affected if tk in stock_holdings]
+            direction = "positively (bullish)" if sentiment == "bullish" else "negatively (bearish)" if sentiment == "bearish" else "directly"
+            if impact and len(affected_stocks) <= 1:
                 bullets.append(f"How this affects {tickers_str}: {impact}")
+            elif impact and len(affected_stocks) > 1:
+                bullets.append(f"How this affects your holdings: {impact}")
+                for atk in affected_stocks:
+                    pos_info = next((p for p in positions if p.get("ticker") == atk), {})
+                    term = pos_info.get("term", "")
+                    bullets.append(f"  {atk} ({term}): Monitor this development and its impact on your position.")
             else:
-                # Build a connection explanation from sentiment and category
-                direction = "positively (bullish)" if sentiment == "bullish" else "negatively (bearish)" if sentiment == "bearish" else "directly"
-                category = n.get("category", "")
-                if category:
-                    bullets.append(f"How this affects {tickers_str}: This {category} event impacts {tickers_str} {direction}. Review your position and consider whether action is needed.")
-                else:
-                    bullets.append(f"How this affects {tickers_str}: This development impacts {tickers_str} {direction}. Monitor for further developments.")
+                for atk in affected_stocks:
+                    pos_info = next((p for p in positions if p.get("ticker") == atk), {})
+                    term = pos_info.get("term", "")
+                    bullets.append(f"How this affects {atk}: This development impacts {atk} {direction}. {atk} is a {term.lower()} hold — review if action is needed.")
             # Bullet 3: Recommended action
             if sentiment == "bearish":
                 bullets.append(f"Action: Watch {tickers_str} closely — if this develops further, consider trimming or exiting.")
@@ -409,13 +415,36 @@ def write_dashboard_data(
             sig_reason = sig.get("reason", "") if sig else ""
             thesis = p.get("thesis", p.get("summary", ""))
             catalyst = p.get("catalyst_type", p.get("catalyst", ""))
-            # Build meaningful text, NOT price data
+            # Build meaningful text with REAL data — days until catalyst, P&L, exit plan
+            entry_price = p.get("entry_price", 0) or p.get("entry", 0) or 0
+            current_price = p.get("current_price", 0) or 0
+            pct = round((current_price - entry_price) / entry_price * 100, 1) if entry_price > 0 else 0
+            cat_type = p.get("catalyst_type", "")
+            cat_date = p.get("catalyst_date", "")
+            exit_plan = p.get("what_to_do", "")
+            days_info = ""
+            if cat_date:
+                try:
+                    from datetime import datetime
+                    import pytz
+                    _ed = pytz.timezone("America/New_York")
+                    _cat_dt = datetime.strptime(cat_date[:10], "%Y-%m-%d").date()
+                    _today_dt = datetime.now(_ed).date()
+                    _days = (_cat_dt - _today_dt).days
+                    days_info = f" in {_days} days ({cat_date})" if _days > 0 else " (today)" if _days == 0 else f" ({abs(_days)} days ago)"
+                except Exception:
+                    pass
+
             if sig_reason and "Entry:" not in sig_reason:
                 review_text = sig_reason[:250]
+            elif cat_type and cat_type != "earnings":
+                review_text = f"{sig_action}: {cat_type.replace('_', ' ').capitalize()}{days_info}. Currently {'up' if pct > 0 else 'down'} {abs(pct):.1f}% from entry. {exit_plan[:100] if exit_plan else ''}"
+            elif cat_type == "earnings":
+                review_text = f"{sig_action}: Earnings catalyst{days_info}. Currently {'up' if pct > 0 else 'down'} {abs(pct):.1f}% from entry. Plan: exit before earnings date to lock in run-up profit."
             elif thesis:
-                review_text = f"{sig_action}: {thesis[:200]}"
+                review_text = f"{sig_action}: {thesis[:150]}. Currently {'up' if pct > 0 else 'down'} {abs(pct):.1f}% from entry."
             else:
-                review_text = f"{sig_action} — position under active monitoring. Full review after next morning run with Claude analysis."
+                review_text = f"{sig_action} — position under active monitoring. Currently {'up' if pct > 0 else 'down'} {abs(pct):.1f}% from entry."
             position_review.append({
                 "ticker": tk,
                 "action": sig_action,
@@ -748,18 +777,25 @@ def write_dashboard_data(
         is_price_only = "Entry:" in wtd or "P&L:" in wtd or "Entry at" in wtd or len(wtd) < 20
         if not wtd or is_price_only:
             if pr_match and pr_match.get("bullets"):
-                # Use first bullet that isn't price-only
-                real_bullets = [b for b in pr_match["bullets"] if "Entry:" not in b and "P&L:" not in b]
+                real_bullets = [b for b in pr_match["bullets"] if "Entry:" not in b and "P&L:" not in b and len(b) > 20]
                 if real_bullets:
                     pp["what_to_do"] = real_bullets[0][:250]
-                elif raw.get("thesis"):
-                    pp["what_to_do"] = raw["thesis"][:250]
+            if not pp.get("what_to_do") or len(pp.get("what_to_do","")) < 20 or "Entry:" in pp.get("what_to_do",""):
+                # Build from real data
+                _entry = pp.get("entry_price", 0) or 0
+                _curr = pp.get("current_price", 0) or 0
+                _pct = round((_curr - _entry) / _entry * 100, 1) if _entry > 0 else 0
+                _cat = raw.get("catalyst_type", raw.get("catalyst", ""))
+                _thesis = raw.get("thesis", "")
+                _exit = raw.get("what_to_do", "")
+                if _exit and len(_exit) > 20 and "catalyst scanner" not in _exit.lower():
+                    pp["what_to_do"] = _exit[:250]
+                elif _cat:
+                    pp["what_to_do"] = f"Holding for {_cat.replace('_',' ')} catalyst. Currently {'up' if _pct > 0 else 'down'} {abs(_pct):.1f}%. Monitor daily."
+                elif _thesis and len(_thesis) > 20:
+                    pp["what_to_do"] = _thesis[:250]
                 else:
-                    pp["what_to_do"] = "Position under active monitoring."
-            elif raw.get("thesis"):
-                pp["what_to_do"] = raw["thesis"][:250]
-            else:
-                pp["what_to_do"] = "Position under active monitoring."
+                    pp["what_to_do"] = f"Position under monitoring. {'Up' if _pct > 0 else 'Down'} {abs(_pct):.1f}% from entry."
 
         # Fix catalyst
         cat = pp.get("catalyst", "") or ""
@@ -821,6 +857,7 @@ def write_dashboard_data(
         "performance_portfolio": perf_portfolio,
         "performance_spy": perf_spy,
         "news": news_cards if news_cards else _morning_news,
+        "coming_up": coming_up if "coming_up" in dir() else [],
         "forward_catalysts": [
             {
                 "date": c.get("date", ""),

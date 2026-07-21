@@ -96,6 +96,27 @@ def main():
     # Step 3 — News (recent + forward catalysts)
     log("Fetching complete news package...")
     news_package = fetch_complete_news_package()
+
+    # Per-ticker news check — ensure ANY mention of a held ticker in RSS is flagged
+    # This catches things like analyst downgrades that affect specific holdings
+    try:
+        _rss_all = news_package.get("recent_news", [])
+        _held_stock_tickers = {p.get("ticker", "") for p in positions if p.get("ticker", "") not in {"BTC","ETH","XRP","ZEC","SOL","SPY"}}
+        _ticker_mentions = {}
+        for item in _rss_all:
+            headline = (item.get("headline", "") + " " + item.get("summary", "")).upper()
+            for tk in _held_stock_tickers:
+                if tk in headline and tk not in _ticker_mentions:
+                    _ticker_mentions[tk] = item
+        for tk, item in _ticker_mentions.items():
+            # Check if this ticker is already covered in the news
+            already_covered = any(tk in str(n.get("affected_tickers", [])) for n in _rss_all if n.get("affected_tickers"))
+            if not already_covered:
+                item["affected_tickers"] = [tk]
+                item["matched_ticker"] = tk
+                log(f"  PER-TICKER CHECK: Found news mentioning held ticker {tk}")
+    except Exception as e:
+        log(f"Per-ticker news check error (non-fatal): {e}")
     news = news_package.get("recent_news", [])
     forward_catalysts = news_package.get("forward_catalysts", [])
 
@@ -886,6 +907,39 @@ def main():
                                 log(f"  VOLUME SPIKE: {tk} RVOL {vd['rvol']:.1f}x, +{day1_ret:.1f}%")
                                 if len([c for c in catalyst_opportunities if c["catalyst_type"] == "volume_spike"]) >= 5:
                                     break
+
+        # ── SECOND PASS: Score and filter ALL candidates including late additions ──
+        for c in catalyst_opportunities:
+            if "conviction_score" not in c or c["conviction_score"] is None:
+                score = 0
+                ct = c.get("catalyst_type", "")
+                days = c.get("days_until", 30)
+                excess = c.get("excess_21d", 0)
+                rvol = c.get("rvol", 0)
+                type_scores = {"fda_pdufa": 35, "earnings": 22, "insider_buying": 20, "stock_split": 18, "press_release": 17, "ipo": 15, "ipo_event": 15, "analyst_upgrade": 14, "post-catalyst-confirmed": 20, "event": 12, "economic": 8, "strong-catalyst-reduced": 10, "volume_spike": 5}
+                score += type_scores.get(ct, 10)
+                if 5 <= days <= 15: score += 20
+                elif 1 <= days <= 4: score += 15
+                elif days == 0: score += 12
+                elif 16 <= days <= 25: score += 10
+                else: score += 5
+                if excess > 15: score += 20
+                elif excess > 10: score += 16
+                elif excess > 5: score += 12
+                elif excess > 3: score += 8
+                elif excess > 0: score += 4
+                if rvol >= 3.0: score += 15
+                elif rvol >= 2.0: score += 12
+                elif rvol >= 1.5: score += 8
+                c["conviction_score"] = min(100, score)
+        # Remove volume spikes and generic analyst upgrades (not real forward catalysts)
+        catalyst_opportunities = [c for c in catalyst_opportunities
+            if c.get("catalyst_type") not in ("volume_spike",)
+            and not (c.get("catalyst_type") == "analyst_upgrade" and c.get("conviction_score", 0) < 40)]
+        # Ensure all have required fields
+        for c in catalyst_opportunities:
+            if "exit_strategy" not in c: c["exit_strategy"] = "Monitor and exit when trailing stop triggers."
+            if "hold_period" not in c: c["hold_period"] = "1-3 weeks"
         except Exception as e:
             log(f"Non-earnings catalyst sources error (non-fatal): {e}")
 

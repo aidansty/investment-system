@@ -200,6 +200,15 @@ def main():
             morning_prices[sp.get("ticker", "")] = sp.get("current_price", 0)
     except Exception:
         pass
+    # For positions NOT in the morning snapshot (newly added),
+    # use entry_price as the baseline for crash detection
+    for p in positions:
+        tk = p.get("ticker", "")
+        if tk not in morning_prices or morning_prices[tk] == 0:
+            entry = p.get("entry_price", 0) or p.get("entry", 0) or 0
+            if entry > 0:
+                morning_prices[tk] = entry
+                log(f"  Crash detection: using entry price ${entry} for {tk} (no morning snapshot)")
     # Fetch intraday LOWS — catches flash crashes that recovered before 2:45 PM
     intraday_lows = {}
     try:
