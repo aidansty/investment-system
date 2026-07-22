@@ -1767,6 +1767,27 @@ if (!BRIEFING_DATA.news || !BRIEFING_DATA.news.length) {
   newsList.innerHTML = '<p class="hint">No briefing data yet. Check back after 9 AM on a trading day.</p>';
 }
 
+// ── COMING UP — Dated events affecting your holdings ──
+const comingUp = BRIEFING_DATA.coming_up || [];
+if (comingUp.length > 0) {
+  const cuDiv = document.getElementById('position-review').parentNode;
+  const cuCard = document.createElement('div');
+  cuCard.className = 'section-gap';
+  cuCard.innerHTML = '<h2 class="section-title">Coming Up — Events Affecting You</h2><div class="info-card">' +
+    comingUp.slice(0, 8).map(evt => {
+      const badge = evt.ticker === 'MACRO' ? 'badge-hold' : 'badge-amber';
+      const label = evt.ticker === 'MACRO' ? 'MARKET' : evt.ticker;
+      return '<div style="padding:10px;border-bottom:0.5px solid rgba(255,255,255,0.05);">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<span><b>' + label + '</b> — ' + (evt.event_type || '').replace(/_/g,' ') + '</span>' +
+        '<span class="badge ' + badge + '">' + (evt.date || '') + '</span></div>' +
+        '<p style="font-size:12.5px;color:var(--text-body);margin-top:4px;">' + (evt.description || '') + '</p>' +
+        '<p style="font-size:11px;color:var(--text-secondary);font-style:italic;">' + (evt.why_matters || '') + '</p></div>';
+    }).join('') + '</div>';
+  const posSection = document.getElementById('position-review');
+  posSection.parentNode.insertBefore(cuCard, posSection);
+}
+
 // Position review
 const posReview = document.getElementById('position-review');
 (BRIEFING_DATA.position_review || []).filter(p => {
