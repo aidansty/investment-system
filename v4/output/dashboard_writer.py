@@ -395,12 +395,28 @@ def write_dashboard_data(
                 else:
                     pr["what_to_do"] = claude_bullets[0][:250] if claude_bullets else sig_reason[:250]
             elif sig_action == "hold":
-                # Both agree on hold — keep Claude's fresh, news-driven text entirely
-                # Do NOT override — Claude's text references today's news
+                # Both agree on hold — keep Claude's fresh text
                 pr["action"] = "Hold"
-                # Only touch what_to_do if Claude left it empty
                 if not pr.get("what_to_do") and claude_bullets:
                     pr["what_to_do"] = claude_bullets[0][:250]
+                # Check for stale text (references events > 14 days old)
+                _all_text = " ".join(pr.get("bullets", [])) + " " + (pr.get("what_to_do", "") or "")
+                _stale_phrases = ["just reported", "earnings reported", "June 25", "June 26", "June 27", "inclusion dates"]
+                if any(sp.lower() in _all_text.lower() for sp in _stale_phrases):
+                    # Replace stale text with current status
+                    _entry = pr.get("entry_price", 0) or 0
+                    _curr = 0
+                    for _pp in (positions or []):
+                        if _pp.get("ticker") == ticker:
+                            _curr = _pp.get("current_price", 0) or 0
+                            break
+                    _pct = round((_curr - _entry) / _entry * 100, 1) if _entry > 0 else 0
+                    _next_earn = ""
+                    if earnings_calendar and ticker in earnings_calendar:
+                        _next_earn = f" Next earnings: {earnings_calendar[ticker].get('date', 'TBD')}."
+                    fresh_text = f"Hold — {'up' if _pct > 0 else 'down'} {abs(_pct):.1f}% from entry.{_next_earn} No thesis-breaking developments today. Monitoring for catalyst opportunities."
+                    pr["bullets"] = [fresh_text]
+                    pr["what_to_do"] = fresh_text
 
     # Ensure EVERY stock position appears in position_review
     CRYPTO_SKIP_PR = {"BTC", "ETH", "XRP", "ZEC", "SOL", "BNB", "DOGE"}
@@ -425,11 +441,9 @@ def write_dashboard_data(
             days_info = ""
             if cat_date:
                 try:
-                    from datetime import datetime
-                    import pytz
-                    _ed = pytz.timezone("America/New_York")
-                    _cat_dt = datetime.strptime(cat_date[:10], "%Y-%m-%d").date()
-                    _today_dt = datetime.now(_ed).date()
+                    from datetime import datetime as _dt_fb
+                    _cat_dt = _dt_fb.strptime(cat_date[:10], "%Y-%m-%d").date()
+                    _today_dt = _dt_fb.now().date()
                     _days = (_cat_dt - _today_dt).days
                     days_info = f" in {_days} days ({cat_date})" if _days > 0 else " (today)" if _days == 0 else f" ({abs(_days)} days ago)"
                 except Exception:

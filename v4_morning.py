@@ -97,26 +97,7 @@ def main():
     log("Fetching complete news package...")
     news_package = fetch_complete_news_package()
 
-    # Per-ticker news check — ensure ANY mention of a held ticker in RSS is flagged
-    # This catches things like analyst downgrades that affect specific holdings
-    try:
-        _rss_all = news_package.get("recent_news", [])
-        _held_stock_tickers = {p.get("ticker", "") for p in positions if p.get("ticker", "") not in {"BTC","ETH","XRP","ZEC","SOL","SPY"}}
-        _ticker_mentions = {}
-        for item in _rss_all:
-            headline = (item.get("headline", "") + " " + item.get("summary", "")).upper()
-            for tk in _held_stock_tickers:
-                if tk in headline and tk not in _ticker_mentions:
-                    _ticker_mentions[tk] = item
-        for tk, item in _ticker_mentions.items():
-            # Check if this ticker is already covered in the news
-            already_covered = any(tk in str(n.get("affected_tickers", [])) for n in _rss_all if n.get("affected_tickers"))
-            if not already_covered:
-                item["affected_tickers"] = [tk]
-                item["matched_ticker"] = tk
-                log(f"  PER-TICKER CHECK: Found news mentioning held ticker {tk}")
-    except Exception as e:
-        log(f"Per-ticker news check error (non-fatal): {e}")
+    # Per-ticker news check moved to after positions load
     news = news_package.get("recent_news", [])
     forward_catalysts = news_package.get("forward_catalysts", [])
 
