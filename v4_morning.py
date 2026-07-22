@@ -907,6 +907,8 @@ def main():
                                 log(f"  VOLUME SPIKE: {tk} RVOL {vd['rvol']:.1f}x, +{day1_ret:.1f}%")
                                 if len([c for c in catalyst_opportunities if c["catalyst_type"] == "volume_spike"]) >= 5:
                                     break
+        except Exception as e:
+            log(f"Non-earnings catalyst sources error (non-fatal): {e}")
 
         # ── SECOND PASS: Score and filter ALL candidates including late additions ──
         for c in catalyst_opportunities:
