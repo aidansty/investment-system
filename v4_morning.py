@@ -942,8 +942,6 @@ def main():
         for c in catalyst_opportunities:
             if "exit_strategy" not in c: c["exit_strategy"] = "Monitor and exit when trailing stop triggers."
             if "hold_period" not in c: c["hold_period"] = "1-3 weeks"
-        except Exception as e:
-            log(f"Non-earnings catalyst sources error (non-fatal): {e}")
 
         log(f"Catalyst scanner: {len(catalyst_opportunities)} total opportunities (earnings + events + news + upgrades + volume)")
         for c in catalyst_opportunities:
