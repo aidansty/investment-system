@@ -884,7 +884,7 @@ def write_dashboard_data(
             }
             for c in forward_catalysts
         ],
-        "position_review": [pr for pr in (position_review if position_review else _morning_position_review) if pr.get("ticker","") not in {"SPY","BTC","ETH","XRP","ZEC","SOL"}],
+        "position_review": [pr for pr in (_morning_position_review if run_type == "afternoon" and _morning_position_review else position_review if position_review else _morning_position_review) if pr.get("ticker","") not in {"SPY","BTC","ETH","XRP","ZEC","SOL"}],
         "industry_opportunities": [],  # Removed — catalyst scanner replaces this
         "what_changed": what_changed,
         "notable_moves": notable_moves,
