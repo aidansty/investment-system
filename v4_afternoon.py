@@ -286,9 +286,11 @@ def main():
                 news=news,
                 morning_top_industries=morning_top,
                 today=str(today),
-        )
-    except Exception as e:
-        log(f"Afternoon update error: {e}")
+            )
+        except Exception as e:
+            log(f"Afternoon update error: {e}")
+    else:
+        log("No urgent headlines — skipping Claude call to save credits")
 
     # New opportunities vs morning
     afternoon_top = industry_results.get("top_industries", [])
