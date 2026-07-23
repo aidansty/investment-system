@@ -412,8 +412,6 @@ def write_dashboard_data(
                             break
                     _pct = round((_curr - _entry) / _entry * 100, 1) if _entry > 0 else 0
                     _next_earn = ""
-                    if earnings_calendar and ticker in earnings_calendar:
-                        _next_earn = f" Next earnings: {earnings_calendar[ticker].get('date', 'TBD')}."
                     fresh_text = f"Hold — {'up' if _pct > 0 else 'down'} {abs(_pct):.1f}% from entry.{_next_earn} No thesis-breaking developments today. Monitoring for catalyst opportunities."
                     pr["bullets"] = [fresh_text]
                     pr["what_to_do"] = fresh_text
@@ -1201,57 +1199,61 @@ def _parse_position_review(text: str, positions: list) -> list:
 
 
 def _flush_morning_position(ticker, action, bullets, pos_lookup, reviews):
+    """Claude's fresh daily bullets are AUTHORITATIVE. positions.json is fallback only."""
     p = pos_lookup.get(ticker, {})
     entry = p.get("entry", 0) or p.get("entry_price", 0) or 0
     current = p.get("current_price", 0) or 0
-    qty = p.get("qty", 0) or 0
     pct = round((current - entry) / entry * 100, 2) if entry > 0 else 0
     header = f"Entry: ${entry:.2f} | Current: ${current:.2f} | P&L: {pct:+.1f}%"
 
-    # Get the stored what_to_do from positions.json as the authoritative reasoning
-    what_to_do = p.get("what_to_do", "")
+    # Clean Claude's bullets: strip markdown bold, skip empties and price echoes
+    claude_bullets = []
+    for b in (bullets or []):
+        t = b.strip().lstrip("-\u2022*").strip()
+        t = t.replace("**", "")
+        if not t:
+            continue
+        if t.startswith("Entry:") and "P&L" in t:
+            continue  # we add our own price header
+        claude_bullets.append(t)
 
-    # Extract real action from what_to_do text if parser didn't find it
-    resolved_action = action
-    if what_to_do:
-        wtd_upper = what_to_do.upper()
-        if wtd_upper.startswith("CLOSE") or "CLOSE —" in wtd_upper or "EXIT —" in wtd_upper:
-            resolved_action = "Close"
-        elif wtd_upper.startswith("WATCH") or "WATCH —" in wtd_upper:
-            resolved_action = "Watch"
-        elif wtd_upper.startswith("TRIM") or "TRIM —" in wtd_upper:
-            resolved_action = "Trim"
-        elif wtd_upper.startswith("EXIT"):
-            resolved_action = "Exit"
-        elif "HOLD AND MONITOR" in wtd_upper or "HOLD AND WATCH" in wtd_upper or "MONITOR" in wtd_upper:
-            resolved_action = "Watch"
+    # what_to_do: prefer Claude's explicit "What to do" bullet
+    what_to_do = ""
+    for t in claude_bullets:
+        if t.lower().startswith("what to do"):
+            what_to_do = t.split(":", 1)[1].strip() if ":" in t else t
+            break
+    if not what_to_do:
+        for t in claude_bullets:
+            if len(t) > 25 and not t.lower().startswith(("entry", "stop", "today's news impact: no material")):
+                what_to_do = t
+                break
+    if not what_to_do:
+        what_to_do = (p.get("what_to_do") or p.get("thesis") or "Position under active monitoring.")
 
-    # Build real bullets from what_to_do text
-    real_bullets = [header]
-    if what_to_do:
-        for sentence in what_to_do.replace("\n", " ").split("."):
-            s = sentence.strip().lstrip("- •*").strip()
-            if len(s) > 20:
-                real_bullets.append(s + ".")
-    if not real_bullets[1:] and bullets:
-        real_bullets.extend(bullets)
+    # catalyst: prefer Claude's "Catalyst status" bullet
+    catalyst = ""
+    for t in claude_bullets:
+        if t.lower().startswith("catalyst status"):
+            catalyst = t.split(":", 1)[1].strip() if ":" in t else t
+            break
+    if not catalyst:
+        catalyst = p.get("catalyst") or (p.get("catalyst_type") or "").replace("_", " ").capitalize() or "Monitoring for catalyst"
+
+    final_bullets = ([header] + claude_bullets) if claude_bullets else [header, what_to_do]
 
     reviews.append({
         "ticker": ticker,
-        "action": resolved_action,
+        "action": (action or "Hold").capitalize(),
+        "bullets": final_bullets[:6],
+        "what_to_do": what_to_do[:300],
+        "catalyst": catalyst[:200],
+        "why": what_to_do[:300],
         "entry_price": entry,
-        "current_price": current,
-        "pct_change": pct,
-        "bullets": real_bullets[:5],
-        "reasoning": what_to_do or (bullets[0] if bullets else ""),
-        "summary": p.get("summary", ""),
-        "catalyst": p.get("catalyst", ""),
-        "why": p.get("why", ""),
-        "what_to_do": what_to_do,
-        "industry": p.get("industry", ""),
         "term": p.get("term", ""),
+        "industry": p.get("industry", ""),
+        "summary": p.get("summary", p.get("thesis", "")),
     })
-
 
 def _classify_term(ind: dict) -> str:
     conviction = ind.get("conviction_score", 0)

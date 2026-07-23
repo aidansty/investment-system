@@ -1060,6 +1060,15 @@ def main():
         log("Dashboard data written successfully.")
     except Exception as e:
         log(f"Dashboard write error: {e}")
+        try:
+            import requests as _rq, os as _os3
+            _tok = _os3.environ.get("TELEGRAM_BOT_TOKEN", "")
+            _cid = _os3.environ.get("TELEGRAM_CHAT_ID", "")
+            if _tok and _cid:
+                _rq.post(f"https://api.telegram.org/bot{_tok}/sendMessage",
+                    json={"chat_id": _cid, "text": f"\u26a0\ufe0f SYSTEM ERROR: Dashboard write FAILED — dashboard is showing STALE data. Error: {str(e)[:200]}", "parse_mode": "HTML"}, timeout=10)
+        except Exception:
+            pass
 
     elapsed = time.time() - start
     log(f"=== V4 Morning Complete: {today} | Runtime: {elapsed:.1f}s ===")
