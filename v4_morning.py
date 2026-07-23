@@ -139,6 +139,21 @@ def main():
 
     # Step 4a — Confirmed earnings dates from Finnhub
     log("Fetching confirmed earnings dates...")
+    # Per-ticker news check — scan RSS for ANY mention of held stock tickers
+    try:
+        _rss_all = news_package.get("recent_news", [])
+        _held_stock_tickers = {p.get("ticker", "") for p in positions if p.get("ticker", "") not in {"BTC","ETH","XRP","ZEC","SOL","SPY"}}
+        for item in _rss_all:
+            headline = (item.get("headline", "") + " " + item.get("summary", "")).upper()
+            for tk in _held_stock_tickers:
+                if tk in headline:
+                    existing_affected = item.get("affected_tickers", [])
+                    if tk not in existing_affected:
+                        item["affected_tickers"] = existing_affected + [tk]
+                        log(f"  PER-TICKER: {tk} mentioned in headline")
+    except Exception as e:
+        log(f"Per-ticker news check error (non-fatal): {e}")
+
     earnings_calendar = {}
     recent_earnings_results = {}
     try:
