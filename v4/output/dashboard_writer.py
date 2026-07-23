@@ -339,10 +339,15 @@ def write_dashboard_data(
         pr["entry_price"] = raw.get("entry", 0) or raw.get("entry_price", 0)
         pr["term"] = raw.get("term", "")
         pr["industry"] = raw.get("industry", "")
-        pr["what_to_do"] = raw.get("what_to_do", "")
-        pr["summary"] = raw.get("summary", "")
-        pr["catalyst"] = raw.get("catalyst", "")
-        pr["why"] = raw.get("why", "")
+        # FILL GAPS ONLY — never overwrite Claude's fresh daily analysis with static file text
+        if not pr.get("what_to_do"):
+            pr["what_to_do"] = raw.get("what_to_do", "")
+        if not pr.get("summary"):
+            pr["summary"] = raw.get("summary", "")
+        if not pr.get("catalyst"):
+            pr["catalyst"] = raw.get("catalyst", "")
+        if not pr.get("why"):
+            pr["why"] = pr.get("what_to_do") or raw.get("why", "")
         # Pull quant data if available
         quant = raw.get("quant", {})
         if quant:
