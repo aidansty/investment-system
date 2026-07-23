@@ -12,7 +12,8 @@
       "why": "This is a long-term core holding designed to anchor the portfolio with stable, compounding returns over many years. When no higher-conviction opportunity exists for your cash, SPY is where uninvested capital belongs rather than sitting idle.",
       "cost_basis": 4169.65,
       "what_to_do": "Hold. No action needed. This position is up 12.9% and serves its purpose as the portfolio foundation. Only reassess if the investment thesis for a specific higher-conviction opportunity justifies reallocating this capital.",
-      "entry_date": "2026-04-14"
+      "entry_date": "2026-04-14",
+      "entry_price": 659.44
     },
     {
       "ticker": "MU",
@@ -26,7 +27,8 @@
       "why": "This was entered as a medium-term position around the AI memory demand supercycle. It has returned over 100% from entry, which is exceptional. The pre-earnings exit rule in your framework exists precisely for situations like this \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 massive gains before a binary event.",
       "cost_basis": 148.59,
       "what_to_do": "WATCH \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 Earnings just reported June 25. Review the actual results and forward guidance carefully before deciding to hold or exit. If guidance is strong and HBM demand outlook is positive, hold. If guidance disappoints or forward estimates are cut, exit and reallocate.",
-      "entry_date": "2026-04-14"
+      "entry_date": "2026-04-14",
+      "entry_price": 599.21
     },
     {
       "ticker": "AMD",
@@ -40,7 +42,8 @@
       "why": "This is a medium-term conviction position built around a multi-quarter thesis that AMD gains meaningful GPU market share in the AI data center market. It is not a trade around a single quarter but a thesis that plays out over 6-18 months as AI infrastructure investment accelerates.",
       "cost_basis": 263.68,
       "what_to_do": "Hold. AMD is up 18.4% but the thesis is intact and nothing negative has emerged. The only reason to trim or exit would be a negative AMD-specific event, sector weakness, or a deteriorating macro environment for growth stocks. Without that, let the position continue to develop toward the August 4 earnings catalyst.",
-      "entry_date": "2026-04-14"
+      "entry_date": "2026-04-14",
+      "entry_price": 453.74
     },
     {
       "ticker": "SPCX",
@@ -54,7 +57,8 @@
       "why": "This is a long-term core holding in the commercial space infrastructure buildout. SpaceX has a dominant and defensible position in launch and satellite internet that is likely to compound for decades. It is held for the long-term thesis, not for short-term price action.",
       "cost_basis": 236.98,
       "what_to_do": "Hold through the index inclusion dates. The Russell 1000 and Nasdaq-100 inclusion through early July is the immediate catalyst. After index inclusion is complete, reassess the position size and whether to add more or hold at current allocation.",
-      "entry_date": "2026-04-14"
+      "entry_date": "2026-04-14",
+      "entry_price": 183.84
     },
     {
       "ticker": "NVDA",
@@ -68,7 +72,8 @@
       "why": "This is a long-term core holding in the AI infrastructure buildout. NVIDIA's position is genuinely dominant and defensible in a way that is rare in technology. The company is held for years, not quarters, as AI becomes the defining technology investment of this decade.",
       "cost_basis": 200,
       "what_to_do": "Hold long-term. Up only 1.6% from entry but the thesis is multi-year and intact. No action needed. The August 26 earnings will be worth watching but this is not a position to exit before earnings \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 it is a position to hold through the AI infrastructure buildout cycle.",
-      "entry_date": "2026-04-14"
+      "entry_date": "2026-04-14",
+      "entry_price": 205.33
     },
     {
       "ticker": "BTC",
