@@ -184,6 +184,19 @@ def main():
             item["matched_ticker"] = "MACRO"
             relevant_headlines.append(item)
 
+    # Holding-specific news (Finnhub per-ticker) — intraday analyst cuts etc.
+    try:
+        from v4.data.fetch_news import fetch_holdings_news
+        _hold_tks = [p.get("ticker", "") for p in positions
+                     if p.get("ticker", "") not in {"BTC","ETH","XRP","ZEC","SOL","SPY"}]
+        _holding_news = fetch_holdings_news(_hold_tks, days_back=1)
+        for _hn in _holding_news:
+            if _hn["headline"] not in [h.get("headline") for h in relevant_headlines]:
+                relevant_headlines.append(_hn)
+                log(f"  HOLDING NEWS (PM): {_hn['headline'][:90]}")
+    except Exception as e:
+        log(f"Holding news fetch error (non-fatal): {e}")
+
     news = relevant_headlines
     forward_catalysts = []
     news_package = {"recent_news": news, "forward_catalysts": []}

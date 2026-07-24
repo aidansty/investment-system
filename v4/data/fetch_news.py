@@ -454,3 +454,54 @@ def fetch_complete_news_package() -> dict:
 
 
 # fetch_ticker_news REMOVED — was costing $0.30-0.80 per call and not needed
+
+
+def fetch_holdings_news(tickers: list, days_back: int = 2) -> list:
+    """Per-holding news from Finnhub company-news (free tier).
+    This catches ticker-specific events broad RSS misses:
+    analyst price-target cuts, downgrades, guidance changes, lawsuits.
+    """
+    import os, requests
+    from datetime import datetime, timedelta
+    key = os.environ.get("FINNHUB_KEY", "")
+    if not key or not tickers:
+        return []
+    MATERIAL = ["price target", "downgrade", "upgrade", "initiat", "cuts", "cut ",
+                "lowers", "raises", "guidance", "lawsuit", "investigation", "sec ",
+                "recall", "contract", "acquisition", "merger", "partnership", "fda",
+                "resign", "ceo", "cfo", "misses", "beats", "warns", "slashes",
+                "outlook", "restructur", "layoff", "short seller", "halted"]
+    out = []
+    seen = set()
+    frm = (datetime.utcnow() - timedelta(days=days_back)).strftime("%Y-%m-%d")
+    to = datetime.utcnow().strftime("%Y-%m-%d")
+    for tk in tickers:
+        try:
+            r = requests.get(
+                f"https://finnhub.io/api/v1/company-news?symbol={tk}&from={frm}&to={to}&token={key}",
+                timeout=8)
+            if r.status_code != 200:
+                continue
+            for item in r.json()[:15]:
+                headline = (item.get("headline") or "").strip()
+                if not headline:
+                    continue
+                hl = headline.lower()
+                if not any(kw in hl for kw in MATERIAL):
+                    continue
+                dedupe = headline[:60].lower()
+                if dedupe in seen:
+                    continue
+                seen.add(dedupe)
+                out.append({
+                    "headline": f"[{tk}] {headline}",
+                    "summary": (item.get("summary") or "")[:300],
+                    "source": item.get("source", "Finnhub"),
+                    "url": item.get("url", ""),
+                    "affected_tickers": [tk],
+                    "holding_specific": True,
+                    "significance": "high",
+                })
+        except Exception:
+            continue
+    return out

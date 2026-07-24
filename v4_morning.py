@@ -154,6 +154,22 @@ def main():
     except Exception as e:
         log(f"Per-ticker news check error (non-fatal): {e}")
 
+    # HOLDING-SPECIFIC NEWS — Finnhub company-news per held stock.
+    # Catches analyst PT cuts/downgrades that broad RSS misses (the RPD gap).
+    try:
+        from v4.data.fetch_news import fetch_holdings_news
+        _hold_tks = [p.get("ticker", "") for p in positions
+                     if p.get("ticker", "") not in {"BTC","ETH","XRP","ZEC","SOL","SPY"}]
+        _holding_news = fetch_holdings_news(_hold_tks, days_back=2)
+        if _holding_news:
+            news_package["recent_news"] = _holding_news + news_package.get("recent_news", [])
+            for _hn in _holding_news:
+                log(f"  HOLDING NEWS: {_hn['headline'][:90]}")
+        else:
+            log("  Holding-specific news: none material in last 2 days")
+    except Exception as e:
+        log(f"Holding news fetch error (non-fatal): {e}")
+
     earnings_calendar = {}
     recent_earnings_results = {}
     try:
