@@ -366,7 +366,26 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
                     pass
 
         # Evaluate: losing + no catalyst = dead capital
+        # DRAWDOWN OVERRIDE — fires regardless of forward catalyst.
+        # A big loss ahead of a catalyst means the market is repricing the thesis.
         is_high_vol_pos = position.get("high_volatility", False)
+        _dd_exit = -24 if is_high_vol_pos else -15
+        _dd_watch = -16 if is_high_vol_pos else -10
+        if pct_change <= _dd_exit:
+            return {
+                "action": "exit", "ticker": ticker, "exit_type": "drawdown",
+                "urgency": "eod_decision", "conviction": conviction,
+                "reason": f"DRAWDOWN EXIT: {ticker} is DOWN {pct_change:+.1f}% — even with an upcoming catalyst, a selloff this deep ahead of the event means the market is repricing the thesis against us. Recommend exit; re-enter only if the story genuinely changes.",
+                "pct_change": pct_change,
+            }
+        if pct_change <= _dd_watch:
+            return {
+                "action": "watch", "ticker": ticker, "exit_type": "drawdown_watch",
+                "urgency": "eod_decision", "conviction": conviction,
+                "reason": f"DRAWDOWN WATCH: {ticker} is DOWN {pct_change:+.1f}%. Decide before close: check TODAY'S news for why it is falling. If the drop is stock-specific (downgrade, guidance cut, negative report), exit — the catalyst thesis is compromised. If it is market/sector noise and the catalyst is intact, hold with a hard mental stop at {_dd_exit}%.",
+                "pct_change": pct_change,
+            }
+
         checkpoint_threshold = -16 if is_high_vol_pos else -8  # High-vol gets double stop distance
         if pct_change <= checkpoint_threshold and not has_forward_catalyst:
             return {
