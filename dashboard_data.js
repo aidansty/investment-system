@@ -12,11 +12,11 @@ window.BRIEFING_DATA = {
   "vix_trend": "Falling",
   "vix_regime": "Green",
   "market_bullets": [
-    "VIX at 16.64 sits in the lower half of the normal range \u2014 no panic, no complacency. This is an environment where individual stock selection matters more than macro hedging.",
+    "VIX at 16.64 sits in the lower half of the normal range — no panic, no complacency. This is an environment where individual stock selection matters more than macro hedging.",
     "VIX is trending downward, which confirms institutional money is not positioned defensively. Risk appetite is present, and the market is absorbing the tariff noise and Iran war headlines without breaking.",
-    "Green regime (65/100) means the system permits new entries, but the conviction bar is still high \u2014 no industry scan today cleared 70, so the regime is green but the opportunity set is thin.",
+    "Green regime (65/100) means the system permits new entries, but the conviction bar is still high — no industry scan today cleared 70, so the regime is green but the opportunity set is thin.",
     "This portfolio carries three significant stress points right now: SPCX is down 35.7% with no recovery, RPD is down 19% ahead of earnings, and the oil-driven inflation spike is directly threatening AMD's forward multiple through the Fed rate hike risk. The green regime helps PLTR and NVDA but doesn't fix those three.",
-    "No economic events today \u2014 Friday quiet. The macro landmine this week was oil crossing $100/barrel; that damage is priced in and the next pressure point is next Thursday when HUM reports."
+    "No economic events today — Friday quiet. The macro landmine this week was oil crossing $100/barrel; that damage is priced in and the next pressure point is next Thursday when HUM reports."
   ],
   "positions": [
     {
@@ -47,10 +47,10 @@ window.BRIEFING_DATA = {
       "balance": 245.55,
       "pct_change": 65.25,
       "dollar_change": 96.96,
-      "summary": "Micron Technology manufactures DRAM and NAND memory chips \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one of the primary beneficiaries of that demand surge.",
-      "catalyst": "Earnings confirmed September 21 \u2014 59 days away. No near-term catalyst. The thesis is AI-driven memory demand (HBM for Nvidia GPU stacks), which remains intact based on Alphabet and Microsoft confirmin",
-      "why": "WATCH \u2014 at +65.3%, this is your biggest winner and deserves a defined trailing discipline. The tariff escalation today introduces a new supply-chain risk variable. Name what to monitor: watch for any specific tariff action targeting South Korea or Taiwan that would directly affect Micron's DRAM fabs",
-      "what_to_do": "WATCH \u2014 at +65.3%, this is your biggest winner and deserves a defined trailing discipline. The tariff escalation today introduces a new supply-chain risk variable. Name what to monitor: watch for any specific tariff action targeting South Korea or Taiwan that would directly affect Micron's DRAM fabs",
+      "summary": "Micron Technology manufactures DRAM and NAND memory chips ÃÂ¢ÃÂÃÂ the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one of the primary beneficiaries of that demand surge.",
+      "catalyst": "Earnings confirmed September 21 — 59 days away. No near-term catalyst. The thesis is AI-driven memory demand (HBM for Nvidia GPU stacks), which remains intact based on Alphabet and Microsoft confirmin",
+      "why": "WATCH — at +65.3%, this is your biggest winner and deserves a defined trailing discipline. The tariff escalation today introduces a new supply-chain risk variable. Name what to monitor: watch for any specific tariff action targeting South Korea or Taiwan that would directly affect Micron's DRAM fabs",
+      "what_to_do": "WATCH — at +65.3%, this is your biggest winner and deserves a defined trailing discipline. The tariff escalation today introduces a new supply-chain risk variable. Name what to monitor: watch for any specific tariff action targeting South Korea or Taiwan that would directly affect Micron's DRAM fabs",
       "industry": "Semiconductors",
       "cost_basis": 148.59,
       "action": "Hold"
@@ -66,9 +66,9 @@ window.BRIEFING_DATA = {
       "pct_change": 18.94,
       "dollar_change": 49.95,
       "summary": "Advanced Micro Devices makes CPUs and GPUs that compete directly with Intel and NVIDIA. In the AI race, AMD's MI300 and MI450 GPU series are taking meaningful market share from NVIDIA in data center AI workloads, making AMD one of the clearest ways to play the AI buildout without paying NVIDIA's premium valuation.",
-      "catalyst": "Earnings August 4 \u2014 11 days away. The thesis is AI GPU demand share gain vs. Nvidia, specifically in data center inference. The Alphabet and Microsoft capex signals confirmed this week that hyperscale",
-      "why": "HOLD. Eleven days to earnings, positive news flow today on both partnership and demand environment, and the hyperscaler capex guidance from Alphabet/Microsoft directly supports AMD's revenue setup. The tariff risk is real but does not resolve before August 4 \u2014 manage that after earnings.",
-      "what_to_do": "HOLD. Eleven days to earnings, positive news flow today on both partnership and demand environment, and the hyperscaler capex guidance from Alphabet/Microsoft directly supports AMD's revenue setup. The tariff risk is real but does not resolve before August 4 \u2014 manage that after earnings.",
+      "catalyst": "Earnings August 4 — 11 days away. The thesis is AI GPU demand share gain vs. Nvidia, specifically in data center inference. The Alphabet and Microsoft capex signals confirmed this week that hyperscale",
+      "why": "HOLD. Eleven days to earnings, positive news flow today on both partnership and demand environment, and the hyperscaler capex guidance from Alphabet/Microsoft directly supports AMD's revenue setup. The tariff risk is real but does not resolve before August 4 — manage that after earnings.",
+      "what_to_do": "HOLD. Eleven days to earnings, positive news flow today on both partnership and demand environment, and the hyperscaler capex guidance from Alphabet/Microsoft directly supports AMD's revenue setup. The tariff risk is real but does not resolve before August 4 — manage that after earnings.",
       "industry": "Semiconductors",
       "cost_basis": 263.68,
       "action": "Hold"
@@ -85,8 +85,8 @@ window.BRIEFING_DATA = {
       "dollar_change": -45.2,
       "summary": "SpaceX is the dominant commercial rocket company in the world, operating Falcon 9, Starship, and the Starlink satellite internet constellation with over 7,000 satellites in orbit. It recently completed its IPO and is now publicly traded, giving investors access to what may be the most important infrastructure company of the next century.",
       "catalyst": "August 6 date confirmed. But a -35.7% drawdown ahead of any catalyst means the market has already delivered a verdict. When a position is down this severely before the event, the stock price is tellin",
-      "why": "Today's news impact: No material news today specific to SPCX. The broader macro environment \u2014 $100 oil, rising yields, tariff escalation \u2014 is hostile to speculative or small-cap positions, which compounds the existing problem.",
-      "what_to_do": "Today's news impact: No material news today specific to SPCX. The broader macro environment \u2014 $100 oil, rising yields, tariff escalation \u2014 is hostile to speculative or small-cap positions, which compounds the existing problem.",
+      "why": "Today's news impact: No material news today specific to SPCX. The broader macro environment — $100 oil, rising yields, tariff escalation — is hostile to speculative or small-cap positions, which compounds the existing problem.",
+      "what_to_do": "Today's news impact: No material news today specific to SPCX. The broader macro environment — $100 oil, rising yields, tariff escalation — is hostile to speculative or small-cap positions, which compounds the existing problem.",
       "industry": "Aerospace & Space",
       "cost_basis": 236.98,
       "action": "Exit"
@@ -101,7 +101,7 @@ window.BRIEFING_DATA = {
       "balance": 208.76,
       "pct_change": 1.67,
       "dollar_change": 3.43,
-      "summary": "NVIDIA is the dominant supplier of GPUs for artificial intelligence \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrastructure, they are overwhelmingly buying NVIDIA GPUs. This gives NVIDIA extraordinary pricing power and demand visibility.",
+      "summary": "NVIDIA is the dominant supplier of GPUs for artificial intelligence ÃÂ¢ÃÂÃÂ its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrastructure, they are overwhelmingly buying NVIDIA GPUs. This gives NVIDIA extraordinary pricing power and demand visibility.",
       "catalyst": "Monitoring for catalyst",
       "why": "This is a long-term core holding in the AI infrastructure buildout. NVIDIA's position is genuinely dominant and defensible in a way that is rare in technology. The company is held for years, not quarters, as AI becomes the defining technology investment of this decade.",
       "what_to_do": "Position under monitoring. Up 1.7% from entry.",
@@ -216,24 +216,6 @@ window.BRIEFING_DATA = {
       "industry": "Managed Care",
       "cost_basis": 0,
       "action": "Hold"
-    },
-    {
-      "ticker": "RPD",
-      "type": "Stock",
-      "term": "Short-term",
-      "qty": 18,
-      "entry_price": 11.8,
-      "current_price": 9.56,
-      "balance": 172.08,
-      "pct_change": -18.98,
-      "dollar_change": -40.32,
-      "summary": "Rapid7 \u2014 cybersecurity catalyst play",
-      "catalyst": "No forward catalyst identified",
-      "why": "DRAWDOWN EXIT: RPD is DOWN -19.0% \u2014 even with an upcoming catalyst, a selloff this deep ahead of the event means the market is repricing the thesis against us. Recommend exit; re-enter only if the story genuinely changes.",
-      "what_to_do": "DRAWDOWN EXIT: RPD is DOWN -19.0% \u2014 even with an upcoming catalyst, a selloff this deep ahead of the event means the market is repricing the thesis against us. Recommend exit; re-enter only if the story genuinely changes.",
-      "industry": "Cybersecurity",
-      "cost_basis": 0,
-      "action": "Exit"
     }
   ],
   "cash": 1477.2078059038197,
@@ -248,9 +230,9 @@ window.BRIEFING_DATA = {
       "url": "https://finnhub.io/api/news?id=1cc18c607ea9723513b4e12a1bfe409c1c5d689008474f3a0bab06690cec638c",
       "source": "SeekingAlpha",
       "bullets": [
-        "Advanced Micro Devices, Inc. is rated a buy, with a fair value range of $550\u00e2\u0080\u0093$690, driven by secular AI compute demand and expanding CPU and GPU TAM. Learn more about AMD stock here.",
-        "How this affects AMD: This development impacts AMD directly. AMD is a medium-term hold \u2014 review if action is needed.",
-        "Action: No immediate change needed for AMD \u2014 continue holding and monitor."
+        "Advanced Micro Devices, Inc. is rated a buy, with a fair value range of $550â$690, driven by secular AI compute demand and expanding CPU and GPU TAM. Learn more about AMD stock here.",
+        "How this affects AMD: This development impacts AMD directly. AMD is a medium-term hold — review if action is needed.",
+        "Action: No immediate change needed for AMD — continue holding and monitor."
       ],
       "affected_tickers": [
         "AMD"
@@ -264,8 +246,8 @@ window.BRIEFING_DATA = {
       "source": "SeekingAlpha",
       "bullets": [
         "TSMC Q2 earnings surged, but CapEx fears hit shares. Click here to read more on the TSM stock.",
-        "How this affects AMD: This development impacts AMD directly. AMD is a medium-term hold \u2014 review if action is needed.",
-        "Action: No immediate change needed for AMD \u2014 continue holding and monitor."
+        "How this affects AMD: This development impacts AMD directly. AMD is a medium-term hold — review if action is needed.",
+        "Action: No immediate change needed for AMD — continue holding and monitor."
       ],
       "affected_tickers": [
         "AMD"
@@ -279,8 +261,8 @@ window.BRIEFING_DATA = {
       "source": "Yahoo",
       "bullets": [
         "SpaceX shares initially surged in their public debut last month, but the broader trade had already rolled over.",
-        "How this affects SPCX: This development impacts SPCX directly. SPCX is a long-term hold \u2014 review if action is needed.",
-        "Action: No immediate change needed for SPCX \u2014 continue holding and monitor."
+        "How this affects SPCX: This development impacts SPCX directly. SPCX is a long-term hold — review if action is needed.",
+        "Action: No immediate change needed for SPCX — continue holding and monitor."
       ],
       "affected_tickers": [
         "SPCX"
@@ -294,8 +276,8 @@ window.BRIEFING_DATA = {
       "source": "Yahoo",
       "bullets": [
         "When the Oracle of Omaha wasn't patient, he paid dearly for it.",
-        "How this affects NVDA: This development impacts NVDA directly. NVDA is a long-term hold \u2014 review if action is needed.",
-        "Action: No immediate change needed for NVDA \u2014 continue holding and monitor."
+        "How this affects NVDA: This development impacts NVDA directly. NVDA is a long-term hold — review if action is needed.",
+        "Action: No immediate change needed for NVDA — continue holding and monitor."
       ],
       "affected_tickers": [
         "NVDA"
@@ -363,30 +345,30 @@ window.BRIEFING_DATA = {
       "action": "Hold",
       "bullets": [
         "Entry: $599.21 | Current: $990.21 | P&L: +65.2%",
-        "Today's news impact: The new sweeping tariffs on 60 trade partners (see above) are the most relevant news for MU today. Micron's manufacturing is South Korea and Japan-dependent \u2014 tariff escalation on those geographies introduces supply-side cost risk that wasn't priced into MU's current elevated multiple. This is not an exit signal but it is a reason to watch.",
-        "Catalyst status: Earnings confirmed September 21 \u2014 59 days away. No near-term catalyst. The thesis is AI-driven memory demand (HBM for Nvidia GPU stacks), which remains intact based on Alphabet and Microsoft confirming accelerated AI capex. The Intel print also confirms demand-side strength.",
-        "What to do and WHY: WATCH \u2014 at +65.3%, this is your biggest winner and deserves a defined trailing discipline. The tariff escalation today introduces a new supply-chain risk variable. Name what to monitor: watch for any specific tariff action targeting South Korea or Taiwan that would directly affect Micron's DRAM fabs. Absent that, the AI memory demand thesis is intact and September earnings remain the primary catalyst. Do not exit based on today's tariff news alone \u2014 it is sector-wide risk, not MU-specific."
+        "Today's news impact: The new sweeping tariffs on 60 trade partners (see above) are the most relevant news for MU today. Micron's manufacturing is South Korea and Japan-dependent — tariff escalation on those geographies introduces supply-side cost risk that wasn't priced into MU's current elevated multiple. This is not an exit signal but it is a reason to watch.",
+        "Catalyst status: Earnings confirmed September 21 — 59 days away. No near-term catalyst. The thesis is AI-driven memory demand (HBM for Nvidia GPU stacks), which remains intact based on Alphabet and Microsoft confirming accelerated AI capex. The Intel print also confirms demand-side strength.",
+        "What to do and WHY: WATCH — at +65.3%, this is your biggest winner and deserves a defined trailing discipline. The tariff escalation today introduces a new supply-chain risk variable. Name what to monitor: watch for any specific tariff action targeting South Korea or Taiwan that would directly affect Micron's DRAM fabs. Absent that, the AI memory demand thesis is intact and September earnings remain the primary catalyst. Do not exit based on today's tariff news alone — it is sector-wide risk, not MU-specific."
       ],
-      "what_to_do": "WATCH \u2014 at +65.3%, this is your biggest winner and deserves a defined trailing discipline. The tariff escalation today introduces a new supply-chain risk variable. Name what to monitor: watch for any specific tariff action targeting South Korea or Taiwan that would directly affect Micron's DRAM fabs",
-      "catalyst": "Earnings confirmed September 21 \u2014 59 days away. No near-term catalyst. The thesis is AI-driven memory demand (HBM for Nvidia GPU stacks), which remains intact based on Alphabet and Microsoft confirmin",
-      "why": "WATCH \u2014 at +65.3%, this is your biggest winner and deserves a defined trailing discipline. The tariff escalation today introduces a new supply-chain risk variable. Name what to monitor: watch for any specific tariff action targeting South Korea or Taiwan that would directly affect Micron's DRAM fabs",
+      "what_to_do": "WATCH — at +65.3%, this is your biggest winner and deserves a defined trailing discipline. The tariff escalation today introduces a new supply-chain risk variable. Name what to monitor: watch for any specific tariff action targeting South Korea or Taiwan that would directly affect Micron's DRAM fabs",
+      "catalyst": "Earnings confirmed September 21 — 59 days away. No near-term catalyst. The thesis is AI-driven memory demand (HBM for Nvidia GPU stacks), which remains intact based on Alphabet and Microsoft confirmin",
+      "why": "WATCH — at +65.3%, this is your biggest winner and deserves a defined trailing discipline. The tariff escalation today introduces a new supply-chain risk variable. Name what to monitor: watch for any specific tariff action targeting South Korea or Taiwan that would directly affect Micron's DRAM fabs",
       "entry_price": 599.21,
       "term": "Medium-term",
       "industry": "Semiconductors",
-      "summary": "Micron Technology manufactures DRAM and NAND memory chips \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one of the primary beneficiaries of that demand surge."
+      "summary": "Micron Technology manufactures DRAM and NAND memory chips ÃÂ¢ÃÂÃÂ the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one of the primary beneficiaries of that demand surge."
     },
     {
       "ticker": "AMD",
       "action": "Hold",
       "bullets": [
         "Entry: $453.74 | Current: $539.69 | P&L: +18.9%",
-        "Today's news impact: Two items directly hit AMD today. First, the Cerebras partnership (see above) is incremental positive \u2014 AMD is expanding its inference infrastructure footprint ahead of earnings. Second, the tariff escalation (see above) introduces hardware cost risk through AMD's Asia-based supply chain, but this is a medium-term concern, not an August 4 catalyst issue.",
-        "Catalyst status: Earnings August 4 \u2014 11 days away. The thesis is AI GPU demand share gain vs. Nvidia, specifically in data center inference. The Alphabet and Microsoft capex signals confirmed this week that hyperscaler spending is accelerating. The Cerebras partnership today adds further validation. Conviction is improving going into the print.",
-        "What to do and WHY: HOLD. Eleven days to earnings, positive news flow today on both partnership and demand environment, and the hyperscaler capex guidance from Alphabet/Microsoft directly supports AMD's revenue setup. The tariff risk is real but does not resolve before August 4 \u2014 manage that after earnings."
+        "Today's news impact: Two items directly hit AMD today. First, the Cerebras partnership (see above) is incremental positive — AMD is expanding its inference infrastructure footprint ahead of earnings. Second, the tariff escalation (see above) introduces hardware cost risk through AMD's Asia-based supply chain, but this is a medium-term concern, not an August 4 catalyst issue.",
+        "Catalyst status: Earnings August 4 — 11 days away. The thesis is AI GPU demand share gain vs. Nvidia, specifically in data center inference. The Alphabet and Microsoft capex signals confirmed this week that hyperscaler spending is accelerating. The Cerebras partnership today adds further validation. Conviction is improving going into the print.",
+        "What to do and WHY: HOLD. Eleven days to earnings, positive news flow today on both partnership and demand environment, and the hyperscaler capex guidance from Alphabet/Microsoft directly supports AMD's revenue setup. The tariff risk is real but does not resolve before August 4 — manage that after earnings."
       ],
-      "what_to_do": "HOLD. Eleven days to earnings, positive news flow today on both partnership and demand environment, and the hyperscaler capex guidance from Alphabet/Microsoft directly supports AMD's revenue setup. The tariff risk is real but does not resolve before August 4 \u2014 manage that after earnings.",
-      "catalyst": "Earnings August 4 \u2014 11 days away. The thesis is AI GPU demand share gain vs. Nvidia, specifically in data center inference. The Alphabet and Microsoft capex signals confirmed this week that hyperscale",
-      "why": "HOLD. Eleven days to earnings, positive news flow today on both partnership and demand environment, and the hyperscaler capex guidance from Alphabet/Microsoft directly supports AMD's revenue setup. The tariff risk is real but does not resolve before August 4 \u2014 manage that after earnings.",
+      "what_to_do": "HOLD. Eleven days to earnings, positive news flow today on both partnership and demand environment, and the hyperscaler capex guidance from Alphabet/Microsoft directly supports AMD's revenue setup. The tariff risk is real but does not resolve before August 4 — manage that after earnings.",
+      "catalyst": "Earnings August 4 — 11 days away. The thesis is AI GPU demand share gain vs. Nvidia, specifically in data center inference. The Alphabet and Microsoft capex signals confirmed this week that hyperscale",
+      "why": "HOLD. Eleven days to earnings, positive news flow today on both partnership and demand environment, and the hyperscaler capex guidance from Alphabet/Microsoft directly supports AMD's revenue setup. The tariff risk is real but does not resolve before August 4 — manage that after earnings.",
       "entry_price": 453.74,
       "term": "Medium-term",
       "industry": "Semiconductors",
@@ -397,9 +379,9 @@ window.BRIEFING_DATA = {
       "action": "Exit",
       "bullets": [
         "Entry: $183.84 | Current: $118.24 | P&L: -35.7%",
-        "Today's news impact: No material news today specific to SPCX. The broader macro environment \u2014 $100 oil, rising yields, tariff escalation \u2014 is hostile to speculative or small-cap positions, which compounds the existing problem.",
-        "Catalyst status: August 6 date confirmed. But a -35.7% drawdown ahead of any catalyst means the market has already delivered a verdict. When a position is down this severely before the event, the stock price is telling you something the thesis isn't \u2014 either the thesis was wrong, the timing was wrong, or the market knows something about execution risk that isn't visible yet. The rules engine flagged this for exit.",
-        "What to do and WHY: EXIT. This is not a thesis-based hold \u2014 there is no recorded thesis in the system, the loss has exceeded 35%, and the rules engine is correct. A -35."
+        "Today's news impact: No material news today specific to SPCX. The broader macro environment — $100 oil, rising yields, tariff escalation — is hostile to speculative or small-cap positions, which compounds the existing problem.",
+        "Catalyst status: August 6 date confirmed. But a -35.7% drawdown ahead of any catalyst means the market has already delivered a verdict. When a position is down this severely before the event, the stock price is telling you something the thesis isn't — either the thesis was wrong, the timing was wrong, or the market knows something about execution risk that isn't visible yet. The rules engine flagged this for exit.",
+        "What to do and WHY: EXIT. This is not a thesis-based hold — there is no recorded thesis in the system, the loss has exceeded 35%, and the rules engine is correct. A -35."
       ],
       "what_to_do": "Entry: $183.84 | Current: $118.24 | P&L: -35.7%",
       "catalyst": "August 6 date confirmed. But a -35.7% drawdown ahead of any catalyst means the market has already delivered a verdict. When a position is down this severely before the event, the stock price is tellin",
@@ -418,8 +400,8 @@ window.BRIEFING_DATA = {
       "bullets": [
         "Entry: $205.33 | Current: $208.76 | P&L: +1.7%"
       ],
-      "reasoning": "Hold \u2014 thesis intact.",
-      "summary": "NVIDIA is the dominant supplier of GPUs for artificial intelligence \u00c3\u0083\u00c2\u00a2\u00c3\u0082\u00c2\u0080\u00c3\u0082\u00c2\u0094 its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrastructure, they are overwhelmingly buying NVIDIA GPUs. This gives NVIDIA extraordinary pricing power and demand visibility.",
+      "reasoning": "Hold — thesis intact.",
+      "summary": "NVIDIA is the dominant supplier of GPUs for artificial intelligence ÃÂ¢ÃÂÃÂ its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrastructure, they are overwhelmingly buying NVIDIA GPUs. This gives NVIDIA extraordinary pricing power and demand visibility.",
       "catalyst": "",
       "why": "This is a long-term core holding in the AI infrastructure buildout. NVIDIA's position is genuinely dominant and defensible in a way that is rare in technology. The company is held for years, not quarters, as AI becomes the defining technology investment of this decade.",
       "what_to_do": "Entry: $205.33 | Current: $208.76 | P&L: +1.7%",
@@ -435,30 +417,12 @@ window.BRIEFING_DATA = {
       "bullets": [
         "Entry: $357.37 | Current: $394.50 | P&L: +10.4%"
       ],
-      "reasoning": "Hold \u2014 thesis intact.",
+      "reasoning": "Hold — thesis intact.",
       "summary": "Humana Inc",
       "catalyst": "",
       "why": "",
       "what_to_do": "Entry: $357.37 | Current: $394.50 | P&L: +10.4%",
       "industry": "Managed Care",
-      "term": "Short-term"
-    },
-    {
-      "ticker": "RPD",
-      "action": "Exit",
-      "entry_price": 11.8,
-      "current_price": 9.56,
-      "pct_change": -18.98,
-      "bullets": [
-        "DRAWDOWN EXIT: RPD is DOWN -19.0% \u2014 even with an upcoming catalyst, a selloff this deep ahead of the event means the market is repricing the thesis against us. Recommend exit; re-enter only if the story genuinely changes.",
-        "Claude analysis: Entry: $11.80 | Current: $9.56 | P&L: -19.0%"
-      ],
-      "reasoning": "Hold \u2014 thesis intact.",
-      "summary": "Rapid7 \u2014 cybersecurity catalyst play",
-      "catalyst": "No forward catalyst identified",
-      "why": "DRAWDOWN EXIT: RPD is DOWN -19.0% \u2014 even with an upcoming catalyst, a selloff this deep ahead of the event means the market is repricing the thesis against us. Recommend exit; re-enter only if the story genuinely changes.",
-      "what_to_do": "DRAWDOWN EXIT: RPD is DOWN -19.0% \u2014 even with an upcoming catalyst, a selloff this deep ahead of the event means the market is repricing the thesis against us. Recommend exit; re-enter only if the story genuinely changes.",
-      "industry": "Cybersecurity",
       "term": "Short-term"
     }
   ],
@@ -475,7 +439,7 @@ window.BRIEFING_DATA = {
       "industry": "Oil & Gas",
       "earnings_date": "2026-08-04",
       "eps_estimate": 13.3993,
-      "excess_21d": 26.0,
+      "excess_21d": 26,
       "price": 312.27,
       "has_news": false,
       "news_headlines": [],
@@ -633,7 +597,7 @@ window.BRIEFING_DATA = {
         "exit_type": "drawdown",
         "urgency": "eod_decision",
         "conviction": 50,
-        "reason": "DRAWDOWN EXIT: SPCX is DOWN -35.7% \u2014 even with an upcoming catalyst, a selloff this deep ahead of the event means the market is repricing the thesis against us. Recommend exit; re-enter only if the story genuinely changes.",
+        "reason": "DRAWDOWN EXIT: SPCX is DOWN -35.7% — even with an upcoming catalyst, a selloff this deep ahead of the event means the market is repricing the thesis against us. Recommend exit; re-enter only if the story genuinely changes.",
         "pct_change": -35.68,
         "tax_awareness": {
           "ticker": "SPCX",
@@ -688,7 +652,7 @@ window.BRIEFING_DATA = {
         "ticker": "SOL",
         "exit_type": null,
         "reason": "All hold conditions met. Conviction 50/100.",
-        "pct_change": -100.0
+        "pct_change": -100
       },
       {
         "action": "hold",
@@ -711,7 +675,7 @@ window.BRIEFING_DATA = {
         "exit_type": "drawdown",
         "urgency": "eod_decision",
         "conviction": 50,
-        "reason": "DRAWDOWN EXIT: RPD is DOWN -19.0% \u2014 even with an upcoming catalyst, a selloff this deep ahead of the event means the market is repricing the thesis against us. Recommend exit; re-enter only if the story genuinely changes.",
+        "reason": "DRAWDOWN EXIT: RPD is DOWN -19.0% — even with an upcoming catalyst, a selloff this deep ahead of the event means the market is repricing the thesis against us. Recommend exit; re-enter only if the story genuinely changes.",
         "pct_change": -18.98,
         "tax_awareness": {
           "ticker": "RPD",
@@ -729,7 +693,7 @@ window.BRIEFING_DATA = {
       "max_allowed_pct": 0.2,
       "over_limit": true,
       "regime": "Green",
-      "warning": "\u26a0\ufe0f Crypto 41.7% exceeds 20% limit in Green regime."
+      "warning": "⚠️ Crypto 41.7% exceeds 20% limit in Green regime."
     },
     "kill_criteria": {
       "triggered": false,
