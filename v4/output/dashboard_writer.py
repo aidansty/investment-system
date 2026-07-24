@@ -184,14 +184,14 @@ def write_dashboard_data(
                 for atk in affected_stocks:
                     pos_info = next((p for p in positions if p.get("ticker") == atk), {})
                     term = pos_info.get("term", "")
-                    bullets.append(f"How this affects {atk}: This development impacts {atk} {direction}. {atk} is a {term.lower()} hold — review if action is needed.")
+                    bullets.append(f"Affects {atk} ({term.lower()}) — see {atk}'s position review below for the impact analysis.")
             # Bullet 3: Recommended action
             if sentiment == "bearish":
                 bullets.append(f"Action: Watch {tickers_str} closely — if this develops further, consider trimming or exiting.")
             elif sentiment == "bullish":
                 bullets.append(f"Action: Bullish for {tickers_str} — hold or consider adding if conviction is high.")
             else:
-                bullets.append(f"Action: No immediate change needed for {tickers_str} — continue holding and monitor.")
+                bullets.append(f"Action: see position review for {tickers_str}.")
         elif relevance == "opportunity":
             opp_tickers = ", ".join(affected[:3])
             # Bullet 1: What the news/event IS
@@ -231,6 +231,9 @@ def write_dashboard_data(
 
     # Also scan forward catalysts for items affecting holdings or creating opportunities
     for fc in (news_package.get("forward_catalysts", []) if news_package else []):
+        _evt_txt = str(fc.get("event", "")) + " " + str(fc.get("description", ""))
+        if re.search(r"Q[1-4]\s*\d{4}\s*Earnings|Earnings\s*(Before|After)\s*(Open|Close)", _evt_txt, re.IGNORECASE):
+            continue  # earnings dates live in Coming Up, not news
         if len(news_cards) >= 7:
             break
         affected = fc.get("affected_holdings", []) or fc.get("tickers", [])
@@ -330,6 +333,37 @@ def write_dashboard_data(
             if match:
                 pos_review_text = match.group(0)
     position_review = _parse_position_review(pos_review_text, positions)
+
+    # ── Coming Up: parse Claude's dated-events section ──
+    coming_up = []
+    try:
+        _cu_text = ""
+        for _k in list(sections.keys()) if isinstance(sections, dict) else []:
+            if "coming up" in _k.lower():
+                _cu_text = sections[_k]
+                break
+        if not _cu_text and briefing:
+            _m2 = re.search(r"##\s*Coming Up[^\n]*\n(.*?)(?=\n##|$)", briefing.get("raw_text", "") or "", re.DOTALL)
+            _cu_text = _m2.group(1) if _m2 else ""
+        _held_all = {p.get("ticker", "") for p in (positions or [])}
+        for _ln in (_cu_text or "").split("\n"):
+            _s = _ln.strip().lstrip("-\u2022 ").strip()
+            if len(_s) < 10:
+                continue
+            _dm = re.search(r"(\d{4}-\d{2}-\d{2}|\w+ \d{1,2})", _s)
+            _tks = [w.strip("[]():,") for w in _s.split() if w.strip("[]():,").isupper() and 2 <= len(w.strip("[]():,")) <= 5]
+            _tk = next((t for t in _tks if t in _held_all), _tks[0] if _tks else "MARKET")
+            coming_up.append({
+                "ticker": _tk,
+                "event_type": "earnings" if "earning" in _s.lower() else "event",
+                "date": _dm.group(1) if _dm else "",
+                "description": _s[:150],
+                "why_matters": "Your holding" if _tk in _held_all else "Affects your portfolio",
+            })
+        coming_up = coming_up[:8]
+        log(f"Coming Up: {len(coming_up)} dated events parsed from briefing")
+    except Exception as _e:
+        log(f"Coming Up parse error (non-fatal): {_e}")
 
     # Enrich each position with quant data and entry price from positions.json
     pos_lookup = {p.get("ticker"): p for p in positions}
@@ -715,6 +749,42 @@ def write_dashboard_data(
     # IMPORTANT: preserve morning briefing data — do not clear it
         # Morning position_review and industry_opportunities stay in their keys
         # so the morning briefing tab remains populated after afternoon run
+
+    # ── Claude's Actionable Intelligence = primary news cards ──
+    # Claude already did the filtering + causal reasoning; use it directly.
+    try:
+        _ai_text = (
+            sections.get("Actionable Intelligence") or ""
+        ) if "sections" in dir() and isinstance(sections, dict) else ""
+        if not _ai_text and briefing:
+            _m = re.search(r"##\s*Actionable Intelligence\s*\n(.*?)(?=\n##|$)", briefing.get("raw_text", "") or "", re.DOTALL)
+            _ai_text = _m.group(1) if _m else ""
+        _claude_cards = []
+        _cur = None
+        for _ln in (_ai_text or "").split("\n"):
+            _s = _ln.strip()
+            if not _s:
+                continue
+            if _s.startswith("**") or (_s.startswith("[") and _s.endswith("]")):
+                if _cur and _cur["bullets"]:
+                    _claude_cards.append(_cur)
+                _cur = {"headline": _s.strip("*[] "), "bullets": [], "badge": "NEWS"}
+            elif _s.startswith("-") and _cur is not None:
+                _b = _s.lstrip("-\u2022 ").replace("**", "").strip()
+                if _b:
+                    _cur["bullets"].append(_b[:300])
+        if _cur and _cur["bullets"]:
+            _claude_cards.append(_cur)
+        if len(_claude_cards) >= 2:
+            news_cards = _claude_cards[:6]
+            log(f"News cards: using {len(news_cards)} Claude-analyzed items (RSS fallback bypassed)")
+    except Exception as _e:
+        log(f"Claude news-card parse error (non-fatal, RSS cards kept): {_e}")
+
+    # ── Truncation guard: thin reviews = briefing hit token cap ──
+    _thin = [pr.get("ticker") for pr in position_review if len(pr.get("bullets", [])) < 3]
+    if _thin:
+        log(f"WARNING - POSSIBLE BRIEFING TRUNCATION: thin reviews for {_thin}")
 
     # Positions for portfolio tab — field names match positions.json exactly
     portfolio_positions = []

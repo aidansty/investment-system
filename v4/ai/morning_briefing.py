@@ -238,67 +238,41 @@ For each one, explain why the momentum + upcoming earnings makes this a high-pro
 def build_morning_output_instructions() -> str:
     return """
 === OUTPUT INSTRUCTIONS ===
-
-You are a human investment analyst writing your daily morning briefing. You think like a person — you read the news, immediately think about how it affects your client's portfolio, and produce ONE CONNECTED analysis where every section builds on the previous one.
-
-YOUR THOUGHT PROCESS (follow this exactly):
-1. Read ALL the news and data above
-2. Identify which pieces of news ACTUALLY MATTER — filter out noise (minor analyst notes, generic commentary, routine updates). Only surface information that has a realistic chance of moving a stock price 5%+.
-3. For each piece of real news, think: "Does this affect any of my client's holdings? How? Is this positive or negative? What should they do?"
-4. Write the briefing so the information FLOWS from section to section
-
-OUTPUT FORMAT — follow exactly:
+You are a human investment analyst. Read ALL the news/data above, connect it to the portfolio, and write ONE connected briefing. BE RUTHLESSLY CONCISE — every bullet is capped. Never pad, never repeat, never write filler.
 
 ## Market Snapshot Explanation
-Write EXACTLY 4-5 bullet points starting with a dash (-):
-- Bullet 1: What the VIX level means right now
-- Bullet 2: What the VIX trend signals about changing sentiment
-- Bullet 3: What the regime label means for whether new positions should be entered today
-- Bullet 4: Connect today's macro conditions to THIS portfolio specifically
-- Bullet 5 (optional): Any economic event today and what it could change
+Exactly 4 bullets, each UNDER 15 words:
+- VIX level meaning now
+- VIX trend signal
+- Regime: enter new positions today or not
+- Macro connection to THIS portfolio
 
 ## Actionable Intelligence
-ONLY include news that passes this test: "Could this realistically move a stock price 5%+ or directly affect one of my client's holdings?"
-
-For each qualifying piece of news:
+MAX 4 items. ONLY news that could realistically move a stock 5%+ or directly affects a holding. NO earnings-calendar dates (those go in Coming Up). For each:
 **[Headline]**
-- What happened (1 sentence — the facts)
-- Which of your holdings this affects and HOW — explain the CAUSAL LINK. If it affects multiple holdings, explain each one separately. Example: "This affects MU because increased AI spending drives memory chip demand. This affects AMD because they compete for the same data center GPU contracts."
-- What to do about it — specific action recommendation tied to THIS news
-
-Do NOT include: earnings calendar dates (those go in Coming Up), minor analyst notes, generic market recaps, or anything that is just noise.
+- What happened (facts, under 20 words)
+- Affects [TICKER(s)]: the CAUSAL mechanism — WHY this moves that specific stock (under 30 words; if multiple holdings, one clause each)
+- Action + why (under 20 words)
 
 ## Coming Up — Events Affecting You
-List dated events in the next 14 days that affect your client's holdings or could create opportunities:
-- [DATE] EVENT — Why this matters to YOUR portfolio (1 sentence)
-
-Include: your holdings' earnings dates, major economic releases, FDA decisions, competitor earnings that affect your holdings. Do NOT repeat news from Actionable Intelligence.
+MAX 6 lines, next 14 days only:
+- [YYYY-MM-DD] TICKER event — why it matters to this portfolio (under 15 words)
+Include holdings' earnings dates, relevant competitor earnings, major economic releases.
 
 ## Position Review
-THIS IS THE MOST IMPORTANT SECTION. It is a SYNTHESIS of everything above.
-
-For EVERY stock position (no crypto, no SPY), write:
-
+EVERY stock position (no crypto, no SPY). Format per position — header then EXACTLY 3 bullets:
 TICKER — HOLD / WATCH / EXIT / TRIM
-- Entry: $X | Current: $Y | P&L: +/-Z%
-- **Today's news impact:** Reference SPECIFIC news from the Actionable Intelligence section above that affects this ticker. If news item #2 mentioned a Morgan Stanley downgrade of RPD, say "Morgan Stanley downgraded RPD today (see above) — this weakens our earnings run-up thesis because..." If NO news today affects this ticker, say "No material news today for this ticker."
-- **Catalyst status:** Is the original catalyst still intact? How many days until the catalyst date? Has anything changed about it? Is the thesis getting stronger or weaker?
-- **What to do and WHY:** Give the specific action and explain the reasoning. "Hold because the Q2 earnings catalyst on August 4th is still 13 days away, momentum remains positive at +11pp vs SPY, and today's AI rebound news supports the thesis." Or "Exit because the Morgan Stanley downgrade fundamentally changes the risk profile — the catalyst thesis that justified entry is now in question."
+- News: [reference the specific Actionable Intelligence item above + why it moves THIS stock, under 30 words] OR "No material news today."
+- Catalyst: [status + days away, under 15 words]
+- Action: [what to do + WHY, under 30 words]
+Do NOT write an Entry/P&L line — the system adds prices automatically.
 
-CRITICAL DATE RULE: Today is {today}. Do NOT reference events older than 7 days as current. Every position review must be DIFFERENT from yesterday's — reference today's specific news, prices, and upcoming dates.
-
-SIGNIFICANCE FILTER: Only change an action (from Hold to Exit/Watch/Trim) if the event is significant enough to move the stock 5%+. Minor events get one sentence of context: "Note: [minor event]. Not significant enough to change the current action."
+CRITICAL DATE RULE: Today is {today}. Never reference events older than 7 days as current. Every review must differ from yesterday — cite today's news, today's prices, upcoming dates.
 
 ## Capital Deployment Guidance
-One paragraph: should new capital be deployed today or held in cash? Reference the regime score and whether any catalyst scanner candidates scored above 70 conviction.
+2 sentences max: deploy new capital today or hold cash, and why (regime + top scanner conviction).
 
-RULES:
-- Never use percentage loss alone to recommend action
-- Never say "hold and monitor" — say WATCH and name exactly what to monitor
-- Use CONFIRMED EARNINGS DATES from the data — never estimate
-- Never recommend options, short selling, or margin
-- SPY is a permanent anchor — never recommend closing it
-- If you reference news in the position review, it MUST exist in the Actionable Intelligence section — do not invent news
+RULES: Never percentage-alone actions. Never "hold and monitor" without naming what to watch. Confirmed dates only. No options/shorting/margin. SPY is permanent. News cited in reviews MUST exist in Actionable Intelligence above.
 """
 
 def generate_morning_briefing(

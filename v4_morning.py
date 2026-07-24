@@ -361,7 +361,17 @@ def main():
 
                 # Get price data if available
                 if tk not in prices or len(prices[tk]) < 5:
-                    continue
+                    # On-demand fetch — split/IPO/press candidates outside universe
+                    try:
+                        import yfinance as _yf2
+                        _h = _yf2.download(tk, period="2mo", progress=False, auto_adjust=True)
+                        if _h is not None and not _h.empty and len(_h["Close"]) >= 21:
+                            prices[tk] = [float(x) for x in _h["Close"].values.tolist()]
+                            log(f"  On-demand price fetch: {tk} ({len(prices[tk])} days)")
+                        else:
+                            continue
+                    except Exception:
+                        continue
 
                 price_list = prices[tk]
                 tk_price = round(price_list[-1], 2)
@@ -949,7 +959,7 @@ def main():
         # Remove volume spikes and generic analyst upgrades (not real forward catalysts)
         catalyst_opportunities = [c for c in catalyst_opportunities
             if c.get("catalyst_type") not in ("volume_spike",)
-            and not (c.get("catalyst_type") == "analyst_upgrade" and c.get("conviction_score", 0) < 40)]
+            and c.get("catalyst_type") != "analyst_upgrade"]
         # Ensure all have required fields
         for c in catalyst_opportunities:
             if "exit_strategy" not in c: c["exit_strategy"] = "Monitor and exit when trailing stop triggers."
