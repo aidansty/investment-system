@@ -38,8 +38,10 @@ def fetch_all_events(days_ahead=30):
 
         # 1a. Earnings Calendar
         try:
-            url = f"https://financialmodelingprep.com/api/v3/earning_calendar?from={today_str}&to={end_str}&apikey={FMP_KEY}"
+            url = f"https://financialmodelingprep.com/stable/earnings-calendar?from={today_str}&to={end_str}&apikey={FMP_KEY}"
             r = requests.get(url, timeout=10)
+            if r.status_code != 200:
+                log(f"  API HTTP {r.status_code} for {url.split('?')[0].split('/')[-1]}: {r.text[:90]}")
             if r.status_code == 200:
                 data = r.json()
                 for item in data:
@@ -59,8 +61,10 @@ def fetch_all_events(days_ahead=30):
 
         # 1b. Stock Splits Calendar
         try:
-            url = f"https://financialmodelingprep.com/api/v3/stock_split_calendar?from={today_str}&to={end_str}&apikey={FMP_KEY}"
+            url = f"https://financialmodelingprep.com/stable/splits-calendar?from={today_str}&to={end_str}&apikey={FMP_KEY}"
             r = requests.get(url, timeout=10)
+            if r.status_code != 200:
+                log(f"  API HTTP {r.status_code} for {url.split('?')[0].split('/')[-1]}: {r.text[:90]}")
             if r.status_code == 200:
                 data = r.json()
                 for item in data:
@@ -79,8 +83,10 @@ def fetch_all_events(days_ahead=30):
 
         # 1c. IPO Calendar
         try:
-            url = f"https://financialmodelingprep.com/api/v3/ipo_calendar?from={today_str}&to={end_str}&apikey={FMP_KEY}"
+            url = f"https://financialmodelingprep.com/stable/ipos-calendar?from={today_str}&to={end_str}&apikey={FMP_KEY}"
             r = requests.get(url, timeout=10)
+            if r.status_code != 200:
+                log(f"  API HTTP {r.status_code} for {url.split('?')[0].split('/')[-1]}: {r.text[:90]}")
             if r.status_code == 200:
                 data = r.json()
                 for item in data:
@@ -96,34 +102,14 @@ def fetch_all_events(days_ahead=30):
         except Exception as e:
             log(f"  FMP IPO error: {e}")
 
-        # 1d. Analyst Upgrades/Downgrades (recent, last 7 days)
-        try:
-            week_ago = (today - timedelta(days=7)).strftime("%Y-%m-%d")
-            url = f"https://financialmodelingprep.com/api/v3/upgrades-downgrades-consensus?apikey={FMP_KEY}"
-            r = requests.get(url, timeout=10)
-            if r.status_code == 200:
-                data = r.json()
-                for item in data[:100]:
-                    if item.get("symbol"):
-                        consensus = item.get("consensusKey", "")
-                        if consensus in ("strongBuy", "buy"):
-                            events.append({
-                                "ticker": item["symbol"],
-                                "event_type": "analyst_upgrade",
-                                "date": today_str,
-                                "description": f"Analyst consensus: {consensus} — {item.get('targetConsensus', 'N/A')} target price from {item.get('count', '?')} analysts",
-                                "significance": "medium",
-                                "target_price": item.get("targetConsensus"),
-                            })
-                upgrades = [e for e in events if e["event_type"] == "analyst_upgrade"]
-                log(f"  FMP analyst consensus: {len(upgrades)} strong buy/buy stocks")
-        except Exception as e:
-            log(f"  FMP analyst error: {e}")
+        # (analyst consensus block removed — upgrades dropped from system)
 
         # 1e. Economic Calendar (macro events)
         try:
-            url = f"https://financialmodelingprep.com/api/v3/economic_calendar?from={today_str}&to={end_str}&apikey={FMP_KEY}"
+            url = f"https://financialmodelingprep.com/stable/economic-calendar?from={today_str}&to={end_str}&apikey={FMP_KEY}"
             r = requests.get(url, timeout=10)
+            if r.status_code != 200:
+                log(f"  API HTTP {r.status_code} for {url.split('?')[0].split('/')[-1]}: {r.text[:90]}")
             if r.status_code == 200:
                 data = r.json()
                 high_impact = [item for item in data if item.get("impact", "").lower() in ("high", "medium")]
@@ -141,8 +127,10 @@ def fetch_all_events(days_ahead=30):
 
         # 1f. Press Releases (recent company announcements)
         try:
-            url = f"https://financialmodelingprep.com/api/v3/press-releases?page=0&apikey={FMP_KEY}"
+            url = f"https://financialmodelingprep.com/stable/news/press-releases-latest?page=0&limit=50&apikey={FMP_KEY}"
             r = requests.get(url, timeout=10)
+            if r.status_code != 200:
+                log(f"  API HTTP {r.status_code} for {url.split('?')[0].split('/')[-1]}: {r.text[:90]}")
             if r.status_code == 200:
                 data = r.json()
                 catalyst_keywords = ["FDA", "APPROVAL", "PDUFA", "CONTRACT", "ACQUISITION", "MERGER",
@@ -177,6 +165,8 @@ def fetch_all_events(days_ahead=30):
         try:
             url = f"https://finnhub.io/api/v1/calendar/earnings?from={today_str}&to={end_str}&token={FINNHUB_KEY}"
             r = requests.get(url, timeout=10)
+            if r.status_code != 200:
+                log(f"  API HTTP {r.status_code} for {url.split('?')[0].split('/')[-1]}: {r.text[:90]}")
             if r.status_code == 200:
                 data = r.json()
                 existing_tickers = {e["ticker"] for e in events if e["event_type"] == "earnings"}
@@ -199,6 +189,8 @@ def fetch_all_events(days_ahead=30):
         try:
             url = f"https://finnhub.io/api/v1/calendar/ipo?from={today_str}&to={end_str}&token={FINNHUB_KEY}"
             r = requests.get(url, timeout=10)
+            if r.status_code != 200:
+                log(f"  API HTTP {r.status_code} for {url.split('?')[0].split('/')[-1]}: {r.text[:90]}")
             if r.status_code == 200:
                 ipos = r.json().get("ipoCalendar", [])
                 for item in ipos:
@@ -221,6 +213,8 @@ def fetch_all_events(days_ahead=30):
         try:
             url = f"https://finnhub.io/api/v1/stock/insider-transactions?symbol=&from={today_str}&to={end_str}&token={FINNHUB_KEY}"
             r = requests.get(url, timeout=10)
+            if r.status_code != 200:
+                log(f"  API HTTP {r.status_code} for {url.split('?')[0].split('/')[-1]}: {r.text[:90]}")
             if r.status_code == 200:
                 data = r.json().get("data", [])
                 # Group by ticker — find clusters of insider BUYING

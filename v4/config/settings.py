@@ -60,10 +60,10 @@ INDUSTRY_STOCK_LEADERS = {
     "Consumer Discretionary":["AMZN", "TSLA", "HD", "NKE", "SBUX", "MCD", "TGT", "BKNG", "ABNB", "LVS", "MGM", "DRI", "YUM", "CMG", "DKNG"],
     "Industrial Automation": ["ROK", "HON", "EMR", "PH", "AME", "ROP", "ITW", "GE", "ETN", "DOV", "FTV", "NDSN", "TTC", "MIDD", "FELE"],
     "Logistics & Transport": ["UPS", "FDX", "UBER", "XPO", "ODFL", "SAIA", "CHRW", "EXPD", "ZTO", "JBHT", "HTLD", "WERN", "ARCB", "MRTN", "GXO"],
-    "Homebuilders":          ["DHI", "LEN", "NVR", "PHM", "TOL", "KBH", "MHO", "CCS", "TMHC", "TPH", "LGIH", "GRBK", "SKY", ],
+    "Homebuilders":          ["DHI", "LEN", "NVR", "PHM", "TOL", "KBH", "MHO", "CCS", "TMHC", "LGIH", "GRBK", "SKY", ],
     "REITs":                 ["AMT", "PLD", "EQIX", "SPG", "O", "VICI", "WELL", "DLR", "PSA", "EXR", "AVB", "EQR", "UDR", "CPT", "MAA"],
     "Commodities":           ["FCX", "NEM", "GOLD", "AEM", "WPM", "AGI", "KGC", "HL", "CDE", "PAAS", "CLF", "STLD", "NUE", "RS", "CMC"],
-    "Clean Energy":          ["ENPH", "FSLR", "NEE", "CEG", "VST", "AES", "D", "SO", "DUK", "XEL", "CWEN", "RNW", "SPWR", "MAXN", "IREN"],
+    "Clean Energy":          ["ENPH", "FSLR", "NEE", "CEG", "VST", "AES", "D", "SO", "DUK", "XEL", "CWEN", "RNW", "SPWR", "IREN"],
     "Nuclear Energy":        ["CEG", "VST", "CCJ", "LEU", "NNE", "SMR", "BWXT", "DNN", "UEC", "URG", "UUUU", "OKLO", "LTBR", "GEV"],
     "Emerging Markets":      ["TSM", "BABA", "SE", "MELI", "PDD", "BIDU", "JD", "NIO", "LI", "XPEV", "GRAB", "GLOB", "VTEX", ],
 }
