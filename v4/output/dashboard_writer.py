@@ -231,8 +231,9 @@ def write_dashboard_data(
 
     # Also scan forward catalysts for items affecting holdings or creating opportunities
     for fc in (news_package.get("forward_catalysts", []) if news_package else []):
+        import re as _re
         _evt_txt = str(fc.get("event", "")) + " " + str(fc.get("description", ""))
-        if re.search(r"Q[1-4]\s*\d{4}\s*Earnings|Earnings\s*(Before|After)\s*(Open|Close)", _evt_txt, re.IGNORECASE):
+        if _re.search(r"Q[1-4]\s*\d{4}\s*Earnings|Earnings\s*(Before|After)\s*(Open|Close)", _evt_txt, _re.IGNORECASE):
             continue  # earnings dates live in Coming Up, not news
         if len(news_cards) >= 7:
             break
@@ -343,14 +344,16 @@ def write_dashboard_data(
                 _cu_text = sections[_k]
                 break
         if not _cu_text and briefing:
-            _m2 = re.search(r"##\s*Coming Up[^\n]*\n(.*?)(?=\n##|$)", briefing.get("raw_text", "") or "", re.DOTALL)
+            import re as _re
+            _m2 = _re.search(r"##\s*Coming Up[^\n]*\n(.*?)(?=\n##|$)", briefing.get("raw_text", "") or "", _re.DOTALL)
             _cu_text = _m2.group(1) if _m2 else ""
         _held_all = {p.get("ticker", "") for p in (positions or [])}
         for _ln in (_cu_text or "").split("\n"):
             _s = _ln.strip().lstrip("-\u2022 ").strip()
             if len(_s) < 10:
                 continue
-            _dm = re.search(r"(\d{4}-\d{2}-\d{2}|\w+ \d{1,2})", _s)
+            import re as _re
+            _dm = _re.search(r"(\d{4}-\d{2}-\d{2}|\w+ \d{1,2})", _s)
             _tks = [w.strip("[]():,") for w in _s.split() if w.strip("[]():,").isupper() and 2 <= len(w.strip("[]():,")) <= 5]
             _tk = next((t for t in _tks if t in _held_all), _tks[0] if _tks else "MARKET")
             coming_up.append({
@@ -757,7 +760,8 @@ def write_dashboard_data(
             sections.get("Actionable Intelligence") or ""
         ) if "sections" in dir() and isinstance(sections, dict) else ""
         if not _ai_text and briefing:
-            _m = re.search(r"##\s*Actionable Intelligence\s*\n(.*?)(?=\n##|$)", briefing.get("raw_text", "") or "", re.DOTALL)
+            import re as _re
+            _m = _re.search(r"##\s*Actionable Intelligence\s*\n(.*?)(?=\n##|$)", briefing.get("raw_text", "") or "", _re.DOTALL)
             _ai_text = _m.group(1) if _m else ""
         _claude_cards = []
         _cur = None
@@ -782,8 +786,10 @@ def write_dashboard_data(
         log(f"Claude news-card parse error (non-fatal, RSS cards kept): {_e}")
 
     # ── Truncation guard: thin reviews = briefing hit token cap ──
-    _thin = [pr.get("ticker") for pr in position_review if len(pr.get("bullets", [])) < 3]
-    if _thin:
+    _CRY = {"BTC", "ETH", "XRP", "ZEC", "SOL", "SPY"}
+    _thin = [pr.get("ticker") for pr in position_review
+             if pr.get("ticker") not in _CRY and len(pr.get("bullets", [])) < 3]
+    if _thin and run_type == "morning":
         log(f"WARNING - POSSIBLE BRIEFING TRUNCATION: thin reviews for {_thin}")
 
     # Positions for portfolio tab — field names match positions.json exactly
