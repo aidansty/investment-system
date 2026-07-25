@@ -104,56 +104,46 @@ def fetch_all_events(days_ahead=30):
 
         # (analyst consensus block removed — upgrades dropped from system)
 
-        # 1e. Economic Calendar (macro events)
+        # 1e. Economic Calendar — FRED (free; FMP economic is paywalled)
         try:
-            url = f"https://financialmodelingprep.com/stable/economic-calendar?from={today_str}&to={end_str}&apikey={FMP_KEY}"
-            r = requests.get(url, timeout=10)
-            if r.status_code != 200:
-                log(f"  API HTTP {r.status_code} for {url.split('?')[0].split('/')[-1]}: {r.text[:90]}")
-            if r.status_code == 200:
-                data = r.json()
-                high_impact = [item for item in data if item.get("impact", "").lower() in ("high", "medium")]
-                for item in high_impact[:10]:
-                    events.append({
-                        "ticker": "MACRO",
-                        "event_type": "economic",
-                        "date": item.get("date", today_str)[:10],
-                        "description": f"{item.get('event', 'Economic event')} — estimate: {item.get('estimate', 'N/A')}, previous: {item.get('previous', 'N/A')}",
-                        "significance": "high" if item.get("impact", "").lower() == "high" else "medium",
-                    })
-                log(f"  FMP economic calendar: {len([e for e in events if e['event_type'] == 'economic'])} high-impact events")
+            import os as _os
+            _fred = _os.environ.get("FRED_KEY", "")
+            if _fred:
+                # Key recurring high-impact US releases via FRED release dates
+                _series = {
+                    "CPIAUCSL": "CPI (inflation)",
+                    "UNRATE": "Unemployment / Jobs report",
+                    "FEDFUNDS": "Fed Funds Rate (FOMC)",
+                    "PPIACO": "PPI (producer prices)",
+                    "RSAFS": "Retail Sales",
+                }
+                for _sid, _label in _series.items():
+                    try:
+                        _u = f"https://api.stlouisfed.org/fred/release/dates?series_id={_sid}&api_key={_fred}&file_type=json&sort_order=asc&include_release_dates_with_no_data=true&limit=100"
+                        _r = requests.get(_u, timeout=10)
+                        if _r.status_code == 200:
+                            for _rd in _r.json().get("release_dates", []):
+                                _d = _rd.get("date", "")
+                                if today_str <= _d <= end_str:
+                                    events.append({
+                                        "ticker": "MACRO",
+                                        "event_type": "economic",
+                                        "date": _d,
+                                        "description": f"{_label} scheduled release — market-wide catalyst that can move all positions.",
+                                        "significance": "high",
+                                    })
+                                    break  # next upcoming only
+                    except Exception:
+                        continue
+                log(f"  FRED economic calendar: {len([e for e in events if e['event_type'] == 'economic'])} upcoming releases")
+            else:
+                log("  FRED_KEY not set — skipping economic calendar")
         except Exception as e:
-            log(f"  FMP economic error: {e}")
+            log(f"  FRED economic error: {e}")
 
-        # 1f. Press Releases (recent company announcements)
-        try:
-            url = f"https://financialmodelingprep.com/stable/news/press-releases-latest?page=0&limit=50&apikey={FMP_KEY}"
-            r = requests.get(url, timeout=10)
-            if r.status_code != 200:
-                log(f"  API HTTP {r.status_code} for {url.split('?')[0].split('/')[-1]}: {r.text[:90]}")
-            if r.status_code == 200:
-                data = r.json()
-                catalyst_keywords = ["FDA", "APPROVAL", "PDUFA", "CONTRACT", "ACQUISITION", "MERGER",
-                                     "LAUNCH", "PARTNERSHIP", "AGREEMENT", "AWARD", "MILESTONE",
-                                     "BREAKTHROUGH", "PATENT", "EXPANSION", "GUIDANCE", "BUYBACK",
-                                     "REPURCHASE", "SPINOFF", "SPIN-OFF", "DIVESTITURE", "SPLIT",
-                                     "ACTIVIST", "13D", "STAKE", "INDEX", "S&P 500", "NASDAQ-100",
-                                     "RUSSELL", "INCLUSION", "DEFENSE CONTRACT", "GOVERNMENT",
-                                     "CLINICAL TRIAL", "PHASE 3", "PHASE III", "TOPLINE",
-                                     "RECORD REVENUE", "RECORD EARNINGS", "RAISED GUIDANCE"]
-                for item in data[:50]:
-                    title = (item.get("title", "") or "").upper()
-                    if any(kw in title for kw in catalyst_keywords):
-                        events.append({
-                            "ticker": item.get("symbol", ""),
-                            "event_type": "press_release",
-                            "date": (item.get("date", "") or "")[:10],
-                            "description": item.get("title", "")[:150],
-                            "significance": "high",
-                        })
-                log(f"  FMP press releases: {len([e for e in events if e['event_type'] == 'press_release'])} catalyst-relevant")
-        except Exception as e:
-            log(f"  FMP press releases error: {e}")
+        # 1f. Press releases handled by Finnhub sweep (see fetch_catalyst_press_releases)
+        #     FMP press-releases endpoint is paywalled on free tier.
+
     else:
         log("FMP_API_KEY not set — skipping FMP data (sign up free at financialmodelingprep.com)")
 
@@ -271,3 +261,51 @@ def fetch_all_events(days_ahead=30):
         log(f"  {t}: {c}")
 
     return events
+
+
+def fetch_catalyst_press_releases(tickers: list, days_back: int = 3) -> list:
+    """Free press-release substitute: Finnhub company-news swept across the
+    given tickers (scanner momentum candidates), filtered to real catalysts.
+    Replaces the paywalled FMP press-release stream. Ticker-targeted = higher
+    signal-to-noise than a firehose."""
+    import os, requests
+    from datetime import datetime, timedelta
+    key = os.environ.get("FINNHUB_KEY", "")
+    if not key or not tickers:
+        return []
+    KEYWORDS = ["FDA", "APPROVAL", "PDUFA", "CONTRACT", "ACQUISITION", "MERGER",
+                "ACQUIRE", "LAUNCH", "PARTNERSHIP", "AWARD", "MILESTONE",
+                "BREAKTHROUGH", "PATENT", "BUYBACK", "REPURCHASE", "SPINOFF",
+                "SPIN-OFF", "DIVESTITURE", "ACTIVIST", "13D", "STAKE", "INDEX",
+                "S&P 500", "NASDAQ-100", "RUSSELL", "INCLUSION", "DEFENSE",
+                "GOVERNMENT CONTRACT", "PHASE 3", "PHASE III", "TOPLINE",
+                "RAISED GUIDANCE", "RAISES GUIDANCE", "RECORD REVENUE",
+                "WINS", "AWARDED", "SETTLEMENT", "APPROVES", "ANTITRUST",
+                "FTC", "DOJ", "SPECIAL DIVIDEND", "INITIATES DIVIDEND"]
+    frm = (datetime.utcnow() - timedelta(days=days_back)).strftime("%Y-%m-%d")
+    to = datetime.utcnow().strftime("%Y-%m-%d")
+    out, seen = [], set()
+    for tk in tickers[:40]:  # cap API calls
+        try:
+            r = requests.get(f"https://finnhub.io/api/v1/company-news?symbol={tk}&from={frm}&to={to}&token={key}", timeout=8)
+            if r.status_code != 200:
+                continue
+            for item in r.json()[:10]:
+                hl = (item.get("headline") or "")
+                up = hl.upper()
+                if not any(kw in up for kw in KEYWORDS):
+                    continue
+                if tk in seen:
+                    continue
+                seen.add(tk)
+                out.append({
+                    "ticker": tk,
+                    "event_type": "press_release",
+                    "date": datetime.utcfromtimestamp(item.get("datetime", 0)).strftime("%Y-%m-%d") if item.get("datetime") else to,
+                    "description": hl[:150],
+                    "significance": "high",
+                })
+                break
+        except Exception:
+            continue
+    return out

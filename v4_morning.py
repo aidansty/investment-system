@@ -277,6 +277,22 @@ def main():
         log(f"  Held tickers to skip: {held_tickers}")
         log(f"  Skipping {len(held_tickers)} held positions")
 
+        # Press-release sweep — Finnhub company-news across momentum candidates
+        # (free substitute for paywalled FMP press-releases). Runs here because
+        # top_momentum and held_tickers now both exist.
+        try:
+            from v4.data.fetch_events import fetch_catalyst_press_releases
+            _cand_tks = [s["ticker"] for s in top_momentum[:30] if s["ticker"] not in held_tickers]
+            _pr = fetch_catalyst_press_releases(_cand_tks, days_back=3)
+            if _pr:
+                event_calendar.extend(_pr)
+                for _p in _pr:
+                    log(f"  PRESS RELEASE: {_p['ticker']} — {_p['description'][:70]}")
+            else:
+                log("  Press-release sweep: no catalyst-grade announcements found")
+        except Exception as e:
+            log(f"  Press-release sweep error (non-fatal): {e}")
+
         import requests, os
         FINNHUB_KEY = os.environ.get("FINNHUB_KEY", "")
         catalyst_earnings = dict(earnings_calendar or {})
