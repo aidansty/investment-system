@@ -790,13 +790,22 @@ def write_dashboard_data(
     # ── Claude's Actionable Intelligence = primary news cards ──
     # Claude already did the filtering + causal reasoning; use it directly.
     try:
-        _ai_text = (
-            sections.get("Actionable Intelligence") or ""
-        ) if "sections" in dir() and isinstance(sections, dict) else ""
+        import re as _re
+        _ai_text = ""
+        # Source 1: pre-parsed sections dict on the briefing
+        _bsecs = briefing.get("sections", {}) if isinstance(briefing, dict) else {}
+        if isinstance(_bsecs, dict):
+            for _k, _v in _bsecs.items():
+                if "actionable intelligence" in _k.lower():
+                    _ai_text = _v
+                    break
+        # Source 2: forgiving regex on raw_text (header may have trailing chars,
+        # section ends at next ## or end of string)
         if not _ai_text and briefing:
-            import re as _re
-            _m = _re.search(r"##\s*Actionable Intelligence\s*\n(.*?)(?=\n##|$)", briefing.get("raw_text", "") or "", _re.DOTALL)
+            _raw = briefing.get("raw_text", "") or ""
+            _m = _re.search(r"#+\s*Actionable Intelligence[^\n]*\n(.*?)(?=\n#+\s|\Z)", _raw, _re.DOTALL | _re.IGNORECASE)
             _ai_text = _m.group(1) if _m else ""
+        log(f"News-card extraction: Actionable Intelligence section = {len(_ai_text)} chars")
         _claude_cards = []
         _cur = None
         for _ln in (_ai_text or "").split("\n"):
