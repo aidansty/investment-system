@@ -22,6 +22,7 @@ def write_dashboard_data(
     intraday: dict = None,
     rules_output: dict = None,
     catalyst_opportunities: list = None,
+    earnings_calendar: dict = None,
 ) -> None:
     """
     Write structured briefing data to dashboard_data.js.
@@ -335,38 +336,71 @@ def write_dashboard_data(
                 pos_review_text = match.group(0)
     position_review = _parse_position_review(pos_review_text, positions)
 
-    # ── Coming Up: parse Claude's dated-events section ──
+    # ── Coming Up: built from STRUCTURED data (earnings_calendar + events).
+    #    No dependence on Claude's text formatting — this always works. ──
     coming_up = []
     try:
-        _cu_text = ""
-        for _k in list(sections.keys()) if isinstance(sections, dict) else []:
-            if "coming up" in _k.lower():
-                _cu_text = sections[_k]
-                break
-        if not _cu_text and briefing:
-            import re as _re
-            _m2 = _re.search(r"##\s*Coming Up[^\n]*\n(.*?)(?=\n##|$)", briefing.get("raw_text", "") or "", _re.DOTALL)
-            _cu_text = _m2.group(1) if _m2 else ""
+        from datetime import datetime as _dt
         _held_all = {p.get("ticker", "") for p in (positions or [])}
-        for _ln in (_cu_text or "").split("\n"):
-            _s = _ln.strip().lstrip("-\u2022 ").strip()
-            if len(_s) < 10:
+        _stock_held = {t for t in _held_all if t not in {"BTC","ETH","XRP","ZEC","SOL","SPY"}}
+        _today = _dt.now()
+        _seen_cu = set()
+
+        # (a) Every held stock's confirmed earnings date — structured, reliable
+        for _tk, _ed in (earnings_calendar or {}).items():
+            if _tk not in _stock_held:
                 continue
+            _date = _ed.get("date", "") if isinstance(_ed, dict) else str(_ed)
+            if not _date:
+                continue
+            try:
+                _days = (_dt.strptime(_date[:10], "%Y-%m-%d") - _today).days
+            except Exception:
+                _days = None
+            if _days is not None and 0 <= _days <= 21:
+                _seen_cu.add(_tk)
+                coming_up.append({
+                    "ticker": _tk, "event_type": "earnings", "date": _date[:10],
+                    "description": f"{_tk} earnings in {_days} days",
+                    "why_matters": "Your holding reports — pre-earnings decision point.",
+                })
+
+        # (b) Economic / macro events already in the event calendar
+        for _ev in (event_calendar if "event_calendar" in dir() and event_calendar else []):
+            if _ev.get("event_type") == "economic":
+                _d = _ev.get("date", "")
+                if _d and (_ev.get("ticker","MACRO"), _d) not in _seen_cu:
+                    coming_up.append({
+                        "ticker": "MARKET", "event_type": "economic", "date": _d,
+                        "description": _ev.get("description", "")[:120],
+                        "why_matters": "Market-wide — can move all positions.",
+                    })
+
+        # (c) SUPPLEMENT: parse any extra dated events Claude flagged (best-effort)
+        try:
             import re as _re
-            _dm = _re.search(r"(\d{4}-\d{2}-\d{2}|\w+ \d{1,2})", _s)
-            _tks = [w.strip("[]():,") for w in _s.split() if w.strip("[]():,").isupper() and 2 <= len(w.strip("[]():,")) <= 5]
-            _tk = next((t for t in _tks if t in _held_all), _tks[0] if _tks else "MARKET")
-            coming_up.append({
-                "ticker": _tk,
-                "event_type": "earnings" if "earning" in _s.lower() else "event",
-                "date": _dm.group(1) if _dm else "",
-                "description": _s[:150],
-                "why_matters": "Your holding" if _tk in _held_all else "Affects your portfolio",
-            })
+            _m2 = _re.search(r"##\s*Coming Up[^\n]*\n(.*?)(?=\n##|$)", (briefing.get("raw_text","") or "") if briefing else "", _re.DOTALL)
+            _cu_text = _m2.group(1) if _m2 else ""
+            for _ln in _cu_text.split("\n"):
+                _s = _ln.strip().lstrip("-\u2022 ").strip()
+                _dm = _re.search(r"\d{4}-\d{2}-\d{2}", _s)
+                if _dm and len(_s) > 12:
+                    _tks = [w.strip("[]():,.") for w in _s.split() if w.strip("[]():,.").isupper() and 2 <= len(w.strip("[]():,.")) <= 5]
+                    _tk = next((t for t in _tks if t in _held_all), None)
+                    if _tk and _tk not in _seen_cu:
+                        _seen_cu.add(_tk)
+                        coming_up.append({
+                            "ticker": _tk, "event_type": "event", "date": _dm.group(0),
+                            "description": _s[:130], "why_matters": "Flagged in briefing.",
+                        })
+        except Exception:
+            pass
+
+        coming_up.sort(key=lambda x: x.get("date", "9999"))
         coming_up = coming_up[:8]
-        log(f"Coming Up: {len(coming_up)} dated events parsed from briefing")
+        log(f"Coming Up: {len(coming_up)} events (structured earnings + economic + briefing supplement)")
     except Exception as _e:
-        log(f"Coming Up parse error (non-fatal): {_e}")
+        log(f"Coming Up build error (non-fatal): {_e}")
 
     # Enrich each position with quant data and entry price from positions.json
     pos_lookup = {p.get("ticker"): p for p in positions}

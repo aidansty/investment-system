@@ -920,6 +920,15 @@ def main():
 
     # Step 8b — Save morning snapshot for afternoon comparison
     save_morning_snapshot(industry_results.get("top_industries", []), today)
+    # Save raw briefing text where we can actually read it (debugging)
+    try:
+        import os as _os_b
+        _os_b.makedirs("data/briefings", exist_ok=True)
+        with open(f"data/briefings/briefing_{today}.txt", "w") as _bf:
+            _bf.write(briefing.get("raw_text", "") if isinstance(briefing, dict) else str(briefing))
+        log(f"Raw briefing saved: data/briefings/briefing_{today}.txt")
+    except Exception as _e:
+        log(f"Briefing save error (non-fatal): {_e}")
 
     # Step 9 — Send Telegram (2 messages)
     try:
@@ -956,6 +965,7 @@ def main():
             intraday=intraday_data,
             rules_output=rules_output,
             catalyst_opportunities=catalyst_opportunities,
+            earnings_calendar=earnings_calendar,
         )
         log("Dashboard data written successfully.")
     except Exception as e:

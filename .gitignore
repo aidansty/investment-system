@@ -15,3 +15,6 @@ test_*.py
 *.env
 
 # Secrets
+
+# briefings are kept for debugging
+!data/briefings/
