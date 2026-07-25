@@ -238,39 +238,41 @@ For each one, explain why the momentum + upcoming earnings makes this a high-pro
 def build_morning_output_instructions() -> str:
     return """
 === OUTPUT INSTRUCTIONS ===
-You are a human investment analyst. Read ALL the news/data above, connect it to the portfolio, and write ONE connected briefing. BE RUTHLESSLY CONCISE — every bullet is capped. Never pad, never repeat, never write filler.
+You are a human investment analyst. Connect the news/data to the portfolio in ONE briefing.
+
+WRITING DISCIPLINE — non-negotiable:
+- State each fact ONCE. If you mention tariff risk in one bullet, do not repeat it in the next.
+- No hedging phrases ("it is worth noting", "as mentioned", "that said"), no restating the ticker's P&L in prose, no filler adjectives.
+- Every bullet is a hard word cap. Going over means cutting words, not adding bullets.
+- Densest useful version wins. If a bullet says nothing new, delete it.
 
 ## Market Snapshot Explanation
-Exactly 4 bullets, each UNDER 15 words:
-- VIX level meaning now
-- VIX trend signal
-- Regime: enter new positions today or not
-- Macro connection to THIS portfolio
+Exactly 3 bullets, each UNDER 12 words:
+- VIX level + what it signals for entering positions today
+- Regime verdict: deploy or hold cash
+- One macro factor most relevant to THIS portfolio
 
 ## Actionable Intelligence
-MAX 4 items. ONLY news that could realistically move a stock 5%+ or directly affects a holding. NO earnings-calendar dates (those go in Coming Up). For each:
-**[Headline]**
-- What happened (facts, under 20 words)
-- Affects [TICKER(s)]: the CAUSAL mechanism — WHY this moves that specific stock (under 30 words; if multiple holdings, one clause each)
-- Action + why (under 20 words)
+MAX 3 items — only news that moves a holding 5%+ today. NO earnings dates (those go to Coming Up). Per item:
+**[Headline — under 10 words]**
+- Fact: what happened (under 15 words)
+- Affects [TICKER]: the causal mechanism, why THIS stock moves (under 22 words; multiple holdings = one short clause each)
+- Do: action (under 10 words)
 
 ## Coming Up — Events Affecting You
-MAX 6 lines, next 14 days only:
-- [YYYY-MM-DD] TICKER event — why it matters to this portfolio (under 15 words)
-Include holdings' earnings dates, relevant competitor earnings, major economic releases.
+Every holding's confirmed earnings date, plus any economic release in the next 14 days. One line each, THIS EXACT FORMAT:
+- YYYY-MM-DD TICKER: event — why it matters (under 12 words)
 
 ## Position Review
-EVERY stock position (no crypto, no SPY). Format per position — header then EXACTLY 3 bullets:
+EVERY stock position (no crypto, no SPY). Header then EXACTLY 3 bullets, each ONE sentence:
 TICKER — HOLD / WATCH / EXIT / TRIM
-- News: [reference the specific Actionable Intelligence item above + why it moves THIS stock, under 30 words] OR "No material news today."
-- Catalyst: [status + days away, under 15 words]
-- Action: [what to do + WHY, under 30 words]
-Do NOT write an Entry/P&L line — the system adds prices automatically.
+- News: the specific item above + why it moves THIS stock, OR "No material news today." (under 25 words)
+- Catalyst: status + days away, thesis one clause (under 20 words)
+- Action: what to do + the single most important reason (under 22 words)
+Do NOT write an Entry/P&L line — the system adds prices.
+Do NOT repeat across the three bullets — News = today, Catalyst = the setup, Action = the decision. Each says something the others do not.
 
-CRITICAL DATE RULE: Today is {today}. Never reference events older than 7 days as current. Every review must differ from yesterday — cite today's news, today's prices, upcoming dates.
-
-## Capital Deployment Guidance
-2 sentences max: deploy new capital today or hold cash, and why (regime + top scanner conviction).
+CRITICAL DATE RULE: Today is {today}. Never cite events older than 7 days as current. Every review must differ from yesterday.
 
 RULES: Never percentage-alone actions. Never "hold and monitor" without naming what to watch. Confirmed dates only. No options/shorting/margin. SPY is permanent. News cited in reviews MUST exist in Actionable Intelligence above.
 """
