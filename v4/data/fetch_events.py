@@ -110,31 +110,29 @@ def fetch_all_events(days_ahead=30):
             _fred = _os.environ.get("FRED_KEY", "")
             if _fred:
                 # Key recurring high-impact US releases via FRED release dates
-                _series = {
-                    "CPIAUCSL": "CPI (inflation)",
-                    "UNRATE": "Unemployment / Jobs report",
-                    "FEDFUNDS": "Fed Funds Rate (FOMC)",
-                    "PPIACO": "PPI (producer prices)",
-                    "RSAFS": "Retail Sales",
-                }
-                for _sid, _label in _series.items():
-                    try:
-                        _u = f"https://api.stlouisfed.org/fred/release/dates?series_id={_sid}&api_key={_fred}&file_type=json&sort_order=asc&include_release_dates_with_no_data=true&limit=100"
-                        _r = requests.get(_u, timeout=10)
-                        if _r.status_code == 200:
-                            for _rd in _r.json().get("release_dates", []):
-                                _d = _rd.get("date", "")
-                                if today_str <= _d <= end_str:
-                                    events.append({
-                                        "ticker": "MACRO",
-                                        "event_type": "economic",
-                                        "date": _d,
-                                        "description": f"{_label} scheduled release — market-wide catalyst that can move all positions.",
-                                        "significance": "high",
-                                    })
-                                    break  # next upcoming only
-                    except Exception:
-                        continue
+                _WANT = ["consumer price index", "employment situation", "producer price",
+                         "gross domestic product", "retail sales", "fomc", "federal open market"]
+                try:
+                    _u = f"https://api.stlouisfed.org/fred/releases/dates?api_key={_fred}&file_type=json&realtime_start={today_str}&sort_order=asc&limit=200&include_release_dates_with_no_data=true"
+                    _r = requests.get(_u, timeout=10)
+                    if _r.status_code == 200:
+                        _seen_rel = set()
+                        for _rd in _r.json().get("release_dates", []):
+                            _d, _nm = _rd.get("date", ""), (_rd.get("release_name", "") or "")
+                            if not (today_str <= _d <= end_str):
+                                continue
+                            if not any(w in _nm.lower() for w in _WANT):
+                                continue
+                            if _nm in _seen_rel:
+                                continue
+                            _seen_rel.add(_nm)
+                            events.append({"ticker": "MACRO", "event_type": "economic", "date": _d,
+                                           "description": f"{_nm} — market-wide release.",
+                                           "significance": "high"})
+                    else:
+                        log(f"  FRED HTTP {_r.status_code}")
+                except Exception as _fe:
+                    log(f"  FRED error: {_fe}")
                 log(f"  FRED economic calendar: {len([e for e in events if e['event_type'] == 'economic'])} upcoming releases")
             else:
                 log("  FRED_KEY not set — skipping economic calendar")
@@ -293,7 +291,24 @@ def fetch_catalyst_press_releases(tickers: list, days_back: int = 3) -> list:
             for item in r.json()[:10]:
                 hl = (item.get("headline") or "")
                 up = hl.upper()
+                # Reject market-wrap / listicle noise
+                NOISE = ["TOP GAINERS", "LOSERS", "STOCK MARKET TODAY", "MARKET WRAP",
+                         "STOCKS TO WATCH", "BEST STOCKS", "WHY IS", "IS UP", "IS DOWN",
+                         "HERE'S WHAT", "INSIDE THE", "EXPLORE THE", "MOVERS", "PREMARKET",
+                         "3 STOCKS", "5 STOCKS", "JIM CRAMER", "MOTLEY FOOL"]
+                if any(nz in up for nz in NOISE):
+                    continue
+                # Index keywords only count with real inclusion phrasing
+                INDEXY = ["S&P 500", "NASDAQ-100", "RUSSELL", "INDEX"]
+                if any(ix in up for ix in INDEXY) and not any(
+                        ph in up for ph in ["ADDED TO", "WILL JOIN", "JOINS THE", "INCLUSION IN", "TO JOIN THE"]):
+                    if not any(kw in up for kw in ["FDA", "CONTRACT", "ACQUISITION", "MERGER",
+                                                   "BUYBACK", "PHASE 3", "APPROVAL", "AWARDED"]):
+                        continue
                 if not any(kw in up for kw in KEYWORDS):
+                    continue
+                # Company must be named in the headline
+                if tk.upper() not in up and not any(kw in up for kw in ["FDA", "CONTRACT", "AWARDED", "ACQUISITION"]):
                     continue
                 if tk in seen:
                     continue

@@ -98,15 +98,19 @@ def main():
             except Exception as _e:
                 log(f"Coinbase price error for {_t}: {_e}")
         for _p in _raw:
-            _t = _p["ticker"]
-            _qty = _p["qty"]
-            _entry = _p["entry"]
+            _t = _p.get("ticker", "")
+            if not _t:
+                continue
+            _qty = _p.get("qty", 0) or 0
+            _entry = _p.get("entry", 0) or _p.get("entry_price", 0) or 0
             _current = _price_cache.get(_t, 0)
             _balance = round(_current * _qty, 2) if _current else 0
             _pct = round((_current - _entry) / _entry * 100, 2) if _entry > 0 and _current > 0 else 0
             positions.append({
                 "ticker": _t, "type": _p.get("type", "Stock"),
                 "term": _p.get("term", "Medium-term"),
+                "entry_date": _p.get("entry_date", ""),
+                "entry": _entry,
                 "qty": _qty, "entry_price": _entry,
                 "current_price": _current, "balance": _balance,
                 "cost_basis": _p.get("cost_basis", 0),
@@ -215,13 +219,34 @@ def main():
         pass
     # For positions NOT in the morning snapshot (newly added),
     # use entry_price as the baseline for crash detection
+    # Snapshot lives in gitignored data/cache on a DIFFERENT runner — unreachable.
+    # dashboard_data.js IS committed by the morning run, so use its prices.
+    if not morning_prices:
+        try:
+            import json as _json3
+            with open("dashboard_data.js") as _df:
+                _dd = _json3.loads(_df.read().replace("window.BRIEFING_DATA = ", "").rstrip(";"))
+            if _dd.get("run_type") == "morning" or _dd.get("morning_updated"):
+                for _p3 in _dd.get("positions", []):
+                    _cp = _p3.get("current_price", 0) or 0
+                    if _cp > 0:
+                        morning_prices[_p3.get("ticker", "")] = _cp
+                log(f"  Morning prices recovered from dashboard_data.js: {len(morning_prices)} tickers")
+        except Exception as _e:
+            log(f"  Could not recover morning prices: {_e}")
+
+    # Crypto excluded from crash detection; only fall back to entry as last resort
+    _CRY_CD = {"BTC", "ETH", "XRP", "ZEC", "SOL"}
     for p in positions:
         tk = p.get("ticker", "")
+        if tk in _CRY_CD:
+            morning_prices.pop(tk, None)
+            continue
         if tk not in morning_prices or morning_prices[tk] == 0:
             entry = p.get("entry_price", 0) or p.get("entry", 0) or 0
             if entry > 0:
                 morning_prices[tk] = entry
-                log(f"  Crash detection: using entry price ${entry} for {tk} (no morning snapshot)")
+                log(f"  WARNING: no morning price for {tk} — using entry as baseline (alert may reflect total loss, not intraday)")
     # Fetch intraday LOWS — catches flash crashes that recovered before 2:45 PM
     intraday_lows = {}
     try:

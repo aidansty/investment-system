@@ -702,10 +702,10 @@ def main():
             # 1. Catalyst type strength (0-35 points)
             type_scores = {
                 "fda_pdufa": 35,
-                "earnings": 22,
-                "insider_buying": 20,
-                "stock_split": 18,
-                "press_release": 17,
+                "earnings": 18,
+                "insider_buying": 23,
+                "stock_split": 21,
+                "press_release": 26,
                 "ipo": 15,
                 "ipo_event": 15,
                 "analyst_upgrade": 14,
@@ -803,7 +803,7 @@ def main():
                 days = c.get("days_until", 30)
                 excess = c.get("excess_21d", 0)
                 rvol = c.get("rvol", 0)
-                type_scores = {"fda_pdufa": 35, "earnings": 22, "insider_buying": 20, "stock_split": 18, "press_release": 17, "ipo": 15, "ipo_event": 15, "analyst_upgrade": 14, "post-catalyst-confirmed": 20, "event": 12, "economic": 8, "strong-catalyst-reduced": 10, "volume_spike": 5}
+                type_scores = {"fda_pdufa": 35, "earnings": 18, "insider_buying": 23, "stock_split": 21, "press_release": 26, "ipo": 15, "ipo_event": 15, "analyst_upgrade": 14, "post-catalyst-confirmed": 20, "event": 12, "economic": 8, "strong-catalyst-reduced": 10, "volume_spike": 5}
                 score += type_scores.get(ct, 10)
                 if 5 <= days <= 15: score += 20
                 elif 1 <= days <= 4: score += 15
@@ -838,7 +838,36 @@ def main():
         # FINAL GUARD — the true last step: held-skip, sort, cap.
         catalyst_opportunities = [c for c in catalyst_opportunities if c.get("ticker") not in held_tickers]
         catalyst_opportunities.sort(key=lambda x: -x.get("conviction_score", 0))
-        catalyst_opportunities = catalyst_opportunities[:5]
+        # 9. normalize bad catalyst_type values (e.g. "Hold" from prefix parsing)
+        _VALID_CT = {"earnings","stock_split","ipo","ipo_event","press_release","economic",
+                     "fda_pdufa","insider_buying","post-catalyst-confirmed","event",
+                     "strong-catalyst-reduced"}
+        for _c in catalyst_opportunities:
+            if _c.get("catalyst_type") not in _VALID_CT:
+                _c["catalyst_type"] = "event"
+        # 8. flag re-entry into anything exited in the last 30 days
+        try:
+            import json as _jw, datetime as _dtw
+            _wt = _jw.load(open("data/win_rate_tracker.json"))
+            _recs = _wt if isinstance(_wt, list) else _wt.get("recommendations", [])
+            _cut = (_dtw.date.today() - _dtw.timedelta(days=30)).isoformat()
+            _recent_exits = {r.get("ticker") for r in _recs
+                             if r.get("action") == "exit" and str(r.get("date", ""))[:10] >= _cut}
+            for _c in catalyst_opportunities:
+                if _c.get("ticker") in _recent_exits:
+                    _c["wash_sale_warning"] = True
+                    _c["exit_strategy"] = "RE-ENTRY WARNING: you exited this within 30 days. Confirm the thesis actually changed before buying back. " + (_c.get("exit_strategy") or "")
+                    log(f"  RE-ENTRY FLAG: {_c['ticker']} was exited in the last 30 days")
+        except Exception:
+            pass
+        # 7b. diversity: at most 3 earnings plays in the top 5
+        _earn = [c for c in catalyst_opportunities if c.get("catalyst_type") == "earnings"]
+        _other = [c for c in catalyst_opportunities if c.get("catalyst_type") != "earnings"]
+        if _other:
+            catalyst_opportunities = sorted(_earn[:3] + _other[:2],
+                                            key=lambda x: -x.get("conviction_score", 0))[:5]
+        else:
+            catalyst_opportunities = catalyst_opportunities[:5]
         log(f"Catalyst scanner FINAL: {len(catalyst_opportunities)} candidates")
         for c in catalyst_opportunities:
             log(f"  {c['ticker']}: {c.get('catalyst_type','?')} {c.get('earnings_date','')} ({c.get('days_until',0)}d) conv={c.get('conviction_score',0)} +{c.get('excess_21d',0)}pp")

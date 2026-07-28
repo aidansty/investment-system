@@ -779,6 +779,7 @@ def write_dashboard_data(
             _morning_position_review = _existing.get("position_review", [])
             _morning_updated = _existing.get("morning_updated", _existing.get("last_updated", ""))
             _morning_news = _existing.get("news", [])
+            _morning_coming_up = _existing.get("coming_up", [])
             _morning_market = _existing.get("market_bullets", [])
     except Exception:
         pass
@@ -993,7 +994,7 @@ def write_dashboard_data(
         "performance_portfolio": perf_portfolio,
         "performance_spy": perf_spy,
         "news": news_cards if news_cards else _morning_news,
-        "coming_up": coming_up if "coming_up" in dir() else [],
+        "coming_up": (coming_up if coming_up else (_morning_coming_up if "_morning_coming_up" in dir() else [])),
         "forward_catalysts": [
             {
                 "date": c.get("date", ""),

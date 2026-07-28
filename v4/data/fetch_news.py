@@ -489,6 +489,15 @@ def fetch_holdings_news(tickers: list, days_back: int = 2) -> list:
                 hl = headline.lower()
                 if not any(kw in hl for kw in MATERIAL):
                     continue
+                # Article must actually be ABOUT this company
+                _NAMES = {"MU": ["micron"], "AMD": ["amd", "advanced micro"],
+                          "NVDA": ["nvidia"], "SPCX": ["spacex", "space x"],
+                          "HUM": ["humana"], "RPD": ["rapid7", "rapid 7"],
+                          "INTC": ["intel"], "PLTR": ["palantir"]}
+                _aliases = _NAMES.get(tk, []) + [tk.lower()]
+                import re as _re_h
+                if not any(_re_h.search(r"\b" + _a + r"\b", hl) for _a in _aliases):
+                    continue
                 dedupe = headline[:60].lower()
                 if dedupe in seen:
                     continue
