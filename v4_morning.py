@@ -959,25 +959,6 @@ def main():
     except Exception as _e:
         log(f"Briefing save error (non-fatal): {_e}")
 
-    # Step 9 — Send Telegram (2 messages)
-    try:
-        # Add catalyst_opportunities to rules_output so Telegram can access them
-        rules_output["catalyst_opportunities"] = catalyst_opportunities
-        build_and_send_morning_telegram(
-            macro=macro,
-            industry_results=industry_results,
-            news_package=news_package,
-            positions=positions,
-            briefing=briefing,
-            forward_catalysts=forward_catalysts,
-            today=str(today),
-            rules_output=rules_output,
-        )
-    except Exception as e:
-        log(f"Telegram error: {e}")
-        send_telegram(f"⚠️ V4 briefing error: {str(e)[:200]}")
-
-    # Step 10 — Write dashboard data
     log("Writing dashboard data...")
     try:
         cost_basis = sum(p.get("cost_basis", 0) for p in positions)
@@ -1009,6 +990,26 @@ def main():
         except Exception:
             pass
 
+    # Step 9 — Send Telegram (2 messages)
+    try:
+        # Add catalyst_opportunities to rules_output so Telegram can access them
+        rules_output["catalyst_opportunities"] = catalyst_opportunities
+        build_and_send_morning_telegram(
+            macro=macro,
+            industry_results=industry_results,
+            news_package=news_package,
+            positions=positions,
+            briefing=briefing,
+            forward_catalysts=forward_catalysts,
+            today=str(today),
+            rules_output=rules_output,
+            earnings_calendar=earnings_calendar
+        )
+    except Exception as e:
+        log(f"Telegram error: {e}")
+        send_telegram(f"⚠️ V4 briefing error: {str(e)[:200]}")
+
+    # Step 10 — Write dashboard data
     elapsed = time.time() - start
     log(f"=== V4 Morning Complete: {today} | Runtime: {elapsed:.1f}s ===")
 

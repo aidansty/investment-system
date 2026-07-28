@@ -12,6 +12,7 @@ def build_and_send_morning_telegram(
     forward_catalysts: list,
     today: str,
     rules_output: dict = None,
+    earnings_calendar: dict = None,
 ) -> None:
     """
     Morning Telegram — two concise, actionable messages.
@@ -107,8 +108,35 @@ def build_and_send_morning_telegram(
         msg1.append("")
 
     # Coming up — keep as is, this works well
-    if forward_catalysts:
+    # Structured earnings dates first (reliable), then Claude catalysts
+    _cu_lines = []
+    try:
+        from datetime import datetime as _dtc
+        _ec = earnings_calendar or {}
+        for _tk in stock_tickers:
+            _e = _ec.get(_tk)
+            _d = (_e.get("date", "") if isinstance(_e, dict) else str(_e or ""))[:10]
+            if not _d:
+                continue
+            try:
+                _dd = (_dtc.strptime(_d, "%Y-%m-%d") - _dtc.now()).days
+            except Exception:
+                continue
+            if 0 <= _dd <= 21:
+                _cu_lines.append((_d, f"  [{_d}] {_tk} earnings — in {_dd} days"))
+    except Exception:
+        pass
+    for cat in (forward_catalysts or []):
+        _d = cat.get("date", "")
+        if _d and not any(_d in l[1] for l in _cu_lines):
+            _h = cat.get("affected_holdings", [])
+            _cu_lines.append((_d, f"  [{_d}] {cat.get('event','')[:55]}" + (f" \u2192 {', '.join(_h)}" if _h else "")))
+    if _cu_lines:
         msg1.append("<b>\U0001f4c5 Coming Up</b>")
+        for _, _line in sorted(_cu_lines)[:5]:
+            msg1.append(_line)
+        msg1.append("")
+    if False:
         sorted_cats = sorted(forward_catalysts, key=lambda c: c.get("date", "9999"))
         for cat in sorted_cats[:4]:
             date = cat.get("date", "")
@@ -148,6 +176,8 @@ def build_and_send_morning_telegram(
             msg2.append(f"    {days_text} | ${price} | +{excess}pp vs SPY")
             if c.get("news_headlines") and c["news_headlines"][0]:
                 msg2.append(f"    {c['news_headlines'][0][:80]}")
+            if c.get("wash_sale_warning"):
+                msg2.append(f"    \u26a0\ufe0f RE-ENTRY: you exited {c.get('ticker','')} within 30 days — confirm the thesis changed")
             if hold:
                 msg2.append(f"    Hold: {hold}")
             if exit_plan:
@@ -157,6 +187,27 @@ def build_and_send_morning_telegram(
         msg2.append("<b>\U0001f50e Catalyst Scanner</b>")
         msg2.append("  No qualifying candidates today.")
         msg2.append("")
+
+    # Claude's per-holding analysis — the reasoning you read each morning
+    try:
+        _pr = (briefing or {}).get("position_review", []) if isinstance(briefing, dict) else []
+        if not _pr:
+            import json as _jt, os as _ot
+            _p = _ot.path.join(_ot.path.dirname(__file__), "..", "..", "dashboard_data.js")
+            if _ot.path.exists(_p):
+                _pr = _jt.loads(open(_p).read().replace("window.BRIEFING_DATA = ", "").rstrip(";")).get("position_review", [])
+        _pr = [r for r in _pr if r.get("ticker") in stock_tickers]
+        if _pr:
+            msg2.append("<b>\U0001f4dd Your Holdings</b>")
+            for _r in _pr[:6]:
+                _act = (_r.get("action") or "Hold").upper()
+                _em = {"EXIT": "\U0001f534", "WATCH": "\U0001f7e1", "TRIM": "\U0001f7e0"}.get(_act, "\U0001f7e2")
+                msg2.append(f"  {_em} <b>{_r.get('ticker','')}</b> — {_act}")
+                for _b in [b for b in (_r.get("bullets") or []) if "Entry:" not in b][:2]:
+                    msg2.append(f"    {_b[:150]}")
+            msg2.append("")
+    except Exception as _e:
+        pass
 
     # Position alerts — only WATCH, EXIT, TRIM (skip clean HOLDs)
     # Use rules engine signals directly instead of parsing Claude text
