@@ -46,21 +46,6 @@
       "entry_price": 453.74
     },
     {
-      "ticker": "SPCX",
-      "qty": 0.68908,
-      "entry": 183.84,
-      "type": "Stock",
-      "term": "Long-term",
-      "industry": "Aerospace & Space",
-      "summary": "SpaceX is the dominant commercial rocket company in the world, operating Falcon 9, Starship, and the Starlink satellite internet constellation with over 7,000 satellites in orbit. It recently completed its IPO and is now publicly traded, giving investors access to what may be the most important infrastructure company of the next century.",
-      "catalyst": "",
-      "why": "This is a long-term core holding in the commercial space infrastructure buildout. SpaceX has a dominant and defensible position in launch and satellite internet that is likely to compound for decades. It is held for the long-term thesis, not for short-term price action.",
-      "cost_basis": 236.98,
-      "what_to_do": "",
-      "entry_date": "2026-04-14",
-      "entry_price": 183.84
-    },
-    {
       "ticker": "NVDA",
       "qty": 1.00002,
       "entry": 205.33,
