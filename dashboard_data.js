@@ -12,7 +12,7 @@ window.BRIEFING_DATA = {
   "vix_trend": "Flat",
   "vix_regime": "Yellow",
   "market_bullets": [
-    "Regime: Yellow (18.58 VIX, trend flat \u2014 sentiment stable (no change in posture)).",
+    "Regime: Yellow (18.58 VIX, trend flat — sentiment stable (no change in posture)).",
     "Conditions are mixed. Only enter positions with confirmed catalysts and conviction above 75. Hold existing positions."
   ],
   "positions": [
@@ -44,10 +44,10 @@ window.BRIEFING_DATA = {
       "balance": 219.48,
       "pct_change": 47.71,
       "dollar_change": 70.89,
-      "summary": "Micron Technology manufactures DRAM and NAND memory chips \u00c3\u00a2\u00c2\u0080\u00c2\u0094 the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one of the primary beneficiaries of that demand surge.",
-      "catalyst": "Micron Technology manufactures DRAM and NAND memory chips \u00c3\u00a2\u00c2\u0080\u00c2\u0094 the components that store data insi",
-      "why": "Micron Technology manufactures DRAM and NAND memory chips \u00c3\u00a2\u00c2\u0080\u00c2\u0094 the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one",
-      "what_to_do": "Micron Technology manufactures DRAM and NAND memory chips \u00c3\u00a2\u00c2\u0080\u00c2\u0094 the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one",
+      "summary": "Micron Technology manufactures DRAM and NAND memory chips Ã¢ÂÂ the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one of the primary beneficiaries of that demand surge.",
+      "catalyst": "Micron Technology manufactures DRAM and NAND memory chips Ã¢ÂÂ the components that store data insi",
+      "why": "Micron Technology manufactures DRAM and NAND memory chips Ã¢ÂÂ the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one",
+      "what_to_do": "Micron Technology manufactures DRAM and NAND memory chips Ã¢ÂÂ the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one",
       "industry": "Semiconductors",
       "cost_basis": 148.59,
       "action": "Hold"
@@ -71,24 +71,6 @@ window.BRIEFING_DATA = {
       "action": "Hold"
     },
     {
-      "ticker": "SPCX",
-      "type": "Stock",
-      "term": "Long-term",
-      "qty": 0.68908,
-      "entry_price": 183.84,
-      "current_price": 111.13,
-      "balance": 76.58,
-      "pct_change": -39.55,
-      "dollar_change": -50.1,
-      "summary": "SpaceX is the dominant commercial rocket company in the world, operating Falcon 9, Starship, and the Starlink satellite internet constellation with over 7,000 satellites in orbit. It recently completed its IPO and is now publicly traded, giving investors access to what may be the most important infrastructure company of the next century.",
-      "catalyst": "No forward catalyst identified",
-      "why": "FIRST-DAY EXIT: SPCX is DOWN -39.5% within 0 days of entry while the broader market is stable (SPY +0.0%). The entry thesis is likely broken \u2014 cut fast and redeploy.",
-      "what_to_do": "FIRST-DAY EXIT: SPCX is DOWN -39.5% within 0 days of entry while the broader market is stable (SPY +0.0%). The entry thesis is likely broken \u2014 cut fast and redeploy.",
-      "industry": "Aerospace & Space",
-      "cost_basis": 236.98,
-      "action": "Exit"
-    },
-    {
       "ticker": "NVDA",
       "type": "Stock",
       "term": "Long-term",
@@ -98,10 +80,10 @@ window.BRIEFING_DATA = {
       "balance": 196.85,
       "pct_change": -4.13,
       "dollar_change": -8.48,
-      "summary": "NVIDIA is the dominant supplier of GPUs for artificial intelligence \u00c3\u00a2\u00c2\u0080\u00c2\u0094 its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrastructure, they are overwhelmingly buying NVIDIA GPUs. This gives NVIDIA extraordinary pricing power and demand visibility.",
-      "catalyst": "NVIDIA is the dominant supplier of GPUs for artificial intelligence \u00c3\u00a2\u00c2\u0080\u00c2\u0094 its H100 and Blackwell ch",
+      "summary": "NVIDIA is the dominant supplier of GPUs for artificial intelligence Ã¢ÂÂ its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrastructure, they are overwhelmingly buying NVIDIA GPUs. This gives NVIDIA extraordinary pricing power and demand visibility.",
+      "catalyst": "NVIDIA is the dominant supplier of GPUs for artificial intelligence Ã¢ÂÂ its H100 and Blackwell ch",
       "why": "This is a long-term core holding in the AI infrastructure buildout. NVIDIA's position is genuinely dominant and defensible in a way that is rare in technology. The company is held for years, not quarters, as AI becomes the defining technology investment of this decade.",
-      "what_to_do": "NVIDIA is the dominant supplier of GPUs for artificial intelligence \u00c3\u00a2\u00c2\u0080\u00c2\u0094 its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrast",
+      "what_to_do": "NVIDIA is the dominant supplier of GPUs for artificial intelligence Ã¢ÂÂ its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrast",
       "industry": "AI Infrastructure",
       "cost_basis": 200,
       "action": "Hold"
@@ -192,7 +174,7 @@ window.BRIEFING_DATA = {
       "source": "CNBC Top News",
       "bullets": [
         "President Trump Monday voiced support for Federal Reserve Chairman Kevin Warsh while insisting that the U.S. should have the lowest interest rates in the world.",
-        "Market-wide impact \u2014 affects all positions. This may change the regime and entry conditions for new positions."
+        "Market-wide impact — affects all positions. This may change the regime and entry conditions for new positions."
       ],
       "affected_tickers": [],
       "sentiment": "",
@@ -204,7 +186,7 @@ window.BRIEFING_DATA = {
       "source": "Yahoo",
       "bullets": [
         "Michael Burry has placed a targeted short against Applied Materials, but Wall Street analysts keep piling on upgrades as memory chip demand surges. Find out whether the Big Short legend has spotted a crack in the cycle or left a critical blind spot e",
-        "Affects MU (medium-term) \u2014 see MU's position review below for the impact analysis.",
+        "Affects MU (medium-term) — see MU's position review below for the impact analysis.",
         "Action: see position review for MU."
       ],
       "affected_tickers": [
@@ -214,12 +196,12 @@ window.BRIEFING_DATA = {
       "relevance": "holding"
     },
     {
-      "headline": "[AMD] Jim Cramer Warns the Semiconductor Selloff Has \u2018Monstrous\u2019 Sellers Behind It",
+      "headline": "[AMD] Jim Cramer Warns the Semiconductor Selloff Has ‘Monstrous’ Sellers Behind It",
       "url": "https://finnhub.io/api/news?id=6f26120553edda00ea42d259c4ea8ffff38bf05bf58c19f797fb4c05e3fcafd1",
       "source": "Yahoo",
       "bullets": [
         "Jim Cramer says the chip sector selloff gripping NVIDIA, AMD, and Intel has nothing to do with their fundamentals, and the type of seller driving it makes a quick recovery far harder than most investors expect.",
-        "Affects AMD (medium-term) \u2014 see AMD's position review below for the impact analysis.",
+        "Affects AMD (medium-term) — see AMD's position review below for the impact analysis.",
         "Action: see position review for AMD."
       ],
       "affected_tickers": [
@@ -229,12 +211,12 @@ window.BRIEFING_DATA = {
       "relevance": "holding"
     },
     {
-      "headline": "[NVDA] Cracker Barrel\u2019s CEO Steps Down Months After Logo Backlash",
+      "headline": "[NVDA] Cracker Barrel’s CEO Steps Down Months After Logo Backlash",
       "url": "https://finnhub.io/api/news?id=4ec37b0b38959ffcd0ae01511267b5b6ad97830006edd7495356ff374ad88048",
       "source": "Yahoo",
       "bullets": [
-        "Turns out \u201cUncle Herschel\u201d had more job security than failed modernizer Julie Masino",
-        "Affects NVDA (long-term) \u2014 see NVDA's position review below for the impact analysis.",
+        "Turns out “Uncle Herschel” had more job security than failed modernizer Julie Masino",
+        "Affects NVDA (long-term) — see NVDA's position review below for the impact analysis.",
         "Action: see position review for NVDA."
       ],
       "affected_tickers": [
@@ -249,7 +231,7 @@ window.BRIEFING_DATA = {
       "source": "Price Monitor",
       "bullets": [
         "SPCX dropped from $183.84 this morning to $111.13 now (-39.6% decline, intraday low $108.66). May indicate stealth downgrade, sector rotation, or block trade.",
-        "Affects SPCX (long-term) \u2014 see SPCX's position review below for the impact analysis.",
+        "Affects SPCX (long-term) — see SPCX's position review below for the impact analysis.",
         "Action: see position review for SPCX."
       ],
       "affected_tickers": [
@@ -268,7 +250,7 @@ window.BRIEFING_DATA = {
       "bullets": [
         "Entry: $357.37 | Current: $394.50 | P&L: +10.4%",
         "News: Iran pause reduces oil-driven inflation slightly, modestly easing managed care cost pressure heading into Wednesday's print.",
-        "Catalyst: Earnings July 29 before open \u2014 2 days away; thesis is managed care margin recovery and medical loss ratio improvement.",
+        "Catalyst: Earnings July 29 before open — 2 days away; thesis is managed care margin recovery and medical loss ratio improvement.",
         "Action: Hold full position through earnings; exit or reassess immediately after the print regardless of direction."
       ],
       "what_to_do": "News: Iran pause reduces oil-driven inflation slightly, modestly easing managed care cost pressure heading into Wednesday's print.",
@@ -284,13 +266,13 @@ window.BRIEFING_DATA = {
       "action": "Hold",
       "bullets": [
         "Entry: $453.74 | Current: $539.69 | P&L: +18.9%",
-        "News: New tariff blitz targeting China and EU directly threatens AMD's data center GPU and EPYC server revenue \u2014 magnitude of impact unknown until earnings.",
-        "Catalyst: Earnings August 4 after close \u2014 8 days away; thesis is AI accelerator and server CPU market share gains.",
+        "News: New tariff blitz targeting China and EU directly threatens AMD's data center GPU and EPYC server revenue — magnitude of impact unknown until earnings.",
+        "Catalyst: Earnings August 4 after close — 8 days away; thesis is AI accelerator and server CPU market share gains.",
         "Action: Watch for any pre-earnings guidance revision this week; tariff exposure to China is now the single biggest thesis risk."
       ],
-      "what_to_do": "News: New tariff blitz targeting China and EU directly threatens AMD's data center GPU and EPYC server revenue \u2014 magnitude of impact unknown until earnings.",
+      "what_to_do": "News: New tariff blitz targeting China and EU directly threatens AMD's data center GPU and EPYC server revenue — magnitude of impact unknown until earnings.",
       "catalyst": "Monitoring for catalyst",
-      "why": "News: New tariff blitz targeting China and EU directly threatens AMD's data center GPU and EPYC server revenue \u2014 magnitude of impact unknown until earnings.",
+      "why": "News: New tariff blitz targeting China and EU directly threatens AMD's data center GPU and EPYC server revenue — magnitude of impact unknown until earnings.",
       "entry_price": 453.74,
       "term": "Medium-term",
       "industry": "Semiconductors",
@@ -302,8 +284,8 @@ window.BRIEFING_DATA = {
       "bullets": [
         "Entry: $205.33 | Current: $208.76 | P&L: +1.7%",
         "News: No material news today directly affecting NVDA; KLAC's strong capex signal is indirectly supportive of AI infrastructure spending.",
-        "Catalyst: Earnings August 26 after close \u2014 30 days away; Blackwell GPU ramp and data center demand remain the thesis.",
-        "Action: Hold; the position is only +1.7% \u2014 do not add ahead of a tariff-uncertain earnings cycle."
+        "Catalyst: Earnings August 26 after close — 30 days away; Blackwell GPU ramp and data center demand remain the thesis.",
+        "Action: Hold; the position is only +1.7% — do not add ahead of a tariff-uncertain earnings cycle."
       ],
       "what_to_do": "News: No material news today directly affecting NVDA; KLAC's strong capex signal is indirectly supportive of AI infrastructure spending.",
       "catalyst": "Monitoring for catalyst",
@@ -311,7 +293,7 @@ window.BRIEFING_DATA = {
       "entry_price": 205.33,
       "term": "Long-term",
       "industry": "AI Infrastructure",
-      "summary": "NVIDIA is the dominant supplier of GPUs for artificial intelligence \u00c3\u00a2\u00c2\u0080\u00c2\u0094 its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrastructure, they are overwhelmingly buying NVIDIA GPUs. This gives NVIDIA extraordinary pricing power and demand visibility."
+      "summary": "NVIDIA is the dominant supplier of GPUs for artificial intelligence Ã¢ÂÂ its H100 and Blackwell chips are the engines behind virtually every major AI model being trained today. When companies like OpenAI, Google, Meta, or Microsoft build AI infrastructure, they are overwhelmingly buying NVIDIA GPUs. This gives NVIDIA extraordinary pricing power and demand visibility."
     },
     {
       "ticker": "MU",
@@ -319,7 +301,7 @@ window.BRIEFING_DATA = {
       "bullets": [
         "Entry: $599.21 | Current: $990.21 | P&L: +65.2%",
         "News: KLAC's strong process control results signal continued leading-edge fab investment, supporting advanced DRAM and HBM demand that underpins MU's thesis.",
-        "Catalyst: Earnings September 21 after close \u2014 56 days away; thesis is HBM3E pricing power and AI memory cycle recovery.",
+        "Catalyst: Earnings September 21 after close — 56 days away; thesis is HBM3E pricing power and AI memory cycle recovery.",
         "Action: Hold the +65.3% gain; set a mental stop around $880 to protect gains if macro deteriorates before September."
       ],
       "what_to_do": "News: KLAC's strong process control results signal continued leading-edge fab investment, supporting advanced DRAM and HBM demand that underpins MU's thesis.",
@@ -328,40 +310,23 @@ window.BRIEFING_DATA = {
       "entry_price": 599.21,
       "term": "Medium-term",
       "industry": "Semiconductors",
-      "summary": "Micron Technology manufactures DRAM and NAND memory chips \u00c3\u00a2\u00c2\u0080\u00c2\u0094 the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one of the primary beneficiaries of that demand surge."
-    },
-    {
-      "ticker": "SPCX",
-      "action": "Exit",
-      "bullets": [
-        "Entry: $183.84 | Current: $118.24 | P&L: -35.7%",
-        "News: No material news today; the -35.7% drawdown has no catalyst-driven recovery signal visible.",
-        "Catalyst: Earnings August 6 \u2014 10 days away, but a -35.7% decline into an event signals the market has already repriced this position severely against the thesis.",
-        "Action: Exit today per the Rules Engine drawdown signal; redeploy capital only when a 75+ conviction opportunity clears in Yellow regime."
-      ],
-      "what_to_do": "Entry: $183.84 | Current: $118.24 | P&L: -35.7%",
-      "catalyst": "Monitoring for catalyst",
-      "why": "Entry: $183.84 | Current: $118.24 | P&L: -35.7%",
-      "entry_price": 183.84,
-      "term": "Long-term",
-      "industry": "Aerospace & Space",
-      "summary": "SpaceX is the dominant commercial rocket company in the world, operating Falcon 9, Starship, and the Starlink satellite internet constellation with over 7,000 satellites in orbit. It recently completed its IPO and is now publicly traded, giving investors access to what may be the most important infrastructure company of the next century."
+      "summary": "Micron Technology manufactures DRAM and NAND memory chips Ã¢ÂÂ the components that store data inside every AI server, data center, smartphone, and PC on the planet. As AI model training and inference require exponentially more memory, Micron is one of the primary beneficiaries of that demand surge."
     }
   ],
   "industry_opportunities": [],
   "what_changed": [
-    "**Trump-Fed interference escalating:** Trump publicly backed Kevin Warsh as Fed Chair while simultaneously calling for lower rates and accusing unnamed Fed officials of \"bad intentions.\" This is the sharpest direct political pressure on Fed independence seen this cycle and is creating uncertainty about whether rate policy will reflect economics or political pressure \u2014 a meaningful risk factor for rate-sensitive positions including VNQ and the broader market.",
-    "**SPCX in freefall \u2014 price alert triggered:** SPCX hit an intraday low of -40.9% from entry, with the current reading at -39.6%. This is not a minor move \u2014 this is a position that has lost more than a third of its value and is now triggering mandatory review under the 10-15% loss rule, which was breached long ago. This demands a definitive decision before close today.",
+    "**Trump-Fed interference escalating:** Trump publicly backed Kevin Warsh as Fed Chair while simultaneously calling for lower rates and accusing unnamed Fed officials of \"bad intentions.\" This is the sharpest direct political pressure on Fed independence seen this cycle and is creating uncertainty about whether rate policy will reflect economics or political pressure — a meaningful risk factor for rate-sensitive positions including VNQ and the broader market.",
+    "**SPCX in freefall — price alert triggered:** SPCX hit an intraday low of -40.9% from entry, with the current reading at -39.6%. This is not a minor move — this is a position that has lost more than a third of its value and is now triggering mandatory review under the 10-15% loss rule, which was breached long ago. This demands a definitive decision before close today.",
     "**AMD earnings catalyst approaching with mixed signals:** Wedbush tweaked AMD's price target ahead of the August 4 earnings print, and Jim Cramer warned that the semiconductor selloff has \"monstrous\" institutional sellers behind it. Both data points landed this afternoon and directly affect AMD thesis timing and position risk heading into the catalyst window.",
-    "**Singapore surprise monetary tightening:** Singapore's MAS tightened policy unexpectedly citing rising oil prices rekindling inflation risk. This matters globally because Singapore is a leading indicator for Asian export demand \u2014 tighter financial conditions there signal that global inflation risk is not as contained as the market has been pricing, which adds headwind to the Fed rate-cut narrative Trump is simultaneously pushing.",
-    "**Michael Burry's semiconductor short is being challenged:** News broke flagging Applied Materials continuing to win analyst upgrades despite Burry holding a short position in the semiconductor space. This is directly relevant to MU and AMD \u2014 it signals analyst consensus remains constructive on semis even as a high-profile short thesis exists, reinforcing the demand narrative but also flagging that smart money is divided."
+    "**Singapore surprise monetary tightening:** Singapore's MAS tightened policy unexpectedly citing rising oil prices rekindling inflation risk. This matters globally because Singapore is a leading indicator for Asian export demand — tighter financial conditions there signal that global inflation risk is not as contained as the market has been pricing, which adds headwind to the Fed rate-cut narrative Trump is simultaneously pushing.",
+    "**Michael Burry's semiconductor short is being challenged:** News broke flagging Applied Materials continuing to win analyst upgrades despite Burry holding a short position in the semiconductor space. This is directly relevant to MU and AMD — it signals analyst consensus remains constructive on semis even as a high-profile short thesis exists, reinforcing the demand narrative but also flagging that smart money is divided."
   ],
   "notable_moves": [
-    "**SPCX \u2014 approximately -39.6% from entry, intraday low -40.9%:** The most extreme mover in the portfolio today. A position this far underwater with no recovery catalyst in sight is the session's defining event for this portfolio specifically.",
-    "**SPY \u2014 tracking near $737.66, modest intraday pressure:** The Trump-Warsh-Fed noise is introducing mid-afternoon volatility into the broad market. SPY's reaction to Fed independence concerns matters because it anchors portfolio-level risk assessment.",
-    "**QQQ \u2014 under mild pressure from semiconductor sentiment:** Jim Cramer's warning about \"monstrous\" institutional sellers in semiconductors aligns with afternoon softness in QQQ, which is heavily weighted toward NVDA, AMD, and MSFT. Tech-heavy indices are the most exposed to the political Fed uncertainty.",
-    "**XLF (Financials ETF) \u2014 +6.5pp relative to SPY on conviction scan:** The Warsh endorsement is being read by financials traders as a potential signal toward eventual rate normalization, which would benefit bank net interest margins. XLF is showing relative strength today as a result.",
-    "**IBB (Biotech ETF) \u2014 +8.5pp vs SPY on relative momentum:** Biotech is outperforming the tape today on a conviction scan reading of 35/100 \u2014 the relative strength is notable given the macro headwinds hitting growth sectors, suggesting rotation into defensive-growth plays within healthcare."
+    "**SPCX — approximately -39.6% from entry, intraday low -40.9%:** The most extreme mover in the portfolio today. A position this far underwater with no recovery catalyst in sight is the session's defining event for this portfolio specifically.",
+    "**SPY — tracking near $737.66, modest intraday pressure:** The Trump-Warsh-Fed noise is introducing mid-afternoon volatility into the broad market. SPY's reaction to Fed independence concerns matters because it anchors portfolio-level risk assessment.",
+    "**QQQ — under mild pressure from semiconductor sentiment:** Jim Cramer's warning about \"monstrous\" institutional sellers in semiconductors aligns with afternoon softness in QQQ, which is heavily weighted toward NVDA, AMD, and MSFT. Tech-heavy indices are the most exposed to the political Fed uncertainty.",
+    "**XLF (Financials ETF) — +6.5pp relative to SPY on conviction scan:** The Warsh endorsement is being read by financials traders as a potential signal toward eventual rate normalization, which would benefit bank net interest margins. XLF is showing relative strength today as a result.",
+    "**IBB (Biotech ETF) — +8.5pp vs SPY on relative momentum:** Biotech is outperforming the tape today on a conviction scan reading of 35/100 — the relative strength is notable given the macro headwinds hitting growth sectors, suggesting rotation into defensive-growth plays within healthcare."
   ],
   "afternoon_positions": [
     {
@@ -381,7 +346,7 @@ window.BRIEFING_DATA = {
       "qty": 0.24798,
       "pct_change": 47.71,
       "bullets": [
-        "No new developments today \u2014 thesis intact, hold into tomorrow."
+        "No new developments today — thesis intact, hold into tomorrow."
       ]
     },
     {
@@ -392,18 +357,7 @@ window.BRIEFING_DATA = {
       "qty": 0.58112,
       "pct_change": 6.9,
       "bullets": [
-        "No new developments today \u2014 thesis intact, hold into tomorrow."
-      ]
-    },
-    {
-      "ticker": "SPCX",
-      "action": "Hold",
-      "entry_price": 183.84,
-      "current_price": 111.13,
-      "qty": 0.68908,
-      "pct_change": -39.55,
-      "bullets": [
-        "No new developments today \u2014 thesis intact, hold into tomorrow."
+        "No new developments today — thesis intact, hold into tomorrow."
       ]
     },
     {
@@ -414,7 +368,7 @@ window.BRIEFING_DATA = {
       "qty": 1.00002,
       "pct_change": -4.13,
       "bullets": [
-        "No new developments today \u2014 thesis intact, hold into tomorrow."
+        "No new developments today — thesis intact, hold into tomorrow."
       ]
     },
     {
@@ -425,7 +379,7 @@ window.BRIEFING_DATA = {
       "qty": 0.04544048,
       "pct_change": -99.95,
       "bullets": [
-        "No new developments today \u2014 thesis intact, hold into tomorrow."
+        "No new developments today — thesis intact, hold into tomorrow."
       ]
     },
     {
@@ -436,7 +390,7 @@ window.BRIEFING_DATA = {
       "qty": 1.00032929,
       "pct_change": 0.17,
       "bullets": [
-        "No new developments today \u2014 thesis intact, hold into tomorrow."
+        "No new developments today — thesis intact, hold into tomorrow."
       ]
     },
     {
@@ -447,7 +401,7 @@ window.BRIEFING_DATA = {
       "qty": 0.2038873,
       "pct_change": -99.08,
       "bullets": [
-        "No new developments today \u2014 thesis intact, hold into tomorrow."
+        "No new developments today — thesis intact, hold into tomorrow."
       ]
     },
     {
@@ -458,92 +412,92 @@ window.BRIEFING_DATA = {
       "qty": 250.635305,
       "pct_change": 928.81,
       "bullets": [
-        "No new developments today \u2014 thesis intact, hold into tomorrow."
+        "No new developments today — thesis intact, hold into tomorrow."
       ]
     }
   ],
   "afternoon_candidates": [
     {
       "industry": "Financials",
-      "allocation_guidance": "Conviction 42.0/100 is below the 75 entry threshold \u2014 this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
+      "allocation_guidance": "Conviction 42.0/100 is below the 75 entry threshold — this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
       "etf": "XLF",
-      "conviction": 52.0,
+      "conviction": 52,
       "recommended_security": "XLF",
       "recommended_type": "etf",
-      "recommended_conviction": 42.0,
+      "recommended_conviction": 42,
       "stock_leaders": [],
       "stock_reasoning": [],
-      "etf_reasoning": "XLF scored 52.0/100 on its own 63-day momentum vs SPY (+6.5pp). The strongest individual stock scanned inside this industry only reached 0/100 \u2014 not enough edge over the ETF to justify single-stock concentration risk right now.",
+      "etf_reasoning": "XLF scored 52.0/100 on its own 63-day momentum vs SPY (+6.5pp). The strongest individual stock scanned inside this industry only reached 0/100 — not enough edge over the ETF to justify single-stock concentration risk right now.",
       "term": "Medium-term",
       "bullets": [
         "XLF is outperforming SPY by +6.5 percentage points over the last 63 trading days.",
-        "Trump backs 'fantastic' Warsh while calling for lower rates and citing 'bad intentions' of other Fed officials \u2014 President Trump Monday voiced support for Federal Reserve Chairman Kevin Warsh while insisting that the U.S. should have the lowest interest rates in the world.",
-        "Singapore tightens monetary policy in surprise move as rising oil prices rekindle inflation risk \u2014 Unlike most central banks, the MAS manages medium-term price stability by managing the Singapore dollar exchange rate against a trade-weighted basket of currencies.",
+        "Trump backs 'fantastic' Warsh while calling for lower rates and citing 'bad intentions' of other Fed officials — President Trump Monday voiced support for Federal Reserve Chairman Kevin Warsh while insisting that the U.S. should have the lowest interest rates in the world.",
+        "Singapore tightens monetary policy in surprise move as rising oil prices rekindle inflation risk — Unlike most central banks, the MAS manages medium-term price stability by managing the Singapore dollar exchange rate against a trade-weighted basket of currencies.",
         "Ripple tailwinds flowing in from related sectors: fed_rate_cut."
       ],
-      "vehicle": "XLF ETF \u2014 no individual stock in this industry scored meaningfully higher than the ETF itself (52.0/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
+      "vehicle": "XLF ETF — no individual stock in this industry scored meaningfully higher than the ETF itself (52.0/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
       "stocks": [],
-      "why_now": "Event catalyst score of 80/100 indicates multiple confirmed near-term catalysts that could drive further upside. Positive spillover effects from: fed_rate_cut are amplifying sector momentum. Macro is neutral \u2014 sector strength here is coming from fundamentals and catalysts, not just a rising tide."
+      "why_now": "Event catalyst score of 80/100 indicates multiple confirmed near-term catalysts that could drive further upside. Positive spillover effects from: fed_rate_cut are amplifying sector momentum. Macro is neutral — sector strength here is coming from fundamentals and catalysts, not just a rising tide."
     },
     {
       "industry": "REITs",
-      "allocation_guidance": "Conviction 36.0/100 is below the 75 entry threshold \u2014 this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
+      "allocation_guidance": "Conviction 36.0/100 is below the 75 entry threshold — this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
       "etf": "VNQ",
-      "conviction": 36.0,
+      "conviction": 36,
       "recommended_security": "VNQ",
       "recommended_type": "etf",
-      "recommended_conviction": 36.0,
+      "recommended_conviction": 36,
       "stock_leaders": [],
       "stock_reasoning": [],
-      "etf_reasoning": "VNQ scored 36.0/100 on its own 63-day momentum vs SPY (+3.7pp). The strongest individual stock scanned inside this industry only reached 0/100 \u2014 not enough edge over the ETF to justify single-stock concentration risk right now.",
+      "etf_reasoning": "VNQ scored 36.0/100 on its own 63-day momentum vs SPY (+3.7pp). The strongest individual stock scanned inside this industry only reached 0/100 — not enough edge over the ETF to justify single-stock concentration risk right now.",
       "term": "Short-term",
       "bullets": [
         "VNQ is outperforming SPY by +3.7 percentage points over the last 63 trading days.",
         "Ripple tailwinds flowing in from related sectors: fed_rate_cut."
       ],
-      "vehicle": "VNQ ETF \u2014 no individual stock in this industry scored meaningfully higher than the ETF itself (36.0/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
+      "vehicle": "VNQ ETF — no individual stock in this industry scored meaningfully higher than the ETF itself (36.0/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
       "stocks": [],
-      "why_now": "Event score of 50/100 \u2014 moderate near-term catalyst activity supporting the thesis. Positive spillover effects from: fed_rate_cut are amplifying sector momentum. Macro is neutral \u2014 sector strength here is coming from fundamentals and catalysts, not just a rising tide."
+      "why_now": "Event score of 50/100 — moderate near-term catalyst activity supporting the thesis. Positive spillover effects from: fed_rate_cut are amplifying sector momentum. Macro is neutral — sector strength here is coming from fundamentals and catalysts, not just a rising tide."
     },
     {
       "industry": "Biotech",
-      "allocation_guidance": "Conviction 35.0/100 is below the 75 entry threshold \u2014 this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
+      "allocation_guidance": "Conviction 35.0/100 is below the 75 entry threshold — this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
       "etf": "IBB",
-      "conviction": 35.0,
+      "conviction": 35,
       "recommended_security": "IBB",
       "recommended_type": "etf",
-      "recommended_conviction": 35.0,
+      "recommended_conviction": 35,
       "stock_leaders": [],
       "stock_reasoning": [],
-      "etf_reasoning": "IBB scored 35.0/100 on its own 63-day momentum vs SPY (+8.5pp). The strongest individual stock scanned inside this industry only reached 0/100 \u2014 not enough edge over the ETF to justify single-stock concentration risk right now.",
+      "etf_reasoning": "IBB scored 35.0/100 on its own 63-day momentum vs SPY (+8.5pp). The strongest individual stock scanned inside this industry only reached 0/100 — not enough edge over the ETF to justify single-stock concentration risk right now.",
       "term": "Short-term",
       "bullets": [
         "IBB is outperforming SPY by +8.5 percentage points over the last 63 trading days.",
         "Ripple tailwinds flowing in from related sectors: fed_rate_cut."
       ],
-      "vehicle": "IBB ETF \u2014 no individual stock in this industry scored meaningfully higher than the ETF itself (35.0/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
+      "vehicle": "IBB ETF — no individual stock in this industry scored meaningfully higher than the ETF itself (35.0/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
       "stocks": [],
-      "why_now": "Event score of 50/100 \u2014 moderate near-term catalyst activity supporting the thesis. Positive spillover effects from: fed_rate_cut are amplifying sector momentum. Macro is neutral \u2014 sector strength here is coming from fundamentals and catalysts, not just a rising tide."
+      "why_now": "Event score of 50/100 — moderate near-term catalyst activity supporting the thesis. Positive spillover effects from: fed_rate_cut are amplifying sector momentum. Macro is neutral — sector strength here is coming from fundamentals and catalysts, not just a rising tide."
     },
     {
       "industry": "Investment Banking",
-      "allocation_guidance": "Conviction 42.0/100 is below the 75 entry threshold \u2014 this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
+      "allocation_guidance": "Conviction 42.0/100 is below the 75 entry threshold — this is informational context only, not a sized recommendation yet. No capital should be allocated here until conviction rises.",
       "etf": "KCE",
-      "conviction": 34.0,
+      "conviction": 34,
       "recommended_security": "KCE",
       "recommended_type": "etf",
-      "recommended_conviction": 42.0,
+      "recommended_conviction": 42,
       "stock_leaders": [],
       "stock_reasoning": [],
-      "etf_reasoning": "KCE scored 34.0/100 on its own 63-day momentum vs SPY (+2.7pp). The strongest individual stock scanned inside this industry only reached 0/100 \u2014 not enough edge over the ETF to justify single-stock concentration risk right now.",
+      "etf_reasoning": "KCE scored 34.0/100 on its own 63-day momentum vs SPY (+2.7pp). The strongest individual stock scanned inside this industry only reached 0/100 — not enough edge over the ETF to justify single-stock concentration risk right now.",
       "term": "Short-term",
       "bullets": [
         "KCE is outperforming SPY by +2.7 percentage points over the last 63 trading days.",
-        "\u26a0\ufe0f No confirmed catalyst or news driver identified \u2014 this is a momentum-only signal. Momentum alone is not sufficient reason to invest; treat as a watch item until a specific catalyst emerges."
+        "⚠️ No confirmed catalyst or news driver identified — this is a momentum-only signal. Momentum alone is not sufficient reason to invest; treat as a watch item until a specific catalyst emerges."
       ],
-      "vehicle": "KCE ETF \u2014 no individual stock in this industry scored meaningfully higher than the ETF itself (34.0/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
+      "vehicle": "KCE ETF — no individual stock in this industry scored meaningfully higher than the ETF itself (34.0/100). Broad sector exposure is the better risk-adjusted vehicle right now.",
       "stocks": [],
-      "why_now": "Macro is neutral \u2014 sector strength here is coming from fundamentals and catalysts, not just a rising tide."
+      "why_now": "Macro is neutral — sector strength here is coming from fundamentals and catalysts, not just a rising tide."
     }
   ],
   "exit_signals": [
@@ -562,14 +516,6 @@ window.BRIEFING_DATA = {
       "exit_type": null,
       "urgency": "",
       "pct_change": 6.9
-    },
-    {
-      "ticker": "SPCX",
-      "action": "exit",
-      "reason": "FIRST-DAY EXIT: SPCX is DOWN -39.5% within 0 days of entry while the broader market is stable (SPY +0.0%). The entry thesis is likely broken \u2014 cut fast and redeploy.",
-      "exit_type": "first_day_stop",
-      "urgency": "eod_decision",
-      "pct_change": -39.55
     },
     {
       "ticker": "NVDA",
@@ -605,7 +551,7 @@ window.BRIEFING_DATA = {
       "industry": "Oil & Gas",
       "earnings_date": "2026-08-04",
       "eps_estimate": 13.3993,
-      "excess_21d": 26.0,
+      "excess_21d": 26,
       "price": 312.27,
       "has_news": false,
       "news_headlines": [],
@@ -703,7 +649,7 @@ window.BRIEFING_DATA = {
         "exit_type": "first_day_stop",
         "urgency": "eod_decision",
         "conviction": 50,
-        "reason": "FIRST-DAY EXIT: SPCX is DOWN -39.5% within 0 days of entry while the broader market is stable (SPY +0.0%). The entry thesis is likely broken \u2014 cut fast and redeploy.",
+        "reason": "FIRST-DAY EXIT: SPCX is DOWN -39.5% within 0 days of entry while the broader market is stable (SPY +0.0%). The entry thesis is likely broken — cut fast and redeploy.",
         "pct_change": -39.55
       },
       {
@@ -744,7 +690,7 @@ window.BRIEFING_DATA = {
       "max_allowed_pct": 0.2,
       "over_limit": true,
       "regime": "Yellow",
-      "warning": "\u26a0\ufe0f Crypto 39.4% exceeds 20% limit in Yellow regime."
+      "warning": "⚠️ Crypto 39.4% exceeds 20% limit in Yellow regime."
     },
     "kill_criteria": {
       "triggered": false,
