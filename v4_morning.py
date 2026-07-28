@@ -280,6 +280,21 @@ def main():
         log(f"  Held tickers to skip: {held_tickers}")
         log(f"  Skipping {len(held_tickers)} held positions")
 
+        # SEC EDGAR catalysts — free, covers the whole market (not just momentum names)
+        try:
+            from v4.data.fetch_events import fetch_sec_catalysts
+            _sec = [e for e in fetch_sec_catalysts(days_back=3)
+                    if e.get("ticker") not in held_tickers]
+            if _sec:
+                event_calendar.extend(_sec)
+                for _s in _sec[:8]:
+                    log(f"  SEC CATALYST: {_s['ticker']} — {_s['description'][:70]}")
+                log(f"  SEC EDGAR: {len(_sec)} non-earnings catalysts found")
+            else:
+                log("  SEC EDGAR: no qualifying 8-K catalysts in window")
+        except Exception as e:
+            log(f"  SEC EDGAR error (non-fatal): {e}")
+
         # Press-release sweep — Finnhub company-news across momentum candidates
         # (free substitute for paywalled FMP press-releases). Runs here because
         # top_momentum and held_tickers now both exist.
@@ -701,11 +716,17 @@ def main():
             days = c.get("days_until", 30)
             excess = c.get("excess_21d", 0)
             rvol = c.get("rvol", 0)
+            if not rvol:
+                try:
+                    rvol = (volume_data.get(c.get("ticker", ""), {}) or {}).get("rvol", 0) or 0
+                    c["rvol"] = rvol
+                except Exception:
+                    rvol = 0
 
             # 1. Catalyst type strength (0-35 points)
             type_scores = {
                 "fda_pdufa": 35,
-                "earnings": 18,
+                "earnings": 24,
                 "insider_buying": 23,
                 "stock_split": 21,
                 "press_release": 26,
@@ -762,7 +783,27 @@ def main():
             matches = sum(1 for w in high_impact_words if w in desc)
             score += min(10, matches * 4)
 
-            c["conviction_score"] = min(100, score)
+            # QUALITY DIFFERENTIATORS — what separates a good setup from a bad one
+            try:
+                _tk_q = c.get("ticker", "")
+                _q = (quant_data.get(_tk_q, {}) if "quant_data" in dir() and quant_data else {}) or {}
+                _surp = _q.get("earnings_surprise_pct", _q.get("earnings_surprise", 0)) or 0
+                if _surp > 10:   score += 12
+                elif _surp > 5:  score += 8
+                elif _surp > 0:  score += 4
+                elif _surp < -5: score -= 8
+                _rev = _q.get("revenue_growth_yoy", _q.get("revenue_growth", 0)) or 0
+                if _rev > 20:   score += 8
+                elif _rev > 10: score += 5
+                elif _rev < 0:  score -= 5
+                _tgt = _q.get("analyst_target_upside_pct", 0) or 0
+                if _tgt > 20:   score += 6
+                elif _tgt > 10: score += 3
+                if _surp or _rev or _tgt:
+                    c["quality_note"] = f"surprise {_surp:+.0f}% | rev growth {_rev:+.0f}% | target upside {_tgt:+.0f}%"
+            except Exception:
+                pass
+            c["conviction_score"] = min(100, max(0, score))
             log(f"  SCORED: {c['ticker']} ({ct}) = {c['conviction_score']}/100")
 
         # Add exit strategy to each candidate
@@ -815,7 +856,13 @@ def main():
                 days = c.get("days_until", 30)
                 excess = c.get("excess_21d", 0)
                 rvol = c.get("rvol", 0)
-                type_scores = {"fda_pdufa": 35, "earnings": 18, "insider_buying": 23, "stock_split": 21, "press_release": 26, "ipo": 15, "ipo_event": 15, "analyst_upgrade": 14, "post-catalyst-confirmed": 20, "event": 12, "economic": 8, "strong-catalyst-reduced": 10, "volume_spike": 5}
+            if not rvol:
+                try:
+                    rvol = (volume_data.get(c.get("ticker", ""), {}) or {}).get("rvol", 0) or 0
+                    c["rvol"] = rvol
+                except Exception:
+                    rvol = 0
+                type_scores = {"fda_pdufa": 35, "earnings": 24, "insider_buying": 23, "stock_split": 21, "press_release": 26, "ipo": 15, "ipo_event": 15, "analyst_upgrade": 14, "post-catalyst-confirmed": 20, "event": 12, "economic": 8, "strong-catalyst-reduced": 10, "volume_spike": 5}
                 score += type_scores.get(ct, 10)
                 if 5 <= days <= 15: score += 20
                 elif 1 <= days <= 4: score += 15
@@ -830,7 +877,27 @@ def main():
                 if rvol >= 3.0: score += 15
                 elif rvol >= 2.0: score += 12
                 elif rvol >= 1.5: score += 8
-                c["conviction_score"] = min(100, score)
+                # QUALITY DIFFERENTIATORS — what separates a good setup from a bad one
+            try:
+                _tk_q = c.get("ticker", "")
+                _q = (quant_data.get(_tk_q, {}) if "quant_data" in dir() and quant_data else {}) or {}
+                _surp = _q.get("earnings_surprise_pct", _q.get("earnings_surprise", 0)) or 0
+                if _surp > 10:   score += 12
+                elif _surp > 5:  score += 8
+                elif _surp > 0:  score += 4
+                elif _surp < -5: score -= 8
+                _rev = _q.get("revenue_growth_yoy", _q.get("revenue_growth", 0)) or 0
+                if _rev > 20:   score += 8
+                elif _rev > 10: score += 5
+                elif _rev < 0:  score -= 5
+                _tgt = _q.get("analyst_target_upside_pct", 0) or 0
+                if _tgt > 20:   score += 6
+                elif _tgt > 10: score += 3
+                if _surp or _rev or _tgt:
+                    c["quality_note"] = f"surprise {_surp:+.0f}% | rev growth {_rev:+.0f}% | target upside {_tgt:+.0f}%"
+            except Exception:
+                pass
+            c["conviction_score"] = min(100, max(0, score))
 
         # Final filter: remove volume spikes and ensure all have required fields
         catalyst_opportunities = [c for c in catalyst_opportunities if c.get("catalyst_type") != "volume_spike"]

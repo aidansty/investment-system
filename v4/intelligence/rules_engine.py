@@ -366,6 +366,28 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
                     pass
 
         # Evaluate: losing + no catalyst = dead capital
+        # ADD-TO-WINNER: positive catalyst + intact thesis + room to size up
+        try:
+            _pos_news = position.get("positive_catalyst", False) or position.get("bullish_news", False)
+            _pct_now = pct_change
+            _weight = position.get("portfolio_weight_pct", 0) or 0
+            _cat_days = position.get("days_to_catalyst", 99)
+            if (_pos_news and _pct_now > 0 and _weight < 15 and 0 < _cat_days <= 21
+                    and regime_score >= 50):
+                _room = max(0, 15 - _weight)
+                return {
+                    "action": "buy_more", "ticker": ticker, "exit_type": "add_to_winner",
+                    "urgency": "next_open", "conviction": min(100, conviction + 15),
+                    "reason": (f"BUY MORE: positive catalyst confirmed with {ticker} up {_pct_now:+.1f}% "
+                               f"and the catalyst {_cat_days} days out. Thesis strengthening, not exhausted. "
+                               f"Position is {_weight:.1f}% of portfolio — room to add up to {_room:.1f}% "
+                               f"before the 15% single-position cap. Size the add to roughly half that room "
+                               f"unless conviction is exceptional."),
+                    "pct_change": _pct_now, "add_room_pct": _room,
+                }
+        except Exception:
+            pass
+
         # DRAWDOWN OVERRIDE — fires regardless of forward catalyst.
         # A big loss ahead of a catalyst means the market is repricing the thesis.
         is_high_vol_pos = position.get("high_volatility", False)

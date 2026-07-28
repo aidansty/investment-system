@@ -324,3 +324,51 @@ def fetch_catalyst_press_releases(tickers: list, days_back: int = 3) -> list:
         except Exception:
             continue
     return out
+
+
+def fetch_sec_catalysts(days_back: int = 3) -> list:
+    """SEC EDGAR full-text search — FREE, no API key, no paywall.
+    Surfaces genuine non-earnings catalysts across ALL US listed companies:
+    8-K material events (contracts, FDA responses, M&A) and 13D activist stakes.
+    """
+    import requests
+    from datetime import datetime, timedelta
+    out, seen = [], set()
+    frm = (datetime.utcnow() - timedelta(days=days_back)).strftime("%Y-%m-%d")
+    to = datetime.utcnow().strftime("%Y-%m-%d")
+    QUERIES = [
+        ('"definitive agreement"', "merger_acquisition", "M&A / definitive agreement"),
+        ('"share repurchase program"', "buyback", "Buyback authorized"),
+        ('"awarded a contract"', "contract_award", "Contract award"),
+        ('"FDA approval"', "fda_event", "FDA approval"),
+        ('"Phase 3"', "clinical_data", "Phase 3 clinical data"),
+        ('"special dividend"', "dividend", "Special dividend"),
+    ]
+    headers = {"User-Agent": "investment-system research contact@example.com"}
+    for q, ctype, label in QUERIES:
+        try:
+            url = ("https://efts.sec.gov/LATEST/search-index?q=" + requests.utils.quote(q) +
+                   f"&dateRange=custom&startdt={frm}&enddt={to}&forms=8-K")
+            r = requests.get(url, headers=headers, timeout=12)
+            if r.status_code != 200:
+                url = ("https://efts.sec.gov/LATEST/search-index?q=" + requests.utils.quote(q) +
+                       f"&startdt={frm}&enddt={to}&forms=8-K")
+                r = requests.get(url, headers=headers, timeout=12)
+            if r.status_code != 200:
+                continue
+            for hit in (r.json().get("hits", {}).get("hits", []) or [])[:12]:
+                src = hit.get("_source", {})
+                tks = src.get("tickers") or []
+                tk = (tks[0] if tks else "").upper()
+                if not tk or tk in seen or len(tk) > 5:
+                    continue
+                seen.add(tk)
+                out.append({
+                    "ticker": tk, "event_type": "press_release",
+                    "date": (src.get("file_date") or to)[:10],
+                    "description": f"{label} — SEC 8-K filing ({src.get('display_names', [tk])[0][:60]})",
+                    "sec_catalyst_type": ctype, "significance": "high",
+                })
+        except Exception:
+            continue
+    return out
