@@ -143,6 +143,7 @@ def main():
     try:
         _rss_all = news_package.get("recent_news", [])
         _held_stock_tickers = {p.get("ticker", "") for p in positions if p.get("ticker", "") not in {"BTC","ETH","XRP","ZEC","SOL","SPY"}}
+        _pt_logged = set()
         for item in _rss_all:
             headline = (item.get("headline", "") + " " + item.get("summary", "")).upper()
             for tk in _held_stock_tickers:
@@ -150,7 +151,9 @@ def main():
                     existing_affected = item.get("affected_tickers", [])
                     if tk not in existing_affected:
                         item["affected_tickers"] = existing_affected + [tk]
-                        log(f"  PER-TICKER: {tk} mentioned in headline")
+                        if tk not in _pt_logged:
+                            _pt_logged.add(tk)
+                            log(f"  PER-TICKER: {tk} mentioned in headline")
     except Exception as e:
         log(f"Per-ticker news check error (non-fatal): {e}")
 
@@ -796,6 +799,15 @@ def main():
 
         # Sort by conviction score (highest first) and limit to top 5
         # Re-score any candidates that missed conviction scoring (late additions)
+        # Normalize any malformed catalyst_type (e.g. "Buy More"/"Hold" prefix bleed)
+        _VALID_CT0 = {"earnings","stock_split","ipo","ipo_event","press_release","economic",
+                      "fda_pdufa","insider_buying","post-catalyst-confirmed","event",
+                      "strong-catalyst-reduced"}
+        for _c0 in catalyst_opportunities:
+            _ct0 = _c0.get("catalyst_type", "")
+            if _ct0 not in _VALID_CT0:
+                _c0["catalyst_type"] = "earnings" if _c0.get("earnings_date") else "event"
+
         for c in catalyst_opportunities:
             if "conviction_score" not in c or c["conviction_score"] is None:
                 score = 0
@@ -829,10 +841,11 @@ def main():
                 c["hold_period"] = "1-3 weeks"
 
         catalyst_opportunities.sort(key=lambda x: -x.get("conviction_score", 0))
-        catalyst_opportunities = catalyst_opportunities[:5]
-        log(f"Catalyst scanner: top {len(catalyst_opportunities)} candidates by conviction (filtered from {len(filtered)})")
-        for c in catalyst_opportunities:
-            log(f"  #{catalyst_opportunities.index(c)+1}: {c['ticker']} ({c['catalyst_type']}) conviction={c['conviction_score']}/100, {c.get('days_until',0)}d away")
+        # NOTE: no [:5] here — the FINAL GUARD below applies diversity + cap.
+        # Truncating at this point starved the diversity rule of alternatives.
+        log(f"Catalyst scanner: {len(catalyst_opportunities)} scored candidates (filtered from {len(filtered)})")
+        for _i, c in enumerate(catalyst_opportunities[:10], 1):
+            log(f"  #{_i}: {c['ticker']} ({c['catalyst_type']}) conviction={c['conviction_score']}/100, {c.get('days_until',0)}d away")
         # Late analyst-rec / volume-spike block DELETED (post-scoring appends leaked
         # unfiltered candidates like NET; upgrades+volume are out of the system).
         # FINAL GUARD — the true last step: held-skip, sort, cap.

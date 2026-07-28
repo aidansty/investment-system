@@ -41,5 +41,9 @@ jobs:
           git config user.name "Investment System"
           git config user.email "bot@investment-system"
           git add dashboard_data.js || true
+          git add data/win_rate_tracker.json || true
+          git add data/portfolio_performance.json || true
+          git add data/briefings/ || true
           git diff --staged --quiet || git commit -m "Update dashboard data [$(date '+%Y-%m-%d %H:%M ET')]"
+          git pull --rebase --autostash origin main || true
           git push || true

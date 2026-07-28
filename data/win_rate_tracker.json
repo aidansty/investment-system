@@ -185,6 +185,34 @@
       "spy_return_same_period": null,
       "beat_spy": null,
       "resolved": false
+    },
+    {
+      "id": "RPD_2026-07-24_exit",
+      "ticker": "RPD",
+      "action": "exit",
+      "date": "2026-07-24",
+      "time": "08:47",
+      "run_type": "morning",
+      "price_at_recommendation": 9.56,
+      "reason": "DRAWDOWN EXIT: down -19% \u2014 Morgan Stanley price-target cut, catalyst thesis compromised",
+      "conviction_score": 50,
+      "resolved": false,
+      "entry_type": "exit_signal",
+      "has_catalyst": false
+    },
+    {
+      "id": "SPCX_2026-07-27_exit",
+      "ticker": "SPCX",
+      "action": "exit",
+      "date": "2026-07-27",
+      "time": "08:47",
+      "run_type": "morning",
+      "price_at_recommendation": 118.24,
+      "reason": "DRAWDOWN EXIT: down -35.7% \u2014 no forward catalyst, thesis exhausted",
+      "conviction_score": 50,
+      "resolved": false,
+      "entry_type": "exit_signal",
+      "has_catalyst": false
     }
   ],
   "summary": {}
