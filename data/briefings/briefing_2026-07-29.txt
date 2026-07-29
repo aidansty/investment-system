@@ -1,0 +1,67 @@
+# Morning Briefing — July 29, 2026
+
+---
+
+## Market Snapshot
+
+- VIX 18.67: Yellow regime, selective entries only — elevated uncertainty.
+- Regime 58/100: Hold existing positions; no new entries meet 75+ conviction threshold.
+- Oil +6% on Iran escalation — watch energy costs feeding into managed care and consumer margins.
+
+---
+
+## Actionable Intelligence
+
+**Chip stocks shed $1T+ as AI selloff continues**
+- Fact: Nvidia, SK Hynix, Samsung led broad semiconductor selloff since Friday close.
+- Affects NVDA: Direct — this is the sector rout, not company-specific news. Affects AMD: Same sector pressure ahead of Aug 4 earnings.
+- Do: No action yet — thesis review required at -4.1% for NVDA.
+
+**HUM reports earnings before open today**
+- Fact: Humana releases Q2 results this morning; managed care sector up 17.6pp excess return.
+- Affects HUM: This is the defining catalyst event — the entire short-term thesis resolves today.
+- Do: Evaluate post-open; exit if move is realized per short-term rules.
+
+**Surprise Fed rate hike cannot be ruled out**
+- Fact: Markets pricing non-zero probability of surprise hike at today's FOMC conclusion.
+- Affects ALL HOLDINGS: Rate shock would compress multiples across semiconductors and managed care simultaneously.
+- Do: Hold cash reserves — do not deploy into any new position pre-Fed announcement.
+
+---
+
+## Coming Up — Events Affecting You
+
+- 2026-07-29 HUM: Earnings before open — short-term catalyst resolves today, exit decision imminent.
+- 2026-08-04 AMD: Earnings after close — sector sentiment and AI capex commentary critical.
+- 2026-08-26 NVDA: Earnings after close — next major data point for AI infrastructure thesis.
+- 2026-09-21 MU: Earnings after close — HBM demand and pricing cycle update.
+
+---
+
+## Position Review
+
+**HUM — WATCH → likely EXIT today**
+- News: Earnings hit before open this morning — the managed care catalyst play resolves with today's print.
+- Catalyst: This IS the catalyst; short-term thesis entered June 9 at $357.37 was built entirely on this earnings event.
+- Action: If the anticipated move is realized post-open, exit — short-term holdings don't drift without a new thesis.
+
+---
+
+**NVDA — WATCH**
+- News: Semiconductor sector shed $1T+ since Friday; this is broad AI infrastructure rotation, not NVDA-specific deterioration.
+- Catalyst: Earnings Aug 26 (28 days); thesis rests on continued hyperscaler AI capex — Google's negative free cash flow is a warning signal for that narrative.
+- Action: Loss is -4.1%, below mandatory review threshold of 10-15%; hold but name your line — reassess if decline reaches $175 before Aug 26.
+
+---
+
+**AMD — WATCH**
+- News: No company-specific news; same sector selloff pressure as NVDA applies to the entire AI chip stack.
+- Catalyst: Earnings Aug 4 (6 days away) — AI GPU competitive positioning vs. Nvidia is the thesis-defining question.
+- Action: Position is essentially flat at +0.2%; do not add ahead of earnings — let the Aug 4 print validate or invalidate before sizing up.
+
+---
+
+**MU — HOLD**
+- News: No material news today — ticker-level news feed returned irrelevant results (xAI/BTS headlines are data errors).
+- Catalyst: Earnings Sept 21 (54 days); thesis is HBM demand cycle and memory pricing recovery playing through AI infrastructure buildout.
+- Action: Hold — +36.9% gain is well above entry; watch whether this week's chip sector selloff stabilizes before trimming becomes necessary.
