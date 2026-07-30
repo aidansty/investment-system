@@ -707,6 +707,14 @@ def main():
                 filtered.append(c)
         catalyst_opportunities = filtered
 
+        # Normalize malformed catalyst_type BEFORE scoring ("Hold"/"Buy More" bleed)
+        _VCT = {"earnings","stock_split","ipo","ipo_event","press_release","economic",
+                "fda_pdufa","insider_buying","post-catalyst-confirmed","event",
+                "strong-catalyst-reduced"}
+        for _cn in catalyst_opportunities:
+            if _cn.get("catalyst_type", "") not in _VCT:
+                _cn["catalyst_type"] = "earnings" if _cn.get("earnings_date") else "event"
+
         # ── CONVICTION SCORING ──────────────────────────────────────
         # Score each candidate 0-100 based on catalyst quality, timing,
         # momentum, and institutional interest
@@ -850,49 +858,73 @@ def main():
                 _c0["catalyst_type"] = "earnings" if _c0.get("earnings_date") else "event"
 
         for c in catalyst_opportunities:
-            if "conviction_score" not in c or c["conviction_score"] is None:
-                score = 0
-                ct = c.get("catalyst_type", "")
-                days = c.get("days_until", 30)
-                excess = c.get("excess_21d", 0)
-                rvol = c.get("rvol", 0)
+            if c.get("conviction_score") is not None:
+                continue
+            score = 0
+            ct = c.get("catalyst_type", "")
+            days = c.get("days_until", 30)
+            excess = c.get("excess_21d", 0)
+            rvol = c.get("rvol", 0)
             if not rvol:
                 try:
                     rvol = (volume_data.get(c.get("ticker", ""), {}) or {}).get("rvol", 0) or 0
                     c["rvol"] = rvol
                 except Exception:
                     rvol = 0
-                type_scores = {"fda_pdufa": 35, "earnings": 24, "insider_buying": 23, "stock_split": 21, "press_release": 26, "ipo": 15, "ipo_event": 15, "analyst_upgrade": 14, "post-catalyst-confirmed": 20, "event": 12, "economic": 8, "strong-catalyst-reduced": 10, "volume_spike": 5}
-                score += type_scores.get(ct, 10)
-                if 5 <= days <= 15: score += 20
-                elif 1 <= days <= 4: score += 15
-                elif days == 0: score += 12
-                elif 16 <= days <= 25: score += 10
-                else: score += 5
-                if excess > 15: score += 20
-                elif excess > 10: score += 16
-                elif excess > 5: score += 12
-                elif excess > 3: score += 8
-                elif excess > 0: score += 4
-                if rvol >= 3.0: score += 15
-                elif rvol >= 2.0: score += 12
-                elif rvol >= 1.5: score += 8
-                # QUALITY DIFFERENTIATORS — what separates a good setup from a bad one
+            type_scores = {"fda_pdufa": 35, "press_release": 26, "earnings": 24,
+                           "insider_buying": 23, "stock_split": 21,
+                           "post-catalyst-confirmed": 20, "ipo": 15, "ipo_event": 15,
+                           "event": 12, "strong-catalyst-reduced": 10, "economic": 8}
+            score += type_scores.get(ct, 10)
+            if 5 <= days <= 15:
+                score += 20
+            elif 1 <= days <= 4:
+                score += 15
+            elif days == 0:
+                score += 12
+            elif 16 <= days <= 25:
+                score += 10
+            else:
+                score += 5
+            if excess > 15:
+                score += 20
+            elif excess > 10:
+                score += 16
+            elif excess > 5:
+                score += 12
+            elif excess > 3:
+                score += 8
+            elif excess > 0:
+                score += 4
+            if rvol >= 3.0:
+                score += 15
+            elif rvol >= 2.0:
+                score += 12
+            elif rvol >= 1.5:
+                score += 8
             try:
-                _tk_q = c.get("ticker", "")
-                _q = (quant_data.get(_tk_q, {}) if "quant_data" in dir() and quant_data else {}) or {}
+                _q = (quant_data.get(c.get("ticker", ""), {}) if "quant_data" in dir() and quant_data else {}) or {}
                 _surp = _q.get("earnings_surprise_pct", _q.get("earnings_surprise", 0)) or 0
-                if _surp > 10:   score += 12
-                elif _surp > 5:  score += 8
-                elif _surp > 0:  score += 4
-                elif _surp < -5: score -= 8
+                if _surp > 10:
+                    score += 12
+                elif _surp > 5:
+                    score += 8
+                elif _surp > 0:
+                    score += 4
+                elif _surp < -5:
+                    score -= 8
                 _rev = _q.get("revenue_growth_yoy", _q.get("revenue_growth", 0)) or 0
-                if _rev > 20:   score += 8
-                elif _rev > 10: score += 5
-                elif _rev < 0:  score -= 5
+                if _rev > 20:
+                    score += 8
+                elif _rev > 10:
+                    score += 5
+                elif _rev < 0:
+                    score -= 5
                 _tgt = _q.get("analyst_target_upside_pct", 0) or 0
-                if _tgt > 20:   score += 6
-                elif _tgt > 10: score += 3
+                if _tgt > 20:
+                    score += 6
+                elif _tgt > 10:
+                    score += 3
                 if _surp or _rev or _tgt:
                     c["quality_note"] = f"surprise {_surp:+.0f}% | rev growth {_rev:+.0f}% | target upside {_tgt:+.0f}%"
             except Exception:
@@ -957,6 +989,33 @@ def main():
         traceback.print_exc()
 
     # Step 7 — Run rules engine FIRST (briefing needs its output)
+    # Attach today's holding-specific news to each position so the rules
+    # engine can act on the CAUSE, not just the price move.
+    try:
+        _NEG_W = ["cut", "cuts", "lowers", "slashes", "downgrade", "miss", "misses",
+                  "lawsuit", "investigation", "recall", "warns", "halt", "fraud", "slumps"]
+        _POS_W = ["raises", "beats", "upgrade", "wins", "awarded", "approval", "partnership",
+                  "record", "surges", "expands", "acquires"]
+        for _p in positions:
+            _tk = _p.get("ticker", "")
+            for _n in (news_package.get("recent_news", []) or []):
+                if _tk not in (_n.get("affected_tickers") or []):
+                    continue
+                _h = (_n.get("headline", "") or "")
+                _hl = _h.lower()
+                if any(w in _hl for w in _NEG_W):
+                    _p["negative_news"] = True
+                    _p["news_headline"] = _h
+                    log(f"  NEGATIVE NEWS FLAG: {_tk} — {_h[:80]}")
+                    break
+                if any(w in _hl for w in _POS_W):
+                    _p["positive_catalyst"] = True
+                    _p["news_headline"] = _h
+                    log(f"  POSITIVE NEWS FLAG: {_tk} — {_h[:80]}")
+                    break
+    except Exception as e:
+        log(f"News-to-position flagging error (non-fatal): {e}")
+
     log("Running rules engine...")
     rules_output = {}
     try:

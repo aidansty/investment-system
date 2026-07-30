@@ -366,6 +366,32 @@ def evaluate_exit(position, macro, regime_score, position_review, consecutive_lo
                     pass
 
         # Evaluate: losing + no catalyst = dead capital
+        # NEGATIVE-NEWS OVERRIDE — act on the cause, not just the price.
+        # Guidance cuts, downgrades and lawsuits reprice a stock before the
+        # drawdown rule can see it (the HUM / RPD pattern).
+        try:
+            _neg = (position.get("negative_news") or position.get("bearish_news")
+                    or position.get("negative_catalyst"))
+            _hl = str(position.get("news_headline", "") or "").lower()
+            _SEVERE = ["cuts guidance", "cuts 2026", "cuts outlook", "lowers guidance",
+                       "guidance cut", "slashes", "downgrade", "price target cut",
+                       "lowers price target", "misses", "investigation", "lawsuit",
+                       "recall", "fraud", "halted", "warns", "profit outlook"]
+            _hit = [w for w in _SEVERE if w in _hl]
+            if _neg or _hit:
+                _sev = "SEVERE" if _hit else "material"
+                return {
+                    "action": "watch", "ticker": ticker, "exit_type": "negative_news",
+                    "urgency": "eod_decision", "conviction": conviction,
+                    "reason": (f"NEGATIVE NEWS ({_sev}): {position.get('news_headline','material negative development')[:120]}. "
+                               f"{ticker} is {pct_change:+.1f}% from entry. Decide before close: if this changes the "
+                               f"earnings power or the reason you bought, exit now rather than waiting for the drawdown "
+                               f"rule at -10%. If it is noise or already priced in, hold with a hard stop."),
+                    "pct_change": pct_change,
+                }
+        except Exception:
+            pass
+
         # ADD-TO-WINNER: positive catalyst + intact thesis + room to size up
         try:
             _pos_news = position.get("positive_catalyst", False) or position.get("bullish_news", False)
